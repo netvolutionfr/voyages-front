@@ -1,14 +1,14 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { IconGlobe } from '@tabler/icons-react'
 import React from "react";
-import {NavUser} from "@/components/common/NavUser.tsx";
-import {NavMain} from "@/components/common/NavMain.tsx";
 import {menuNavAdmin, menuNavMain} from "@/config/menu.ts";
 import {useGetIdentity} from "@refinedev/core";
 import type {User} from "@/type/User.ts";
 import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
+import NavMain from "@/components/common/NavMain.tsx";
+import NavUser from "@/components/common/NavUser.tsx";
 
-export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
 
     const { data: user, isLoading } = useGetIdentity<User>();
 
@@ -47,3 +47,5 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
         </Sidebar>
     )
 }
+
+export default AppSidebar;

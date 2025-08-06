@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sidebar"
 import {Link} from "react-router-dom";
 
-export function NavMain({
+const NavMain = ({
                             items,
                             menuTitle
                         }: {
@@ -19,7 +19,7 @@ export function NavMain({
         icon?: Icon
     }[],
     menuTitle?: string
-}) {
+}) => {
     return (
         <SidebarGroup>
             {menuTitle && <SidebarGroupLabel>{menuTitle}</SidebarGroupLabel>}
@@ -40,3 +40,5 @@ export function NavMain({
         </SidebarGroup>
     )
 }
+
+export default NavMain;

@@ -26,7 +26,7 @@ export const authProvider: AuthProvider = {
         });
         return {
             success: true,
-            redirectTo: "/login", // Redirection Refine après la déconnexion
+            redirectTo: "/", // Redirection Refine après la déconnexion
         };
     },
 
@@ -35,7 +35,7 @@ export const authProvider: AuthProvider = {
         if (isAuthenticated) {
             return { authenticated: true };
         } else {
-            return { authenticated: false, redirectTo: "/login" };
+            return { authenticated: false, redirectTo: "/403" };
         }
     },
 

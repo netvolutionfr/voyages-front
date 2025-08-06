@@ -1,5 +1,5 @@
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
-import {SiteHeader} from "@/components/common/SiteHeader.tsx";
+import SiteHeader from "@/components/common/SiteHeader.tsx";
 import AppSidebar from "@/components/common/AppSidebar.tsx";
 import {Outlet} from "react-router-dom";
 import {ThemeProvider} from "@/components/common/ThemeProvider.tsx";

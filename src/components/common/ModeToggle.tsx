@@ -1,8 +1,8 @@
 import {Button} from "@/components/ui/button.tsx";
 import { IconBrightness } from "@tabler/icons-react"
-import {useTheme} from "@/components/common/ThemeProvider.tsx";
+import {useTheme} from "@/components/common/UseTheme.ts";
 
-export function ModeToggle() {
+const ModeToggle = () => {
     const { theme, setTheme } = useTheme()
 
     function toggleTheme() {
@@ -21,3 +21,5 @@ export function ModeToggle() {
         </Button>
     )
 }
+
+export default ModeToggle;

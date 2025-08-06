@@ -3,22 +3,22 @@ import { IconAddressBook, IconDashboard, IconDirections, IconId, IconListDetails
 export const menuNavMain = [
     {
         title: "Tableau de bord",
-        url: "/dashboard",
+        url: "/",
         icon: IconDashboard,
     },
     {
         title: "Profil",
-        url: "/dashboard/profil",
+        url: "/profil",
         icon: IconAddressBook,
     },
     {
         title: "Voyages",
-        url: "/dashboard/voyages",
+        url: "/voyages",
         icon: IconDirections,
     },
     {
         title: "Documents",
-        url: "/dashboard/documents",
+        url: "/documents",
         icon: IconId,
     },
 ];
@@ -26,12 +26,12 @@ export const menuNavMain = [
 export const menuNavAdmin = [
     {
         title: "Gestion des voyages",
-        url: "/dashboard/admin/voyages",
+        url: "/admin/voyages",
         icon: IconListDetails,
     },
     {
-        title: "Liste des utilisateurs",
-        url: "/dashboard/admin/utilisateurs",
+        title: "Liste des participants",
+        url: "/admin/participants",
         icon: IconUsers,
     },
 ];

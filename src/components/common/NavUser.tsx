@@ -28,7 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {useGetIdentity, useLogout} from "@refinedev/core";
 import type {User} from "@/type/User.ts";
 
-export function NavUser() {
+const NavUser = () => {
   const { isMobile } = useSidebar()
   const { mutate: logout } = useLogout();
   const { data: user, isLoading } = useGetIdentity<User>();
@@ -124,3 +124,5 @@ export function NavUser() {
     </SidebarMenu>
   )
 }
+
+export default NavUser;
