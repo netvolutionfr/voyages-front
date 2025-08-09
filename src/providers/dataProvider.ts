@@ -74,6 +74,12 @@ export const voyagesDataProvider: DataProvider = {
     },
 
     update: async ({ resource, id, variables }) => {
+        if (resource === "me") {
+            const response = await axiosInstance.post("/me", variables);
+            return {
+                data: response.data,
+            };
+        }
         try {
             const response = await axiosInstance.put(`/${resource}/${id}`, variables);
             return {
