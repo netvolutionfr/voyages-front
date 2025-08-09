@@ -1,4 +1,12 @@
-import { IconAddressBook, IconDashboard, IconDirections, IconId, IconListDetails, IconUsers } from "@tabler/icons-react";
+import {
+    IconAddressBook,
+    IconDashboard,
+    IconDirections,
+    IconId,
+    IconListDetails,
+    IconSchool,
+    IconUsers
+} from "@tabler/icons-react";
 
 export const menuNavMain = [
     {
@@ -33,5 +41,10 @@ export const menuNavAdmin = [
         title: "Liste des participants",
         url: "/admin/participants",
         icon: IconUsers,
+    },
+    {
+        title: "Gestion des sections",
+        url: "/admin/sections",
+        icon: IconSchool,
     },
 ];

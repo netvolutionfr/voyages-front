@@ -9,8 +9,6 @@ import ProfilLayout from "@/pages/profil/ProfilLayout.tsx";
 import HomePage from "@/pages/HomePage.tsx";
 import Voyages from "@/pages/Voyages.tsx";
 import Documents from './pages/Documents';
-import ParticipantsAdmin from "@/pages/admin/ParticipantsAdmin.tsx";
-import VoyagesAdmin from "@/pages/admin/VoyagesAdmin.tsx";
 import {resources} from "@/config/resources.ts";
 import Error403 from "@/pages/error/403.tsx";
 import Error404 from "@/pages/error/404.tsx";
@@ -19,6 +17,10 @@ import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
 import FicheSanitaire from "@/pages/profil/FicheSanitaire.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
+import VoyagesAdmin from "@/pages/admin/voyages/VoyagesAdmin.tsx";
+import ParticipantsAdmin from "@/pages/admin/participants/ParticipantsAdmin.tsx";
+import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
+import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
 
 function App() {
     return (
@@ -49,6 +51,18 @@ function App() {
                         <Route path="/admin/participants" element={
                                 <RequireAdmin>
                                     <ParticipantsAdmin />
+                                </RequireAdmin>} />
+                        <Route path="/admin/sections" element={
+                                <RequireAdmin>
+                                    <SectionsAdmin />
+                                </RequireAdmin>} />
+                        <Route path="/admin/sections/create" element={
+                                <RequireAdmin>
+                                    <SectionsForm />
+                                </RequireAdmin>} />
+                        <Route path="/admin/sections/edit/:id" element={
+                                <RequireAdmin>
+                                    <SectionsForm />
                                 </RequireAdmin>} />
                     </Route>
                     <Route path="/403" element={<Error403 />} />

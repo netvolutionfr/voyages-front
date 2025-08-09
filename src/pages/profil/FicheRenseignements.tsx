@@ -9,7 +9,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form.tsx";
-import {participantSchema, type participantFormData} from "@/schemas/participantSchema.ts";
+import {ficheRenseignementSchema, type ficheRenseignementFormData} from "@/schemas/ficheRenseignementSchema.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -29,7 +29,7 @@ function convertDateToISO(dateStr: string): string {
 
 const FicheRenseignements = () => {
     const form = useForm({
-        resolver: zodResolver(participantSchema),
+        resolver: zodResolver(ficheRenseignementSchema),
         refineCoreProps : {
             resource: "me",
             id: "me",
@@ -41,7 +41,7 @@ const FicheRenseignements = () => {
     const registerWithMask = useHookFormMask(form.register);
     const register = form.register;
 
-    const onSubmit = async (values: participantFormData) => {
+    const onSubmit = async (values: ficheRenseignementFormData) => {
         // Convert date to ISO format for LocalDate compatibility
         if (values.dateNaissance) {
             values.dateNaissance = convertDateToISO(values.dateNaissance);
@@ -128,53 +128,6 @@ const FicheRenseignements = () => {
                                                 <FormLabel>Téléphone</FormLabel>
                                                 <FormControl>
                                                     <PhoneInput defaultCountry="FR" {...field} className="input" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-
-
-                            <FormField
-                                control={form.control}
-                                name="adresse"
-                                render={() => (
-                                    <FormItem>
-                                        <FormLabel>Adresse</FormLabel>
-                                        <FormControl>
-                                            <Input {...register("adresse")} className="input" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="codePostal"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormLabel>Code Postal</FormLabel>
-                                            <FormControl>
-                                                <Input {...register("codePostal")} className="input" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <div className="col-span-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="ville"
-                                        render={() => (
-                                            <FormItem>
-                                                <FormLabel>Ville</FormLabel>
-                                                <FormControl>
-                                                    <Input {...register("ville")} className="input" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
