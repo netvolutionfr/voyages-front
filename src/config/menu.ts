@@ -29,6 +29,11 @@ export const menuNavMain = [
         url: "/documents",
         icon: IconId,
     },
+    {
+        title: "Enfants",
+        url: "/participants",
+        icon: IconUsers,
+    }
 ];
 
 export const menuNavAdmin = [

@@ -19,7 +19,6 @@ export function DataTable<TData extends BaseRecord, TValue>({
                                                                 filter = "name",
                                          }: DataTableProps<TData, TValue>) {
 
-
     return (
         <div className="flex flex-col gap-4">
         <DataTableToolbar table={table} entity={entity} filter={filter} />
@@ -60,7 +59,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
                     ) : (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
+                                Aucune donnée trouvée.
                             </TableCell>
                         </TableRow>
                     )}

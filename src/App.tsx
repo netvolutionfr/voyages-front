@@ -21,6 +21,9 @@ import VoyagesAdmin from "@/pages/admin/voyages/VoyagesAdmin.tsx";
 import ParticipantsAdmin from "@/pages/admin/participants/ParticipantsAdmin.tsx";
 import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
 import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
+import Participants from "@/pages/participants/Participants.tsx";
+import ParticipantView from "@/pages/participants/ParticipantView.tsx";
+import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
 
 function App() {
     return (
@@ -44,6 +47,10 @@ function App() {
                         </Route>
                         <Route path="/voyages" element={<Voyages />} />
                         <Route path="/documents" element={<Documents />} />
+                        <Route path="/participants" element={<Participants />} />
+                        <Route path="/participants/:id" element={<ParticipantView />} />
+                        <Route path="/participants/create" element={<ParticipantsForm />} />
+                        <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
                         <Route path="/admin/voyages" element={
                                 <RequireAdmin>
                                     <VoyagesAdmin />

@@ -4,6 +4,7 @@ import {useTable} from "@refinedev/react-table";
 import {sectionsColumns} from "@/pages/admin/sections/SectionsColumns.tsx";
 import type {ColumnDef} from "@tanstack/react-table";
 import type {ISection} from "@/pages/admin/sections/ISection.ts";
+import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 
 const SectionsAdmin = () => {
     const columns =
@@ -16,6 +17,11 @@ const SectionsAdmin = () => {
         },
     });
 
+    const isLoading = tableInstance.refineCore.tableQuery?.isLoading;
+
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div className="flex flex-col gap-4">

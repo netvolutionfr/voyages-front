@@ -110,6 +110,7 @@ const FicheRenseignements = () => {
                                                     {...registerWithMask("dateNaissance", ['99/99/9999'], {
                                                         required: true
                                                     })}
+                                                    inputMode="numeric"
                                                 />
                                             </FormControl>
                                             <FormMessage />

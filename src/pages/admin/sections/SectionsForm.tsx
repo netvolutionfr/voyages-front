@@ -14,6 +14,8 @@ import {
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {useEffect} from "react";
+import {Link} from "@refinedev/core";
+import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 
 const SectionsForm = () => {
     const { id } = useParams<{ id: string }>();
@@ -29,6 +31,8 @@ const SectionsForm = () => {
         shouldFocusError: true,
     });
 
+    const isLoading = form.refineCore.formLoading;
+
     useEffect(() => {
         form.setFocus("libelle");
     }, [form, isEditing, id]);
@@ -38,6 +42,10 @@ const SectionsForm = () => {
     const onSubmit = async (values: SectionFormData) => {
         await form.refineCore.onFinish(values);
     };
+
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div>
@@ -82,6 +90,9 @@ const SectionsForm = () => {
                             </FormItem>
                         )}
                     />
+                    <Button className="mr-2" variant="outline" asChild>
+                        <Link to="/admin/sections">Annuler</Link>
+                    </Button>
                     <Button type="submit">Enregistrer</Button>
                 </form>
             </Form>
