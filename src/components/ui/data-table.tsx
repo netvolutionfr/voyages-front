@@ -10,6 +10,7 @@ interface DataTableProps<TData extends BaseRecord, TValue> {
     table: UseTableReturnType<TData, HttpError>,
     entity?: string,
     filter?: string,
+    createButon?: boolean,
 }
 
 export function DataTable<TData extends BaseRecord, TValue>({
@@ -17,11 +18,12 @@ export function DataTable<TData extends BaseRecord, TValue>({
                                                                 table,
                                                                 entity = "items",
                                                                 filter = "name",
+                                                                createButon = true,
                                          }: DataTableProps<TData, TValue>) {
 
     return (
         <div className="flex flex-col gap-4">
-        <DataTableToolbar table={table} entity={entity} filter={filter} />
+        <DataTableToolbar table={table} entity={entity} filter={filter} createButon={createButon} />
         <div className="overflow-hidden rounded-md border">
             <Table>
                 <TableHeader>

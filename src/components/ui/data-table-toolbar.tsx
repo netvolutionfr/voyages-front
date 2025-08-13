@@ -10,12 +10,14 @@ interface DataTableToolbarProps<TData> {
     table: Table<TData>,
     entity?: string,
     filter?: string,
+    createButon?: boolean,
 }
 
 export function DataTableToolbar<TData>({
                                             table,
                                             entity = "items",
                                             filter = "name",
+                                            createButon = true,
                                         }: DataTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0
 
@@ -44,6 +46,7 @@ export function DataTableToolbar<TData>({
             </div>
             <div className="flex items-center gap-2">
                 <DataTableViewOptions table={table} />
+                {createButon && (
                 <Button size="sm" asChild>
                     <Link go={{
                         to: {
@@ -55,6 +58,7 @@ export function DataTableToolbar<TData>({
                         <Plus />
                     </Link>
                 </Button>
+                )}
             </div>
         </div>
     )

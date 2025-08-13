@@ -24,6 +24,7 @@ import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
 import Participants from "@/pages/participants/Participants.tsx";
 import ParticipantView from "@/pages/participants/ParticipantView.tsx";
 import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
+import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
 
 function App() {
     return (
@@ -71,6 +72,10 @@ function App() {
                                 <RequireAdmin>
                                     <SectionsForm />
                                 </RequireAdmin>} />
+                        <Route path="/admin/users" element={
+                            <RequireAdmin>
+                                <UsersAdmin />
+                            </RequireAdmin>} />
                     </Route>
                     <Route path="/403" element={<Error403 />} />
                     <Route path="*" element={<Error404 />} />

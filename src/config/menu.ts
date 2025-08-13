@@ -4,7 +4,7 @@ import {
     IconDirections,
     IconId,
     IconListDetails,
-    IconSchool,
+    IconSchool, IconUser,
     IconUsers
 } from "@tabler/icons-react";
 
@@ -51,5 +51,10 @@ export const menuNavAdmin = [
         title: "Gestion des sections",
         url: "/admin/sections",
         icon: IconSchool,
+    },
+    {
+        title: "Liste des utilisateurs",
+        url: "/admin/users",
+        icon: IconUser,
     },
 ];

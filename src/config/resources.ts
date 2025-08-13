@@ -37,4 +37,8 @@ export const resources: IResourceItem[] = [
         create: "/admin/sections/create",
         edit: "/admin/sections/edit/:id",
     },
+    {
+        name: "users",
+        list: "/admin/users",
+    },
 ];
