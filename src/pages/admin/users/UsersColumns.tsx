@@ -28,6 +28,14 @@ export const usersColumns: ColumnDef<IUser>[] = [
         cell: ({ row }) => <span>{row.getValue("email")}</span>,
     },
     {
+        id: "telephone",
+        accessorKey: "telephone",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Téléphone" />
+        ),
+        cell: ({ row }) => <span>{row.getValue("telephone")}</span>,
+    },
+    {
         id: "role",
         accessorKey: "role",
         header: ({ column }) => (

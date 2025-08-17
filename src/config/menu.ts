@@ -3,12 +3,11 @@ import {
     IconDashboard,
     IconDirections,
     IconId,
-    IconListDetails,
     IconSchool, IconUser,
     IconUsers
 } from "@tabler/icons-react";
 
-export const menuNavMain = [
+export const menuEleves = [
     {
         title: "Tableau de bord",
         url: "/",
@@ -36,11 +35,47 @@ export const menuNavMain = [
     }
 ];
 
-export const menuNavAdmin = [
+export const menuParents = [
+    {
+        title: "Tableau de bord",
+        url: "/",
+        icon: IconDashboard,
+    },
+    {
+        title: "Profil",
+        url: "/profil",
+        icon: IconAddressBook,
+    },
+    {
+        title: "Enfants",
+        url: "/participants",
+        icon: IconUsers,
+    }
+];
+
+export const menuProfs = [
+    {
+        title: "Tableau de bord",
+        url: "/",
+        icon: IconDashboard,
+    },
+    {
+        title: "Gestion des Voyages",
+        url: "/voyages",
+        icon: IconDirections,
+    },
+    {
+        title: "Participants",
+        url: "/participants",
+        icon: IconUsers,
+    },
+];
+
+export const menuAdmin = [
     {
         title: "Gestion des voyages",
-        url: "/admin/voyages",
-        icon: IconListDetails,
+        url: "/voyages",
+        icon: IconDirections,
     },
     {
         title: "Liste des participants",

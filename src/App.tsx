@@ -7,7 +7,7 @@ import {accessControlProvider} from "@/providers/accessControlProvider.ts";
 import DashboardLayout from "@/components/layout/DashboardLayout.tsx";
 import ProfilLayout from "@/pages/profil/ProfilLayout.tsx";
 import HomePage from "@/pages/HomePage.tsx";
-import Voyages from "@/pages/Voyages.tsx";
+import Voyages from "@/pages/voyages/Voyages.tsx";
 import Documents from './pages/Documents';
 import {resources} from "@/config/resources.ts";
 import Error403 from "@/pages/error/403.tsx";
@@ -17,7 +17,6 @@ import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
 import FicheSanitaire from "@/pages/profil/FicheSanitaire.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
-import VoyagesAdmin from "@/pages/admin/voyages/VoyagesAdmin.tsx";
 import ParticipantsAdmin from "@/pages/admin/participants/ParticipantsAdmin.tsx";
 import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
 import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
@@ -25,6 +24,7 @@ import Participants from "@/pages/participants/Participants.tsx";
 import ParticipantView from "@/pages/participants/ParticipantView.tsx";
 import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
 import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
+import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
 
 function App() {
     return (
@@ -47,15 +47,14 @@ function App() {
                             <Route path="parents" element={<FicheParents />} />
                         </Route>
                         <Route path="/voyages" element={<Voyages />} />
+                        <Route path="/voyages/create" element={<VoyagesForm />} />
+                        <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
+                        <Route path="/voyages/:id" element={<Voyages />} />
                         <Route path="/documents" element={<Documents />} />
                         <Route path="/participants" element={<Participants />} />
                         <Route path="/participants/:id" element={<ParticipantView />} />
                         <Route path="/participants/create" element={<ParticipantsForm />} />
                         <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
-                        <Route path="/admin/voyages" element={
-                                <RequireAdmin>
-                                    <VoyagesAdmin />
-                                </RequireAdmin>} />
                         <Route path="/admin/participants" element={
                                 <RequireAdmin>
                                     <ParticipantsAdmin />

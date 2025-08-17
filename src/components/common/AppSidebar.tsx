@@ -1,7 +1,7 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { IconGlobe } from '@tabler/icons-react'
 import React from "react";
-import {menuNavAdmin, menuNavMain} from "@/config/menu.ts";
+import {menuAdmin, menuEleves, menuParents, menuProfs} from "@/config/menu.ts";
 import {useGetIdentity} from "@refinedev/core";
 import type {User} from "@/type/User.ts";
 import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
@@ -17,6 +17,9 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     }
 
     const isAdmin = user?.realm_access.roles.includes("admin")
+    const isParent = user?.realm_access.roles.includes("parent")
+    const isProf = user?.realm_access.roles.includes("teacher");
+    const isEleve = user?.realm_access.roles.includes("student");
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -36,9 +39,17 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={menuNavMain} />
+                {isEleve && (
+                    <NavMain items={menuEleves} menuTitle="Élèves" />
+                )}
+                {isParent && (
+                    <NavMain items={menuParents} menuTitle="Parents" />
+                )}
+                {isProf && (
+                    <NavMain items={menuProfs} menuTitle="Professeurs" />
+                )}
                 {isAdmin && (
-                    <NavMain items={menuNavAdmin} menuTitle="Administration" />
+                    <NavMain items={menuAdmin} menuTitle="Administration" />
                 )}
             </SidebarContent>
             <SidebarFooter>
