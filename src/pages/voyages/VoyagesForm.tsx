@@ -29,7 +29,7 @@ const VoyagesForm = () => {
             resource: "voyages",
             id: id ?? undefined,
             action: isEditing ? "edit" : "create",
-            redirect: false
+            redirect: "list"
         },
         shouldFocusError: true,
     });
