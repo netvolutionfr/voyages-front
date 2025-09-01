@@ -1,69 +1,96 @@
-# React + TypeScript + Vite
+# voyages-front
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Résumé
 
-Currently, two official plugins are available:
+Projet frontend React + TypeScript basé sur Vite. Cette application fournit l'interface d'administration et utilisateur pour gérer des voyages, participants et profils. Elle utilise TailwindCSS pour le style, Refine pour les composants d'administration et Keycloak pour l'authentification.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Prérequis
 
-## Expanding the ESLint configuration
+- Node.js (>= 18 recommandé)
+- npm, yarn ou pnpm
+- Git
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Installation et mise en place locale
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Cloner le dépôt
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone <url-du-repo>
+cd voyages-front
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Installer les dépendances
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Avec npm
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+Ou avec pnpm
+
+```bash
+pnpm install
+```
+
+3. Configuration des variables d'environnement
+
+Créez un fichier .env à la racine si nécessaire (ne pas committer) et ajoutez les variables attendues par le projet, p. ex. :
+
+- REACT_APP_API_URL ou VITE_API_URL — URL de l'API backend
+- VITE_KEYCLOAK_URL, VITE_KEYCLOAK_REALM, VITE_KEYCLOAK_CLIENT_ID — paramètres Keycloak si utilisés
+
+(Vérifier dans le code ou la documentation interne du backend les noms exacts.)
+
+4. Lancer l'application en développement
+
+```bash
+npm run dev
+# ou
+pnpm dev
+```
+
+L'application sera disponible par défaut sur http://localhost:5173 (ou le port indiqué par Vite).
+
+Scripts utiles
+
+- npm run dev — démarre le serveur de développement Vite (HMR)
+- npm run build — compile TypeScript puis build Vite pour la production
+- npm run preview — lance un serveur local pour prévisualiser le build de production
+- npm run lint — exécute ESLint sur le projet
+
+Technologies principales
+
+- React 19 + TypeScript
+- Vite (bundler et dev server)
+- TailwindCSS
+- Refine (bibliothèque d'administration)
+- Keycloak (authentification)
+- Zod (validation)
+
+Structure du projet (résumé)
+
+- src/ — code source de l'application
+  - components/ — composants réutilisables et UI
+  - pages/ — pages applicatives (voyages, participants, profil...)
+  - providers/ — providers pour auth, data, access control
+  - lib/ — utilitaires et configuration axios
+  - schemas/ — schémas de validation
+  - type/ — définitions de types
+
+Conseils de développement
+
+- Respecter les règles ESLint/TypeScript du projet. Le lint et les types sont exécutés lors du build.
+- Pour ajouter de nouvelles routes/pages, suivez la convention existante dans src/pages et mettez à jour la configuration de routes si nécessaire.
+- Pour modifier l'authentification Keycloak, regarder les providers dans src/providers et la configuration dans main.tsx.
+
+Déploiement
+
+1. Construire l'application
+
+```bash
+npm run build
+```
+
+2. Servir le dossier dist avec un serveur statique ou intégrer au pipeline de déploiement (Netlify, Vercel, Docker, etc.).
+
