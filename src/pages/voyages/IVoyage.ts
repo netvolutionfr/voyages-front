@@ -1,14 +1,22 @@
+import type { IPays } from "./IPays";
+
 export type IVoyage = {
     id: number;
     nom: string;
     description: string;
     destination: string;
-    dateDepart: string; // ISO 8601 date string
-    dateRetour: string; // ISO 8601 date string
+    pays?: IPays;
+    participationDesFamilles: number;
+    datesVoyage: {
+        from: string;
+        to: string;
+    };
     nombreMinParticipants: number;
     nombreMaxParticipants: number;
-    dateDebutInscription: string; // ISO 8601 date string
-    dateFinInscription: string; // ISO 8601 date string
+    datesInscription: {
+        from: string;
+        to: string;
+    };
     sections?: Array<{ id: number; libelle: string }>;
     organisateurs?: Array<{ id: number; nom: string }>;
     documentsObligatoires?: Array<{ id: number; nom: string }>;

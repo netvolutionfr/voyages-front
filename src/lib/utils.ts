@@ -19,3 +19,18 @@ export function convertDateToISO(dateStr: string): string {
   const [day, month, year] = dateStr.split('/')
   return `${year}-${month}-${day}` // format ISO compatible avec LocalDate
 }
+
+export function formatCurrencyFromCents(cents: number, locale = 'fr-FR', currency = 'EUR'): string {
+  const euros = cents / 100;
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(euros);
+}
+
+export function parseCurrencyToCents(value: string): number | null {
+  // Supprime les espaces, les symboles monétaires et les virgules
+  const cleanedValue = value.replace(/[^\d.-]/g, '').replace(',', '.');
+  const floatValue = parseFloat(cleanedValue);
+  if (isNaN(floatValue)) {
+    return null;
+  }
+  return Math.round(floatValue * 100);
+}

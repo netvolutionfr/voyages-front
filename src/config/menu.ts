@@ -47,6 +47,11 @@ export const menuParents = [
         icon: IconAddressBook,
     },
     {
+        title: "Voyages",
+        url: "/voyages",
+        icon: IconDirections,
+    },
+    {
         title: "Enfants",
         url: "/participants",
         icon: IconUsers,

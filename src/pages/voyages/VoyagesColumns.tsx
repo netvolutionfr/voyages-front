@@ -1,9 +1,9 @@
-import type {ISection} from "@/pages/admin/sections/ISection.ts";
 import type {ColumnDef} from "@tanstack/react-table";
 import {Checkbox} from "@radix-ui/react-checkbox";
-import ActionsCell from "@/pages/admin/sections/ActionsCell.tsx";
+import ActionsCell from "@/pages/voyages/ActionsCell.tsx";
 import {DataTableColumnHeader} from "@/components/ui/data-table-column-header.tsx";
 import type {IVoyage} from "@/pages/voyages/IVoyage.ts";
+import {formatCurrencyFromCents} from "@/lib/utils.ts";
 
 export const voyagesColumns: ColumnDef<IVoyage>[] = [
     {
@@ -43,16 +43,32 @@ export const voyagesColumns: ColumnDef<IVoyage>[] = [
         enableSorting: true,
     },
     {
-        id: "description",
-        accessorKey: "description",
+        id: "destination",
+        accessorKey: "destination",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Description" />
+            <DataTableColumnHeader column={column} title="Destination" />
         ),
-        cell: ({ row }) => <span>{row.getValue("description")}</span>,
+        cell: ({ row }) => <span>{row.getValue("destination")}</span>,
+    },
+    {
+        id: "pays.nom",
+        accessorKey: "pays.nom",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Pays" />
+        ),
+        cell: ({ row }) => <span>{row.getValue("pays.nom")}</span>,
+    },
+    {
+        id: "participationDesFamilles",
+        accessorKey: "participationDesFamilles",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Participation des familles" />
+        ),
+        cell: ({ row }) => <span>{formatCurrencyFromCents(row.getValue("participationDesFamilles"))}</span>,
     },
     {
         id: "actions",
         header: "Actions",
-        cell: ({row}) => <ActionsCell item={row.original as ISection} />
+        cell: ({row}) => <ActionsCell item={row.original as IVoyage} />
     },
 ];

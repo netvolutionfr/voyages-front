@@ -33,7 +33,13 @@ const VoyagesForm = () => {
         optionValue: "id",
         pagination: {
             pageSize: 100,
-        }
+        },
+        sort: [
+            {
+                field: "id",
+                order: "asc",
+            },
+        ],
     });
     const form = useForm({
         resolver: zodResolver(VoyageSchema),
@@ -58,6 +64,11 @@ const VoyagesForm = () => {
         await form.refineCore.onFinish(values);
     };
 
+    const onError = (errors: unknown, data: unknown) => {
+        console.log(errors);
+        console.log(data);
+    };
+
     if (isLoading) {
         return <LoadingSpinner />;
     }
@@ -66,7 +77,10 @@ const VoyagesForm = () => {
         <div>
             <h1 className="text-2xl font-bold">{isEditing ? `Mise à jour du voyage` : "Ajout d'un nouveau voyage"}</h1>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
+                <form onSubmit={form.handleSubmit(onSubmit,     (errors) => {
+                    const data = form.getValues();
+                    onError(errors, data);
+                })} className="space-y-8 max-w-3xl mx-auto py-10">
 
                     <FormField
                         control={form.control}
@@ -103,7 +117,7 @@ const VoyagesForm = () => {
                     />
                     <FormField
                         control={form.control}
-                        name="paysId"
+                        name="pays.id"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Pays</FormLabel>
@@ -132,19 +146,19 @@ const VoyagesForm = () => {
                                             <CommandList>
                                                 <CommandEmpty>Aucun pays trouvé.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {options.map((pays) => (
+                                                    {options.map((p) => (
                                                         <CommandItem
-                                                            value={pays.value}
-                                                            key={pays.value}
+                                                            value={p.value}
+                                                            key={p.value}
                                                             onSelect={() => {
-                                                                form.setValue("paysId", pays.value)
+                                                                form.setValue("pays.id", p.value)
                                                             }}
                                                         >
-                                                            {pays.label}
+                                                            {p.label}
                                                             <Check
                                                                 className={cn(
                                                                     "ml-auto",
-                                                                    pays.value === field.value
+                                                                    p.value === field.value
                                                                         ? "opacity-100"
                                                                         : "opacity-0"
                                                                 )}
@@ -176,6 +190,26 @@ const VoyagesForm = () => {
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="participationDesFamilles"
+                        render={() => (
+                            <FormItem>
+                                <FormLabel>Participation des familles (en €)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="Participation des familles"
+                                        {...register("participationDesFamilles", {
+                                            valueAsNumber: true,
+                                            setValueAs: (v) => Math.round(v * 100),
+                                        })} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
@@ -190,7 +224,12 @@ const VoyagesForm = () => {
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
                                             selected={field.value}
-                                            onSelect={field.onChange}
+                                            onSelect={(range) => {
+                                                form.setValue("datesVoyage", {
+                                                    from: range?.from ? new Date(range.from) : new Date(),
+                                                    to: range?.to ? new Date(range.to) : new Date()
+                                                });
+                                            }}
                                             disabled={(date) =>
                                                 date < new Date() // Disable past dates
                                             }
@@ -213,7 +252,12 @@ const VoyagesForm = () => {
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
                                             selected={field.value}
-                                            onSelect={field.onChange}
+                                            onSelect={(range) => {
+                                                form.setValue("datesInscription", {
+                                                    from: range?.from ? new Date(range.from) : new Date(),
+                                                    to: range?.to ? new Date(range.to) : new Date()
+                                                });
+                                            }}
                                             disabled={(date) =>
                                                 date < new Date(Date.now() - 1000 * 60 * 60 * 24) // Disable past dates except today
                                             }
