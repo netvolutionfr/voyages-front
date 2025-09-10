@@ -1,0 +1,17 @@
+name: Rapport de bug
+description: Décrire un problème
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    attributes:
+      label: Comportement observé
+  - type: textarea
+    attributes:
+      label: Comportement attendu
+  - type: textarea
+    attributes:
+      label: Étapes pour reproduire
+  - type: textarea
+    attributes:
+      label: Logs / captures (si possible)

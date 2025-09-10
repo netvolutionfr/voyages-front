@@ -1,0 +1,17 @@
+name: Demande de fonctionnalité
+description: Proposer une amélioration
+title: "[Feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    attributes:
+      label: Contexte / besoin
+  - type: textarea
+    attributes:
+      label: Solution envisagée
+  - type: textarea
+    attributes:
+      label: Impacts / risques
+  - type: textarea
+    attributes:
+      label: Critères d'acceptation
