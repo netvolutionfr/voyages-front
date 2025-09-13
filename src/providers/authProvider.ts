@@ -2,6 +2,11 @@ import type { AuthProvider } from "@refinedev/core";
 import Keycloak from "keycloak-js";
 import {sha256} from "js-sha256";
 
+const PUBLIC_PATHS = ["/premier-acces"];
+
+const isPublicPath = (path: string) =>
+    PUBLIC_PATHS.some((p) => path === p || path.startsWith(p + "/"));
+
 const keycloakConfig = {
     url: import.meta.env.VITE_KEYCLOAK_URL,
     realm: import.meta.env.VITE_KEYCLOAK_REALM,
@@ -12,11 +17,9 @@ export const keycloak = new Keycloak(keycloakConfig);
 
 export const authProvider: AuthProvider = {
     login: async () => {
-        // Cette méthode ne sera pas appelée si 'onLoad' est défini sur 'login-required'
-        // car Keycloak gère la redirection directement.
-        return {
-            success: true,
-        };
+        // manuellement, si besoin
+        keycloak.login({ redirectUri: window.location.href });
+        return { success: true };
     },
 
     logout: async () => {
@@ -31,12 +34,19 @@ export const authProvider: AuthProvider = {
     },
 
     check: async () => {
-        const isAuthenticated = keycloak.authenticated;
-        if (isAuthenticated) {
+        const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
+
+        if (isPublicPath(pathname)) {
             return { authenticated: true };
-        } else {
-            return { authenticated: false, redirectTo: "/403" };
         }
+
+        const isAuthenticated = !!keycloak.token;
+        if (!isAuthenticated) {
+            keycloak.login({ redirectUri: window.location.href });
+            return { authenticated: false };
+        }
+
+        return { authenticated: true };
     },
 
     getIdentity: async () => {

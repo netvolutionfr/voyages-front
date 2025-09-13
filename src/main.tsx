@@ -9,25 +9,25 @@ import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
 const AppWithKeycloak = () => {
-    const [keycloakInitialized, setKeycloakInitialized] = useState(false);
-
+    const [ready, setReady] = useState(false);
     useEffect(() => {
         const initKeycloak = async () => {
             try {
                 await keycloak.init({
-                    onLoad: 'login-required', // C'est ici que vous forcez la connexion
+                    onLoad: "check-sso",       // ✨ jamais de redirection auto
+                    pkceMethod: "S256",
+                    checkLoginIframe: false,
                     silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html",
                 });
-                setKeycloakInitialized(true);
+                setReady(true);
             } catch (error) {
-                console.error("Échec de l'initialisation de Keycloak", error);
+                console.error("Échec init Keycloak", error);
             }
         };
         initKeycloak();
     }, []);
 
-    if (!keycloakInitialized) {
-        // Affiche un écran de chargement tant que Keycloak n'est pas initialisé
+    if (!ready) {
         return <LoadingSpinner />;
     }
 

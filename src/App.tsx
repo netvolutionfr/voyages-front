@@ -25,12 +25,18 @@ import ParticipantView from "@/pages/participants/ParticipantView.tsx";
 import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
 import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
 import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
+import FirstLoginPage from "@/pages/FirstLoginPage.tsx";
+import {publicDataProvider} from "@/providers/publicDataProvider.ts";
+import AfterFirstLogin from "@/pages/AfterFirstLogin.tsx";
 
 function App() {
     return (
             <Refine
                 routerProvider={routerProvider}
-                dataProvider={voyagesDataProvider}
+                dataProvider={{
+                    default: voyagesDataProvider,
+                    public: publicDataProvider,
+                }}
                 authProvider={authProvider}
                 accessControlProvider={accessControlProvider}
                 resources={resources}
@@ -76,6 +82,8 @@ function App() {
                                 <UsersAdmin />
                             </RequireAdmin>} />
                     </Route>
+                    <Route path="/premier-acces" element={<FirstLoginPage />} />
+                    <Route path="/apres-premier-acces" element={<AfterFirstLogin />} />
                     <Route path="/403" element={<Error403 />} />
                     <Route path="*" element={<Error404 />} />
                 </Routes>
