@@ -53,7 +53,20 @@ const Voyages = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {voyagesOuverts.map((v) => (
                         <div key={v.id} className="rounded-lg border p-4 bg-white">
-                            <div className="text-lg font-semibold">{v.nom}</div>
+                            <div className="flex items-center justify-between">
+                                <div className="text-lg font-semibold">{v.nom}</div>
+                                <div className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                    {(() => {
+                                        const today = new Date();
+                                        const fin = new Date(v.datesInscription.to + 'T23:59:59Z');
+                                        const diffTime = fin.getTime() - today.getTime();
+                                        const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+                                        return diffDays === 0
+                                            ? "Dernier jour pour s'inscrire"
+                                            : `${diffDays} jour${diffDays > 1 ? "s" : ""} restant${diffDays > 1 ? "s" : ""}`;
+                                    })()}
+                                </div>
+                            </div>
                             <div className="text-sm text-gray-600">{v.destination} ({v.pays?.nom ?? ""})</div>
                             <div className="mt-2 text-sm">{v.description}</div>
                             <div className="mt-2 text-sm">
