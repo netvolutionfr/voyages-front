@@ -1,3 +1,5 @@
+import type {IPays} from "@/pages/voyages/IPays.ts";
+
 export type IVoyage = {
     id: number;
     nom: string;
@@ -9,11 +11,11 @@ export type IVoyage = {
     coverPhotoUrl?: string;
     secteurs?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
 
-    datesVoyage: { from: string; to: string; };
+    datesVoyage: { from: Date; to: Date; };
     nombreMinParticipants: number;
     nombreMaxParticipants: number;
 
-    datesInscription: { from: string; to: string; };
+    datesInscription: { from: Date; to: Date; };
 
     sections?: Array<{ id: number; libelle: string }>;
     organisateurs?: Array<{ id: number; nom: string }>;

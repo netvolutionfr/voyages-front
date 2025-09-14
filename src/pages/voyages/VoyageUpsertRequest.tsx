@@ -2,9 +2,9 @@ export type VoyageUpsertRequest = {
     id?: number | null;
     nom: string;
     description?: string | null;
-    destination?: string | null;
+    destination?: string;
 
-    prixTotalCents?: number | null;           // CENTIMES pour l’API
+    prixTotal?: number | null;           // CENTIMES pour l’API
     participationDesFamilles?: number | null; // CENTIMES pour l’API
     coverPhotoUrl?: string | null;
 

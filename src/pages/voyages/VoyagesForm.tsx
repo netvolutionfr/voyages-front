@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useApiUrl, useSelect } from "@refinedev/core";
+import {type BaseRecord, type HttpError, useSelect} from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -31,6 +31,8 @@ import { fr } from "react-day-picker/locale";
 
 import axiosInstance from "@/lib/axios";
 import imageCompression from "browser-image-compression";
+import type {SubmitHandler} from "react-hook-form";
+import type {VoyageUpsertRequest} from "@/pages/voyages/VoyageUpsertRequest.tsx";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -38,12 +40,12 @@ const secteursAll = [
     { value: "CYCLE_POST_BAC", label: "Cycle post-bac" },
 ] as const;
 
-type Option = { label: string; value: number };
+type SectionOption = { id: number; libelle: string };
+type UserOption    = { id: number; fullName: string };
 
 const VoyagesForm = () => {
     const { id } = useParams<{ id: string }>();
     const isEditing = Boolean(id);
-    const apiUrl = useApiUrl();
 
     // Pays
     const { options: paysOptions } = useSelect<IPays>({
@@ -55,7 +57,7 @@ const VoyagesForm = () => {
     });
 
     // Sections (multi)
-    const { options: sectionOptions } = useSelect<Option>({
+    const { options: sectionOptions } = useSelect<SectionOption>({
         resource: "sections",
         optionLabel: "libelle",
         optionValue: "id",
@@ -64,29 +66,48 @@ const VoyagesForm = () => {
     });
 
     // Organisateurs (multi) : profs + admins
-    const { options: organisateurOptions } = useSelect<Option>({
+    const { options: organisateurOptions } = useSelect<UserOption>({
         resource: "users",
         optionLabel: "fullName",
         optionValue: "id",
         pagination: { pageSize: 500 },
         sort: [{ field: "prenom", order: "asc" }],
-        filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"] as any }],
+        filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"]}],
     });
 
-    const form = useForm<VoyageFormData>({
+    // petites aides pour les dates
+    const today = new Date().toISOString();
+    const plus7 = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+
+    const form = useForm<
+        BaseRecord,          // TData (retour de getOne/getList) — si tu as un IVoyage, mets-le ici
+        HttpError,           // TError (Refine)
+        VoyageUpsertRequest, // TVariables (payload attendu par onFinish)
+        VoyageFormData       // TFormValues (ce que RHF manipule → ton Zod infer)
+    >({
         resolver: zodResolver(VoyageSchema),
         refineCoreProps: {
             resource: "voyages",
             id: id ?? undefined,
             action: isEditing ? "edit" : "create",
             redirect: "list",
-            // useForm chargera les données en édition via getOne → queryResult
         },
         defaultValues: {
+            nom: "",
+            description: null,
+            destination: "",
+            prixTotal: null,
+            participationDesFamilles: null,
+            coverPhotoUrl: null,
+            paysId: 0, // ou undefined si tu rends ce champ optional dans le schéma
+            datesVoyage: { from: today, to: plus7 },
+            nombreMinParticipants: 1,
+            nombreMaxParticipants: 1,
+            datesInscription: null, // { from: Date, to: Date } | null | undefined
             organisateurIds: [],
             sectionIds: [],
             secteurs: [],
-        } as any,
+        },
         shouldFocusError: true,
     });
 
@@ -133,9 +154,9 @@ const VoyagesForm = () => {
         setCoverPreview(URL.createObjectURL(file));
     };
 
-    const onSubmit = async (values: VoyageFormData) => {
-        const payload = formToUpsertPayload(values, id);
-        await form.refineCore.onFinish(payload as any);
+    const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
+        const payload: VoyageUpsertRequest = formToUpsertPayload(values, id);
+        await form.refineCore.onFinish(payload);
     };
 
     if (loading) return <LoadingSpinner />;
@@ -252,7 +273,7 @@ const VoyagesForm = () => {
                     {/* Prix total (euros dans le form) */}
                     <FormField
                         control={form.control}
-                        name="prixTotalCents"
+                        name="prixTotal"
                         render={() => (
                             <FormItem>
                                 <FormLabel>Prix total (en €)</FormLabel>
@@ -261,7 +282,7 @@ const VoyagesForm = () => {
                                         type="number"
                                         step="0.01"
                                         placeholder="Prix total"
-                                        {...form.register("prixTotalCents", {
+                                        {...form.register("prixTotal", {
                                             valueAsNumber: true,
                                             setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
                                         })}
@@ -336,11 +357,11 @@ const VoyagesForm = () => {
                                             locale={fr}
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
-                                            selected={field.value as any}
+                                            selected={field.value}
                                             onSelect={(range) =>
                                                 form.setValue(
                                                     "datesVoyage",
-                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() } as any,
+                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() },
                                                     { shouldDirty: true }
                                                 )
                                             }
@@ -363,11 +384,11 @@ const VoyagesForm = () => {
                                             locale={fr}
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
-                                            selected={field.value as any}
+                                            selected={field.value}
                                             onSelect={(range) =>
                                                 form.setValue(
                                                     "datesInscription",
-                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() } as any,
+                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() },
                                                     { shouldDirty: true }
                                                 )
                                             }
@@ -500,7 +521,10 @@ const VoyagesForm = () => {
                                                             const set = new Set(current);
                                                             if (e.target.checked) set.add(s.value);
                                                             else set.delete(s.value);
-                                                            form.setValue("secteurs", Array.from(set) as any, { shouldDirty: true });
+                                                            form.setValue(
+                                                                "secteurs",
+                                                                Array.from(set) as Array<"CYCLE_BAC" | "CYCLE_POST_BAC">,
+                                                                { shouldDirty: true });
                                                         }}
                                                     />
                                                     {s.label}

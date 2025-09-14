@@ -22,7 +22,7 @@ function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
     return `${base}${sep}${coverPhotoUrl}`;
 }
 
-function formatDateRange(from?: string, to?: string) {
+function formatDateRange(from?: Date, to?: Date) {
     if (!from || !to) return "";
     const f = new Date(from);
     const t = new Date(to);
@@ -86,7 +86,6 @@ const Voyages = () => {
     }
 
     if (!isAdminOrTeacher) {
-        const today = new Date();
         // const voyagesOuverts = (data?.data || []).filter((v) => {
         //     const debut = new Date(v.datesInscription.from + 'T00:00:00Z');
         //     const fin = new Date(v.datesInscription.to + 'T23:59:59Z');

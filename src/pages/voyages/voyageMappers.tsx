@@ -1,16 +1,21 @@
 // Remplit le form à partir d’un IVoyage (édition)
+import type {IVoyage} from "@/pages/voyages/IVoyage.ts";
+import type {VoyageFormData} from "@/schemas/voyageSchema.ts";
+import type {VoyageUpsertRequest} from "@/pages/voyages/VoyageUpsertRequest.tsx";
+
 export function voyageToFormDefaults(v: IVoyage): Partial<VoyageFormData> {
     return {
         nom: v.nom ?? "",
-        description: v.description ?? "",
+        description: v.description ?? null,
         destination: v.destination ?? "",
-        paysId: v.pays?.id as number,
+        // paysId doit pouvoir être undefined en création
+        paysId: v.pays?.id ?? undefined,
 
         // Centimes API → € dans le form
-        prixTotal: v.prixTotalCents != null ? v.prixTotalCents / 100 : undefined,
+        prixTotal: v.prixTotal != null ? v.prixTotal / 100 : undefined,
         participationDesFamilles: v.participationDesFamilles != null ? v.participationDesFamilles / 100 : undefined,
 
-        coverPhotoUrl: v.coverPhotoUrl ?? undefined,
+        coverPhotoUrl: v.coverPhotoUrl ?? null,
 
         datesVoyage: { from: new Date(v.datesVoyage.from), to: new Date(v.datesVoyage.to) },
         nombreMinParticipants: v.nombreMinParticipants,
@@ -30,22 +35,21 @@ export function voyageToFormDefaults(v: IVoyage): Partial<VoyageFormData> {
 // Transforme les valeurs du form en payload API
 export function formToUpsertPayload(values: VoyageFormData, id?: number | string | null): VoyageUpsertRequest {
     return {
-        id: id ? Number(id) : null,
-        nom: values.nom.trim(),
+        id: id ? Number(id) : undefined,
+        nom: values.nom,
         description: values.description ?? null,
-        destination: values.destination ?? null,
+        destination: values.destination || "",
 
-        prixTotalCents: values.prixTotalCents != null ? Math.round(Number(values.prixTotalCents) * 100) : null,
-        participationDesFamilles:
-            values.participationDesFamilles != null ? Math.round(Number(values.participationDesFamilles) * 100) : null,
-
+        // convertir €/float → centimes pour l'API
+        prixTotalCents: values.prixTotal != null ? Math.round(values.prixTotal * 100) : undefined,
+        participationDesFamilles: values.participationDesFamilles != null ? Math.round(values.participationDesFamilles * 100) : undefined,
         coverPhotoUrl: values.coverPhotoUrl ?? null,
 
-        paysId: values.paysId,
+        paysId: Number(values.paysId),
 
         datesVoyage: {
-            from: values.datesVoyage.from.toISOString(),
-            to: values.datesVoyage.to.toISOString(),
+            from: values.datesVoyage.from.toISOString().slice(0, 10),
+            to: values.datesVoyage.to.toISOString().slice(0, 10),
         },
 
         nombreMinParticipants: values.nombreMinParticipants,
@@ -53,13 +57,13 @@ export function formToUpsertPayload(values: VoyageFormData, id?: number | string
 
         datesInscription: values.datesInscription
             ? {
-                from: values.datesInscription.from.toISOString(),
-                to: values.datesInscription.to.toISOString(),
+                from: values.datesInscription.from.toISOString().slice(0, 10),
+                to: values.datesInscription.to.toISOString().slice(0, 10),
             }
             : null,
 
         organisateurIds: values.organisateurIds ?? [],
         sectionIds: values.sectionIds ?? [],
-        secteurs: values.secteurs ?? [],
-    };
+        secteurs: values.secteurs as Array<"CYCLE_BAC" | "CYCLE_POST_BAC">,
+    } as VoyageUpsertRequest;
 }
