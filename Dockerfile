@@ -1,10 +1,11 @@
 # 1) Build
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --no-audit --no-fund
+
 COPY . .
-# Adapte si besoin (Vite/CRA) :
 RUN npm run build
 
 # 2) Nginx statique
