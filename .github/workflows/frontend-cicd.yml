@@ -61,13 +61,20 @@ jobs:
             type=sha,priority=800
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_API_BASE=${{ vars.VITE_API_BASE }}
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_KEYCLOAK_URL=${{ vars.VITE_KEYCLOAK_URL }}
+            VITE_KEYCLOAK_REALM=${{ vars.VITE_KEYCLOAK_REALM }}
+            VITE_KEYCLOAK_CLIENT_ID=${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
+            VITE_FILES_BASE=${{ vars.VITE_FILES_BASE }}
 
   deploy:
     needs: build-and-push
