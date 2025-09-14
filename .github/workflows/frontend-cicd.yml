@@ -83,8 +83,42 @@ jobs:
           port: ${{ secrets.PROD_SSH_PORT }}
           script: |
             set -euo pipefail
-            cd ~/front
-            export FRONT_TAG=${GITHUB_SHA}
-            docker compose pull
-            docker compose up -d --no-deps front
-            docker image prune -f
+
+            # 0) Contexte & tags
+            echo "GITHUB_SHA=${GITHUB_SHA}"
+            IMAGE="ghcr.io/netvolutionfr/voyages-front"
+            TAG="${GITHUB_SHA}"
+
+            # 1) Vérifier que l'image existe sur GHCR (côté CI)
+            echo "CI: image that should exist: ${IMAGE}:${TAG}"
+
+            # 2) Server: se placer dans le bon dossier et afficher l'état
+            cd "$HOME/front" || { echo "No ~/front"; exit 1; }
+            echo "== docker compose version =="
+            docker compose version || docker-compose version
+
+            echo "== compose config (résolu) =="
+            FRONT_TAG="${TAG}" docker compose config
+
+            echo "== images/containers avant =="
+            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed 's/^/  /'
+            docker images | grep -E "$(echo ${IMAGE} | sed 's/\//\\\//g')" || true
+
+            # 3) Pull explicite du tag
+            echo "== pull ${IMAGE}:${TAG} =="
+            docker pull "${IMAGE}:${TAG}"
+
+            # 4) Lancement: forcer le tag à cette exécution
+            echo "== up -d (front) avec FRONT_TAG=${TAG} =="
+            FRONT_TAG="${TAG}" docker compose up -d --no-deps --pull always front
+
+            # 5) Vérifications
+            echo "== ps après =="
+            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed 's/^/  /'
+
+            echo "== logs récents du conteneur =="
+            docker logs --tail=80 voyages-front || true
+
+            # 6) Healthcheck HTTP
+            echo "== check /health =="
+            curl -fsS http://127.0.0.1:8081/health && echo "health: OK"
