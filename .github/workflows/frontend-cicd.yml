@@ -82,14 +82,8 @@ jobs:
             cd ${DEPLOY_DIR} && \
             docker compose pull && \
             docker compose up -d && \
-            docker image prune -f && \"
+            docker image prune -f && \
             echo '== health 8082 ==' && \
               (curl -fsS http://127.0.0.1:8082/health || wget -qO- http://127.0.0.1:8082/health) >/dev/null \
                 && echo 'health: OK'
             "
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "\
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} && \
-            cd ${DEPLOY_DIR} && \
-            docker compose pull && \
-            docker compose up -d && \
-            docker image prune -f"
