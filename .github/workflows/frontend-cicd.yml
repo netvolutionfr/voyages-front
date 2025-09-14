@@ -79,7 +79,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-24.04
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -128,4 +128,4 @@ jobs:
 
             # 6) Healthcheck HTTP
             echo "== check /health =="
-            curl -fsS http://127.0.0.1:8081/health && echo "health: OK"
+            curl -fsS http://127.0.0.1:8082/health && echo "health: OK"
