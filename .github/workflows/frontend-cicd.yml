@@ -39,9 +39,12 @@ jobs:
       - name: Build (CI)
         run: npm run build
         env:
-          # expose tes variables Vite côté build si nécessaire :
           VITE_API_BASE: ${{ vars.VITE_API_BASE }}
-
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_KEYCLOAK_URL: ${{ vars.VITE_KEYCLOAK_URL }}
+          VITE_KEYCLOAK_REALM: ${{ vars.VITE_KEYCLOAK_REALM }}
+          VITE_KEYCLOAK_CLIENT_ID: ${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
+          VITE_FILES_BASE: ${{ vars.VITE_FILES_BASE }}
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
