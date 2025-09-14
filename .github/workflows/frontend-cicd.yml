@@ -76,8 +76,8 @@ jobs:
           IMAGE: ghcr.io/${{ github.repository }} # netvolutionfr/voyages-front
           TAG: ${{ github.sha }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.PROD_SSH_PORT }}" \
-            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" "\
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.PROD_SSH_PORT }} \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "\
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} && \
             cd ${DEPLOY_DIR} && \
             docker compose pull && \
@@ -87,3 +87,9 @@ jobs:
               (curl -fsS http://127.0.0.1:8082/health || wget -qO- http://127.0.0.1:8082/health) >/dev/null \
                 && echo 'health: OK'
             "
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "\
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} && \
+            cd ${DEPLOY_DIR} && \
+            docker compose pull && \
+            docker compose up -d && \
+            docker image prune -f"
