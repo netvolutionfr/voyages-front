@@ -1,6 +1,7 @@
 import type {ColumnDef} from "@tanstack/react-table";
 import {DataTableColumnHeader} from "@/components/ui/data-table-column-header.tsx";
 import type {IUser} from "@/pages/admin/users/IUser.ts";
+import { UserRoundCheck } from "lucide-react";
 
 export const usersColumns: ColumnDef<IUser>[] = [
     {
@@ -34,6 +35,22 @@ export const usersColumns: ColumnDef<IUser>[] = [
             <DataTableColumnHeader column={column} title="Téléphone" />
         ),
         cell: ({ row }) => <span>{row.getValue("telephone")}</span>,
+    },
+    {
+        id: "validated",
+        accessorKey: "validated",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Validé" />
+        ),
+        cell: ({ row }) => (
+            row.getValue("validated")
+                ? (
+                    <div className="flex justify-center items-center">
+                        <UserRoundCheck size={18} />
+                    </div>
+                )
+                : null
+        ),
     },
     {
         id: "role",

@@ -28,6 +28,7 @@ import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
 import FirstLoginPage from "@/pages/FirstLoginPage.tsx";
 import {publicDataProvider} from "@/providers/publicDataProvider.ts";
 import AfterFirstLogin from "@/pages/AfterFirstLogin.tsx";
+import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
 
 function App() {
     return (
@@ -80,6 +81,10 @@ function App() {
                         <Route path="/admin/users" element={
                             <RequireAdmin>
                                 <UsersAdmin />
+                            </RequireAdmin>} />
+                        <Route path="/admin/users/import" element={
+                            <RequireAdmin>
+                                <ImportCsvPage />
                             </RequireAdmin>} />
                     </Route>
                     <Route path="/premier-acces" element={<FirstLoginPage />} />

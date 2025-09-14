@@ -64,10 +64,13 @@ export const voyagesDataProvider: DataProvider = {
 
     create: async ({ resource, variables }) => {
         try {
-            const response = await axiosInstance.post(`/${resource}`, variables);
-            return {
-                data: response.data,
-            };
+            const isForm = typeof FormData !== "undefined" && variables instanceof FormData;
+            const response = await axiosInstance.post(
+                `/${resource}`,
+                variables,
+                isForm ? undefined : { /* keep as-is; JSON par défaut */ }
+            );
+            return { data: response.data };
         } catch (error) {
             return Promise.reject(error);
         }

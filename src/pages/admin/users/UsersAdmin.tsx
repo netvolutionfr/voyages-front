@@ -5,6 +5,9 @@ import type {ColumnDef} from "@tanstack/react-table";
 import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 import type {IUser} from "@/pages/admin/users/IUser.ts";
 import {usersColumns} from "@/pages/admin/users/UsersColumns.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import {Link} from "@refinedev/core";
+import {Upload} from "lucide-react";
 
 const UsersAdmin = () => {
     const columns =
@@ -25,8 +28,16 @@ const UsersAdmin = () => {
 
     return (
         <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Liste des utilisateurs de l'application</h1>
-            <DataTable columns={usersColumns} table={tableInstance} entity="users" filter="nom" createButon={false} />
+            <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl font-bold">Liste des utilisateurs de l&#39;application</h1>
+                <Button>
+                    <Link to="/admin/users/import" className="flex items-center gap-2">
+                        <Upload />
+                        Importer depuis un CSV
+                    </Link>
+                </Button>
+            </div>
+        <DataTable columns={usersColumns} table={tableInstance} entity="users" filter="nom" createButon={false} />
         </div>
     );
 }

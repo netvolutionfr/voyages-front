@@ -78,22 +78,22 @@ export const menuProfs = [
 
 export const menuAdmin = [
     {
-        title: "Gestion des voyages",
+        title: "Voyages",
         url: "/voyages",
         icon: IconDirections,
     },
     {
-        title: "Liste des participants",
+        title: "Participants",
         url: "/admin/participants",
         icon: IconUsers,
     },
     {
-        title: "Gestion des sections",
+        title: "Sections",
         url: "/admin/sections",
         icon: IconSchool,
     },
     {
-        title: "Liste des utilisateurs",
+        title: "Utilisateurs",
         url: "/admin/users",
         icon: IconUser,
     },

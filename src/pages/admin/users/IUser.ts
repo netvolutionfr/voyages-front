@@ -4,5 +4,6 @@ export type IUser = {
     prenom?: string;
     email?: string;
     telephone?: string;
+    validated?: boolean;
     role: string;
 }
