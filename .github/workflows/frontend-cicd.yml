@@ -30,12 +30,12 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Lint & Test
+      - name: Lint & Test (non bloquant temporairement)
         run: |
-          npm run lint --if-present
-          npm test --if-present -- --ci
-        continue-on-error: true
+          npm run lint --if-present || true
+          npm test --if-present -- --ci || true
 
+      # (facultatif) build Node pour smoke-test du code
       - name: Build (CI)
         run: npm run build
         env:
@@ -45,7 +45,8 @@ jobs:
           VITE_KEYCLOAK_REALM: ${{ vars.VITE_KEYCLOAK_REALM }}
           VITE_KEYCLOAK_CLIENT_ID: ${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
           VITE_FILES_BASE: ${{ vars.VITE_FILES_BASE }}
-      - name: Login to GHCR
+
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -88,44 +89,33 @@ jobs:
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.PROD_SSH_PORT }}
+          # si l'image GHCR est privée, décommenter la ligne suivante
+          # envs: PROD_GHCR_TOKEN
           script: |
             set -euo pipefail
 
-            # 0) Contexte & tags
-            echo "GITHUB_SHA=${GITHUB_SHA}"
             IMAGE="ghcr.io/netvolutionfr/voyages-front"
-            TAG="${GITHUB_SHA}"
+            TAG="${{ github.sha }}"
 
-            # 1) Vérifier que l'image existe sur GHCR (côté CI)
-            echo "CI: image that should exist: ${IMAGE}:${TAG}"
-
-            # 2) Server: se placer dans le bon dossier et afficher l'état
             cd "$HOME/front" || { echo "No ~/front"; exit 1; }
-            echo "== docker compose version =="
-            docker compose version || docker-compose version
 
-            echo "== compose config (résolu) =="
+            # (si image privée) login GHCR côté serveur :
+            # echo "${PROD_GHCR_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "== compose config résolu avec FRONT_TAG=${TAG} =="
             FRONT_TAG="${TAG}" docker compose config
 
-            echo "== images/containers avant =="
-            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed 's/^/  /'
-            docker images | grep -E "$(echo ${IMAGE} | sed 's/\//\\\//g')" || true
-
-            # 3) Pull explicite du tag
             echo "== pull ${IMAGE}:${TAG} =="
             docker pull "${IMAGE}:${TAG}"
 
-            # 4) Lancement: forcer le tag à cette exécution
-            echo "== up -d (front) avec FRONT_TAG=${TAG} =="
-            FRONT_TAG="${TAG}" docker compose up -d --no-deps --pull always front
+            echo "== up -d --pull always --force-recreate front =="
+            FRONT_TAG="${TAG}" docker compose up -d --no-deps --pull always --force-recreate front
 
-            # 5) Vérifications
             echo "== ps après =="
-            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed 's/^/  /'
+            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
 
-            echo "== logs récents du conteneur =="
+            echo "== logs récents =="
             docker logs --tail=80 voyages-front || true
 
-            # 6) Healthcheck HTTP
-            echo "== check /health =="
+            echo "== health check sur 8082 =="
             curl -fsS http://127.0.0.1:8082/health && echo "health: OK"
