@@ -156,6 +156,9 @@ const VoyagesForm = () => {
     };
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
+        // Adapter les valeurs du form (euros → centimes)
+        if (values.prixTotal != null) values.prixTotal = Math.round(values.prixTotal * 100);
+        if (values.participationDesFamilles != null) values.participationDesFamilles = Math.round(values.participationDesFamilles * 100);
         await form.refineCore.onFinish(values as VoyageUpsertRequest);
     };
 
