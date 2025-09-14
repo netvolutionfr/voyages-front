@@ -52,7 +52,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_API_BASE=${{ vars.VITE_API_BASE }}
             VITE_API_URL=${{ vars.VITE_API_URL }}
             VITE_KEYCLOAK_URL=${{ vars.VITE_KEYCLOAK_URL }}
             VITE_KEYCLOAK_REALM=${{ vars.VITE_KEYCLOAK_REALM }}
