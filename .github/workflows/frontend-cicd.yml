@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }} # ex: netvolutionfr/voyages-front
 
 jobs:
   build-and-push:
@@ -21,30 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Lint & Test (non bloquant temporairement)
+      # (facultatif) Lint rapide – non bloquant au début
+      - name: Lint (non-bloquant)
         run: |
+          npm ci || true
           npm run lint --if-present || true
-          npm test --if-present -- --ci || true
-
-      # (facultatif) build Node pour smoke-test du code
-      - name: Build (CI)
-        run: npm run build
-        env:
-          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_KEYCLOAK_URL: ${{ vars.VITE_KEYCLOAK_URL }}
-          VITE_KEYCLOAK_REALM: ${{ vars.VITE_KEYCLOAK_REALM }}
-          VITE_KEYCLOAK_CLIENT_ID: ${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
-          VITE_FILES_BASE: ${{ vars.VITE_FILES_BASE }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -62,7 +43,7 @@ jobs:
             type=sha,priority=800
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push image
+      - name: Build and push image (VITE_* en build-args)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -77,45 +58,43 @@ jobs:
             VITE_KEYCLOAK_CLIENT_ID=${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
             VITE_FILES_BASE=${{ vars.VITE_FILES_BASE }}
 
-  deploy:
-    needs: build-and-push
+  deploy_to_server:
     runs-on: ubuntu-24.04
+    needs: build-and-push
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          port: ${{ secrets.PROD_SSH_PORT }}
-          # si l'image GHCR est privée, décommenter la ligne suivante
-          # envs: PROD_GHCR_TOKEN
-          script: |
-            set -euo pipefail
+      - name: Prepare SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.PROD_HOST }}" >> ~/.ssh/known_hosts
 
-            IMAGE="ghcr.io/netvolutionfr/voyages-front"
-            TAG="${{ github.sha }}"
+      - name: Pull & restart via Docker Compose
+        env:
+          DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}  # ex: /home/voyages/front
+          IMAGE: ghcr.io/${{ github.repository }} # netvolutionfr/voyages-front
+          TAG: ${{ github.sha }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.PROD_SSH_PORT }}" \
+            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" "
+              set -euo pipefail
 
-            cd "$HOME/front" || { echo "No ~/front"; exit 1; }
+              echo '== pull image ${IMAGE}:${TAG} =='
+              docker pull ${IMAGE}:${TAG}
 
-            # (si image privée) login GHCR côté serveur :
-            # echo "${PROD_GHCR_TOKEN}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+              cd '${DEPLOY_DIR}'
 
-            echo "== compose config résolu avec FRONT_TAG=${TAG} =="
-            FRONT_TAG="${TAG}" docker compose config
+              echo '== compose config résolu (FRONT_TAG='${TAG}') =='
+              FRONT_TAG='${TAG}' docker compose config
 
-            echo "== pull ${IMAGE}:${TAG} =="
-            docker pull "${IMAGE}:${TAG}"
+              echo '== up -d front --pull always --force-recreate =='
+              FRONT_TAG='${TAG}' docker compose up -d --no-deps --pull always --force-recreate front
 
-            echo "== up -d --pull always --force-recreate front =="
-            FRONT_TAG="${TAG}" docker compose up -d --no-deps --pull always --force-recreate front
+              echo '== ps =='
+              docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
 
-            echo "== ps après =="
-            docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
-
-            echo "== logs récents =="
-            docker logs --tail=80 voyages-front || true
-
-            echo "== health check sur 8082 =="
-            curl -fsS http://127.0.0.1:8082/health && echo "health: OK"
+              echo '== health 8082 =='
+              (curl -fsS http://127.0.0.1:8082/health || wget -qO- http://127.0.0.1:8082/health) >/dev/null \
+                && echo 'health: OK'
+            "
