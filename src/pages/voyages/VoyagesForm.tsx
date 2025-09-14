@@ -24,15 +24,16 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 import type { IPays } from "@/pages/voyages/IPays";
 import { VoyageSchema, type VoyageFormData } from "@/schemas/voyageSchema";
-import { voyageToFormDefaults, formToUpsertPayload } from "@/pages/voyages/voyageMappers";
-import type { IVoyage } from "@/pages/voyages/IVoyage";
+import {dtoToForm} from "@/pages/voyages/voyageMappers";
 
 import { fr } from "react-day-picker/locale";
 
 import axiosInstance from "@/lib/axios";
 import imageCompression from "browser-image-compression";
-import type {SubmitHandler} from "react-hook-form";
-import type {VoyageUpsertRequest} from "@/pages/voyages/VoyageUpsertRequest.tsx";
+import type {VoyageUpsertRequest} from "@/pages/voyages/dto/VoyageUpsertRequest.tsx";
+import type {VoyageDTO} from "@/pages/voyages/dto/VoyageDTO.tsx";
+import type {DateRange} from "react-day-picker";
+import type {SubmitHandler, Resolver} from "react-hook-form";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -42,6 +43,9 @@ const secteursAll = [
 
 type SectionOption = { id: number; libelle: string };
 type UserOption    = { id: number; fullName: string };
+
+const isoNow = () => new Date().toISOString();
+const isoPlusDays = (n: number) => new Date(Date.now() + n*864e5).toISOString();
 
 const VoyagesForm = () => {
     const { id } = useParams<{ id: string }>();
@@ -75,17 +79,14 @@ const VoyagesForm = () => {
         filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"]}],
     });
 
-    // petites aides pour les dates
-    const today = new Date().toISOString();
-    const plus7 = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
 
     const form = useForm<
         BaseRecord,          // TData (retour de getOne/getList) — si tu as un IVoyage, mets-le ici
         HttpError,           // TError (Refine)
-        VoyageUpsertRequest, // TVariables (payload attendu par onFinish)
+        VoyageUpsertRequest, // TRequest (payload API)
         VoyageFormData       // TFormValues (ce que RHF manipule → ton Zod infer)
     >({
-        resolver: zodResolver(VoyageSchema),
+        resolver: zodResolver(VoyageSchema) as Resolver<VoyageFormData>,
         refineCoreProps: {
             resource: "voyages",
             id: id ?? undefined,
@@ -100,7 +101,7 @@ const VoyagesForm = () => {
             participationDesFamilles: null,
             coverPhotoUrl: null,
             paysId: 0, // ou undefined si tu rends ce champ optional dans le schéma
-            datesVoyage: { from: today, to: plus7 },
+            datesVoyage: { from: isoNow(), to: isoPlusDays(7) },
             nombreMinParticipants: 1,
             nombreMaxParticipants: 1,
             datesInscription: null, // { from: Date, to: Date } | null | undefined
@@ -111,18 +112,18 @@ const VoyagesForm = () => {
         shouldFocusError: true,
     });
 
-    const { queryResult } = form.refineCore;
+    const { query } = form.refineCore;
     const loading = form.refineCore.formLoading;
 
     // Pré-remplissage en édition : mapper la réponse API (IVoyage) vers les defaults du form
     useEffect(() => {
         if (!isEditing) return;
-        const record = queryResult?.data?.data as IVoyage | undefined;
+        const record = query?.data?.data as VoyageDTO | undefined;
         if (record) {
-            const defaults = voyageToFormDefaults(record);
+            const defaults = dtoToForm(record);
             form.reset(defaults);
         }
-    }, [isEditing, queryResult?.data?.data, form]);
+    }, [isEditing, query?.data?.data, form]);
 
     useEffect(() => {
         form.setFocus("nom");
@@ -155,8 +156,7 @@ const VoyagesForm = () => {
     };
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
-        const payload: VoyageUpsertRequest = formToUpsertPayload(values, id);
-        await form.refineCore.onFinish(payload);
+        await form.refineCore.onFinish(values as VoyageUpsertRequest);
     };
 
     if (loading) return <LoadingSpinner />;
@@ -357,13 +357,9 @@ const VoyagesForm = () => {
                                             locale={fr}
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
-                                            selected={field.value}
+                                            selected={field.value as unknown as DateRange}
                                             onSelect={(range) =>
-                                                form.setValue(
-                                                    "datesVoyage",
-                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() },
-                                                    { shouldDirty: true }
-                                                )
+                                                { field.onChange(range ?? { from: undefined, to: undefined });}
                                             }
                                             disabled={(date) => date < new Date()}
                                         />
@@ -384,14 +380,8 @@ const VoyagesForm = () => {
                                             locale={fr}
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
-                                            selected={field.value}
-                                            onSelect={(range) =>
-                                                form.setValue(
-                                                    "datesInscription",
-                                                    { from: range?.from ?? new Date(), to: range?.to ?? new Date() },
-                                                    { shouldDirty: true }
-                                                )
-                                            }
+                                            selected={field.value as unknown as DateRange ?? undefined}
+                                            onSelect={(range) => field.onChange(range ?? null)}
                                             disabled={(date) =>
                                                 date < new Date(new Date().setDate(new Date().getDate() - 1))
                                             }

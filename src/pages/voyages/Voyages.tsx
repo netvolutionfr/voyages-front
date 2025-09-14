@@ -16,7 +16,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
     if (!coverPhotoUrl) return undefined;
     if (/^https?:\/\//i.test(coverPhotoUrl)) return coverPhotoUrl;
-    // Sinon : c'est une clé → base publique (ex: https://s3.voyages.siovision.fr/voyages/<key>)
+    // Sinon : c'est une clé → base publique (ex : https://s3.voyages.siovision.fr/voyages/<key>)
     const base = import.meta.env.VITE_FILES_BASE || "";
     const sep = base.endsWith("/") ? "" : "/";
     return `${base}${sep}${coverPhotoUrl}`;
@@ -39,7 +39,7 @@ const Voyages = () => {
     const userRoles: string[] = keycloak.tokenParsed?.realm_access?.roles || [];
     const isAdminOrTeacher = userRoles.includes("admin") || userRoles.includes("teacher");
 
-    // Admin view: keep existing management table
+    // Admin view: keep the existing management table
     const tableInstance = useTable({
         columns,
         refineCoreProps: {
@@ -47,7 +47,7 @@ const Voyages = () => {
         },
     });
 
-    // Student view: list voyages open for registration (current date within inscription window)
+    // Student view: list voyages open for registration (current date within the inscription window)
     const { data, isLoading: isLoadingList } = useList<IVoyage>({
         resource: "voyages",
         pagination: { pageSize: 12 },
@@ -59,7 +59,7 @@ const Voyages = () => {
         : isLoadingList;
 
     if (isLoading) {
-        if (!isAdminOrTeacher) {
+        if (isAdminOrTeacher) {
             return (<LoadingSpinner />)
         } else {
             return (
