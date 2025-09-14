@@ -76,25 +76,14 @@ jobs:
           IMAGE: ghcr.io/${{ github.repository }} # netvolutionfr/voyages-front
           TAG: ${{ github.sha }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.PROD_SSH_PORT }}" \
-            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" "
-              set -euo pipefail
-
-              echo '== pull image ${IMAGE}:${TAG} =='
-              docker pull ${IMAGE}:${TAG}
-
-              cd '${DEPLOY_DIR}'
-
-              echo '== compose config résolu (FRONT_TAG='${TAG}') =='
-              FRONT_TAG='${TAG}' docker compose config
-
-              echo '== up -d front --pull always --force-recreate =='
-              FRONT_TAG='${TAG}' docker compose up -d --no-deps --pull always --force-recreate front
-
-              echo '== ps =='
-              docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
-
-              echo '== health 8082 =='
+          ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.PROD_SSH_PORT }}" \
+            "${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}" "\
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} && \
+            cd ${DEPLOY_DIR} && \
+            docker compose pull && \
+            docker compose up -d && \
+            docker image prune -f && \"
+            echo '== health 8082 ==' && \
               (curl -fsS http://127.0.0.1:8082/health || wget -qO- http://127.0.0.1:8082/health) >/dev/null \
                 && echo 'health: OK'
             "
