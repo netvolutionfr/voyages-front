@@ -1,5 +1,4 @@
 import {
-    IconAddressBook,
     IconDashboard,
     IconDirections,
     IconId,
@@ -14,11 +13,6 @@ export const menuEleves = [
         icon: IconDashboard,
     },
     {
-        title: "Profil",
-        url: "/profil",
-        icon: IconAddressBook,
-    },
-    {
         title: "Voyages",
         url: "/voyages",
         icon: IconDirections,
@@ -27,11 +21,6 @@ export const menuEleves = [
         title: "Documents",
         url: "/documents",
         icon: IconId,
-    },
-    {
-        title: "Enfants",
-        url: "/participants",
-        icon: IconUsers,
     }
 ];
 
@@ -40,11 +29,6 @@ export const menuParents = [
         title: "Tableau de bord",
         url: "/",
         icon: IconDashboard,
-    },
-    {
-        title: "Profil",
-        url: "/profil",
-        icon: IconAddressBook,
     },
     {
         title: "Voyages",

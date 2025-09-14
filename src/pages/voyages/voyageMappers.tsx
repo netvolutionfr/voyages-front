@@ -6,15 +6,15 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
         nom: v.nom ?? "",
         description: v.description ?? null,
         destination: v.destination ?? "",
-        paysId: v.paysId ?? undefined,
+        paysId: v.pays.id ?? undefined,
 
         // Centimes API → € dans le form
         prixTotal: v.prixTotal != null ? v.prixTotal / 100 : undefined,
         participationDesFamilles: v.participationDesFamilles != null ? v.participationDesFamilles / 100 : undefined,
 
         coverPhotoUrl: v.coverPhotoUrl ?? null,
-        organisateurIds: v.organisateurs?.map(o => o.id) ?? [],
-        sectionIds: v.sections?.map(s => s.id) ?? [],
+        organisateurIds: v.organisateurs?.map(o => o.publicId) ?? [],
+        sectionIds: v.sections?.map(s => s.publicId) ?? [],
         secteurs: v.secteurs ?? [],
 
         nombreMinParticipants: v.nombreMinParticipants ?? 1,
@@ -22,8 +22,8 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
         // Dates (string ISO) → Date
         // Par défaut aujourd’hui si pb de conversion (pour éviter erreurs dans le form)
         datesVoyage: {
-            from: v.datesVoyage?.from ?? new Date(),
-            to:   v.datesVoyage?.to   ?? new Date(),
+            from: v.datesVoyage?.from ?? new Date().toISOString(),
+            to:   v.datesVoyage?.to   ?? new Date().toISOString(),
         },
         datesInscription: v.datesInscription
             ? {

@@ -3,7 +3,10 @@ export type VoyageDTO = {
     nom: string;
     description: string;
     destination: string;
-    paysId: number;
+    pays: {
+        id: number;
+        nom?: string;
+    }
     paysNom?: string;
 
     participationDesFamilles: number;  // en CENTIMES côté API
@@ -17,11 +20,12 @@ export type VoyageDTO = {
 
     datesInscription?: { from: string; to: string }; // ISO
 
-    sections?: Array<{ id: number; libelle: string }>;
-    organisateurs?: Array<{ id: number; nom: string }>;
+    sections?: Array<{ publicId: string; libelle: string }>;
+    organisateurs?: Array<{ publicId: string; nom: string }>;
     documentsObligatoires?: Array<{ id: number; nom: string }>;
     participants?: Array<{
         id: number; nom: string; prenom: string; email: string;
         dateNaissance: string; sexe: 'M' | 'F' | 'N'; telephone?: string;
     }>;
+    updatedAt: string;
 }

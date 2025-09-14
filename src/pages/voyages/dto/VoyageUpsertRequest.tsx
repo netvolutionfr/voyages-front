@@ -16,7 +16,7 @@ export type VoyageUpsertRequest = {
 
     datesInscription?: { from: string; to: string } | null;
 
-    organisateurIds: number[];
-    sectionIds: number[];
+    organisateurIds: string[];
+    sectionIds: string[];
     secteurs: Array<"CYCLE_BAC"|"CYCLE_POST_BAC">;
 };

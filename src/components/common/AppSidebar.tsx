@@ -20,7 +20,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const isParent = user?.realm_access.roles.includes("parent")
     const isProf = user?.realm_access.roles.includes("teacher");
     const isEleve = user?.realm_access.roles.includes("student");
-
+    console.log("User roles:", user?.realm_access.roles);
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>

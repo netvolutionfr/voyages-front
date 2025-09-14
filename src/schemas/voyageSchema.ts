@@ -3,7 +3,7 @@ import { z } from "zod";
 // accepte Date|string en entrée, sort une string ISO, valide ISO 8601
 const dateTimeISO = z.preprocess(
     (val) => (val instanceof Date ? val.toISOString() : val),
-    z.string().datetime({ offset: true })
+    z.string()
 );
 
 const rangeISO = z.object({
@@ -22,8 +22,8 @@ export const VoyageSchema = z.object({
     prixTotal: z.number().min(0).nullable().optional(),
     participationDesFamilles: z.number().min(0).nullable().optional(),
     coverPhotoUrl: z.string().nullable().optional(),
-    organisateurIds: z.array(z.number().int().positive()).default([]),
-    sectionIds: z.array(z.number().int().positive()).default([]),
+    organisateurIds: z.array(z.string().min(1)).default([]),
+    sectionIds: z.array(z.string()).default([]),
     secteurs: z.array(z.enum(["CYCLE_BAC","CYCLE_POST_BAC"])).default([]),
 })
     .superRefine((v, ctx) => {

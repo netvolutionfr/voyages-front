@@ -34,6 +34,7 @@ import type {VoyageUpsertRequest} from "@/pages/voyages/dto/VoyageUpsertRequest.
 import type {VoyageDTO} from "@/pages/voyages/dto/VoyageDTO.tsx";
 import type {DateRange} from "react-day-picker";
 import type {SubmitHandler, Resolver} from "react-hook-form";
+import {MultiSelect} from "@/components/ui/multi-select.tsx";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -41,8 +42,8 @@ const secteursAll = [
     { value: "CYCLE_POST_BAC", label: "Cycle post-bac" },
 ] as const;
 
-type SectionOption = { id: number; libelle: string };
-type UserOption    = { id: number; fullName: string };
+type SectionOption = { publicId: string; libelle: string };
+type UserOption    = { publicId: string; fullName: string };
 
 const isoNow = () => new Date().toISOString();
 const isoPlusDays = (n: number) => new Date(Date.now() + n*864e5).toISOString();
@@ -64,7 +65,7 @@ const VoyagesForm = () => {
     const { options: sectionOptions } = useSelect<SectionOption>({
         resource: "sections",
         optionLabel: "libelle",
-        optionValue: "id",
+        optionValue: "publicId",
         pagination: { pageSize: 500 },
         sort: [{ field: "libelle", order: "asc" }],
     });
@@ -73,7 +74,7 @@ const VoyagesForm = () => {
     const { options: organisateurOptions } = useSelect<UserOption>({
         resource: "users",
         optionLabel: "fullName",
-        optionValue: "id",
+        optionValue: "publicId",
         pagination: { pageSize: 500 },
         sort: [{ field: "prenom", order: "asc" }],
         filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"]}],
@@ -116,18 +117,31 @@ const VoyagesForm = () => {
     const loading = form.refineCore.formLoading;
 
     // Pré-remplissage en édition : mapper la réponse API (IVoyage) vers les defaults du form
+    const record = query?.data?.data as VoyageDTO | undefined;
+
     useEffect(() => {
-        if (!isEditing) return;
-        const record = query?.data?.data as VoyageDTO | undefined;
-        if (record) {
-            const defaults = dtoToForm(record);
-            form.reset(defaults);
-        }
-    }, [isEditing, query?.data?.data, form]);
+        if (!isEditing || !record) return;
+        console.log("Reset form with record", dtoToForm(record));
+        form.reset(dtoToForm(record));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditing, record?.id, record?.updatedAt]);
 
     useEffect(() => {
         form.setFocus("nom");
     }, [form]);
+
+
+    useEffect(() => {
+        const sub = form.watch((v, info) => {
+            console.log("[WATCH]", info.name, v.organisateurIds, v);
+        });
+        return () => sub.unsubscribe();
+    }, [form]);
+
+    useEffect(() => {
+        console.log("[FORMSTATE] errors", form.formState.errors);
+    }, [form.formState.errors]);
+
 
     /** Upload direct vers MinIO via presigned URL */
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -159,6 +173,8 @@ const VoyagesForm = () => {
         // Adapter les valeurs du form (euros → centimes)
         if (values.prixTotal != null) values.prixTotal = Math.round(values.prixTotal * 100);
         if (values.participationDesFamilles != null) values.participationDesFamilles = Math.round(values.participationDesFamilles * 100);
+
+        console.log("Submitting voyage form", values);
         await form.refineCore.onFinish(values as VoyageUpsertRequest);
     };
 
@@ -439,58 +455,57 @@ const VoyagesForm = () => {
                     <FormField
                         control={form.control}
                         name="sectionIds"
-                        render={() => (
-                            <FormItem>
-                                <FormLabel>Sections concernées</FormLabel>
-                                <FormControl>
-                                    <select
-                                        multiple
-                                        className="w-full border rounded p-2 h-36"
-                                        {...form.register("sectionIds")}
-                                        onChange={(e) => {
-                                            const vals = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
-                                            form.setValue("sectionIds", vals, { shouldDirty: true });
-                                        }}
-                                    >
-                                        {sectionOptions.map((s) => (
-                                            <option key={s.value} value={Number(s.value)}>
-                                                {s.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                        render={({ field }) => {
+                            return (
+                                <FormItem>
+                                    <FormLabel>Sections concernées</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={sectionOptions}
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value ?? []}
+                                            placeholder="Choisir des sections"
+                                            responsive={true}
+                                            autoSize={true}
+                                            maxCount={0}
+                                            hideSelectAll={true}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            );
+                        }}
                     />
 
-                    {/* Organisateurs (multi) */}
+                    {/* Organisateurs (Multi-Select) */}
                     <FormField
                         control={form.control}
                         name="organisateurIds"
-                        render={() => (
-                            <FormItem>
-                                <FormLabel>Organisateurs</FormLabel>
-                                <FormControl>
-                                    <select
-                                        multiple
-                                        className="w-full border rounded p-2 h-36"
-                                        {...form.register("organisateurIds")}
-                                        onChange={(e) => {
-                                            const vals = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
-                                            form.setValue("organisateurIds", vals, { shouldDirty: true });
-                                        }}
-                                    >
-                                        {organisateurOptions.map((u) => (
-                                            <option key={u.value} value={Number(u.value)}>
-                                                {u.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+                        render={({ field, fieldState }) => {
+
+                            return (
+                                <FormItem>
+                                    <FormLabel>Organisateurs</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={organisateurOptions}
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value ?? []}
+                                            placeholder="Choisir des organisateurs"
+                                            responsive={true}
+                                            autoSize={true}
+                                            maxCount={0}
+                                            hideSelectAll={true}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                    {/* TEMP: Affiche l'erreur brute sous le champ */}
+                                    {fieldState.error && (
+                                        <pre className="text-xs text-muted-foreground">{JSON.stringify(fieldState.error, null, 2)}</pre>
+                                    )}
+                                </FormItem>
+                            );
+                        }}
                     />
 
                     {/* Secteurs (checkboxes) */}
