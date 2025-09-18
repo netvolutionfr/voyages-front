@@ -103,25 +103,24 @@ const Voyages = () => {
                     const dateRange = formatDateRange(v.datesVoyage?.from, v.datesVoyage?.to);
 
                     return (
-                        <Card key={v.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+                        <Card key={v.id} className="overflow-hidden group hover:shadow-lg transition-shadow py-0">
                             {/* Image de couverture */}
-                            <div className="relative h-40 w-full bg-muted">
                                 {cover ? (
                                     <img
                                         src={cover}
                                         alt={`Couverture ${v.nom}`}
                                         className={cn(
-                                            "h-full w-full object-cover transition-transform",
+                                            "h-full w-full object-cover transition-transform rounded-t-lg",
                                             "group-hover:scale-[1.02]"
                                         )}
                                         loading="lazy"
+                                        style={{ aspectRatio: "500/300", objectFit: "cover" }}
                                     />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                         Pas d’image
                                     </div>
                                 )}
-                            </div>
 
                             {/* En-tête */}
                             <CardHeader className="pb-2">
