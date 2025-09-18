@@ -103,7 +103,7 @@ const Voyages = () => {
                     const dateRange = formatDateRange(v.datesVoyage?.from, v.datesVoyage?.to);
 
                     return (
-                        <Card key={v.id} className="overflow-hidden group hover:shadow-lg transition-shadow py-0">
+                        <Card key={v.id} className="overflow-hidden group hover:shadow-lg transition-shadow pt-0">
                             {/* Image de couverture */}
                                 {cover ? (
                                     <img
