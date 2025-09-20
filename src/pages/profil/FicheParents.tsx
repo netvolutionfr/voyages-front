@@ -37,12 +37,12 @@ const FicheParents = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="parent1Nom"
+                                    name="parent1LastName"
                                     render={() => (
                                         <FormItem>
                                             <FormLabel>Nom</FormLabel>
                                             <FormControl>
-                                                <Input {...register("parent1Nom")} className="input" />
+                                                <Input {...register("parent1LastName")} className="input" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -50,12 +50,12 @@ const FicheParents = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="parent1Prenom"
+                                    name="parent1FirstName"
                                     render={() => (
                                         <FormItem>
                                             <FormLabel>Prénom</FormLabel>
                                             <FormControl>
-                                                <Input {...register("parent1Prenom")} className="input" />
+                                                <Input {...register("parent1FirstName")} className="input" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -94,12 +94,12 @@ const FicheParents = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="parent2Nom"
+                                    name="parent2LastName"
                                     render={() => (
                                         <FormItem>
                                             <FormLabel>Nom</FormLabel>
                                             <FormControl>
-                                                <Input {...register("parent2Nom")} className="input" />
+                                                <Input {...register("parent2LastName")} className="input" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -107,12 +107,12 @@ const FicheParents = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="parent2Prenom"
+                                    name="parent2FirstName"
                                     render={() => (
                                         <FormItem>
                                             <FormLabel>Prénom</FormLabel>
                                             <FormControl>
-                                                <Input {...register("parent2Prenom")} className="input" />
+                                                <Input {...register("parent2FirstName")} className="input" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
