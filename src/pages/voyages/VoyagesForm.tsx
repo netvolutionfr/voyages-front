@@ -43,7 +43,7 @@ const secteursAll = [
     { value: "CYCLE_POST_BAC", label: "Cycle post-bac" },
 ] as const;
 
-type SectionOption = { publicId: string; libelle: string };
+type SectionOption = { publicId: string; label: string };
 type UserOption    = { publicId: string; fullName: string };
 
 const isoNow = () => new Date().toISOString();
@@ -55,20 +55,20 @@ const VoyagesForm = () => {
 
     // Pays
     const { options: paysOptions } = useSelect<IPays>({
-        resource: "pays",
-        optionLabel: "nom",
+        resource: "country",
+        optionLabel: "name",
         optionValue: "id",
         pagination: { pageSize: 200 },
-        sort: [{ field: "nom", order: "asc" }],
+        sort: [{ field: "name", order: "asc" }],
     });
 
     // Sections (multi)
     const { options: sectionOptions } = useSelect<SectionOption>({
         resource: "sections",
-        optionLabel: "libelle",
+        optionLabel: "label",
         optionValue: "publicId",
         pagination: { pageSize: 500 },
-        sort: [{ field: "libelle", order: "asc" }],
+        sort: [{ field: "label", order: "asc" }],
     });
 
     // Organisateurs (multi) : profs + admins
@@ -77,7 +77,7 @@ const VoyagesForm = () => {
         optionLabel: "fullName",
         optionValue: "publicId",
         pagination: { pageSize: 500 },
-        sort: [{ field: "prenom", order: "asc" }],
+        sort: [{ field: "firstName", order: "asc" }],
         filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"]}],
     });
 
@@ -90,27 +90,27 @@ const VoyagesForm = () => {
     >({
         resolver: zodResolver(VoyageSchema) as Resolver<VoyageFormData>,
         refineCoreProps: {
-            resource: "voyages",
+            resource: "trips",
             id: id ?? undefined,
             action: isEditing ? "edit" : "create",
             redirect: "list",
         },
         defaultValues: {
-            nom: "",
+            title: "",
             description: null,
             destination: "",
-            prixTotal: null,
-            participationDesFamilles: null,
+            totalPrice: null,
+            familyContribution: null,
             coverPhotoUrl: null,
-            paysId: 0, // ou undefined si tu rends ce champ optional dans le schéma
-            datesVoyage: { from: isoNow(), to: isoPlusDays(7) },
-            nombreMinParticipants: 1,
-            nombreMaxParticipants: 1,
-            datesInscription: null, // { from: Date, to: Date } | null | undefined
-            organisateurIds: [],
+            countryId: 0, // ou undefined si tu rends ce champ optional dans le schéma
+            tripDates: { from: isoNow(), to: isoPlusDays(7) },
+            minParticipants: 1,
+            maxParticipants: 1,
+            registrationPeriod: null, // { from: Date, to: Date } | null | undefined
+            chaperoneIds: [],
             sectionIds: [],
-            secteurs: [],
-            sondage: false,
+            sectors: [],
+            poll: false,
         },
         shouldFocusError: true,
     });
@@ -129,13 +129,13 @@ const VoyagesForm = () => {
     }, [isEditing, record?.id, record?.updatedAt]);
 
     useEffect(() => {
-        form.setFocus("nom");
+        form.setFocus("title");
     }, [form]);
 
 
     useEffect(() => {
         const sub = form.watch((v, info) => {
-            console.log("[WATCH]", info.name, v.organisateurIds, v);
+            console.log("[WATCH]", info.name, v.chaperoneIds, v);
         });
         return () => sub.unsubscribe();
     }, [form]);
@@ -173,8 +173,8 @@ const VoyagesForm = () => {
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
         // Adapter les valeurs du form (euros → centimes)
-        if (values.prixTotal != null) values.prixTotal = Math.round(values.prixTotal * 100);
-        if (values.participationDesFamilles != null) values.participationDesFamilles = Math.round(values.participationDesFamilles * 100);
+        if (values.totalPrice != null) values.totalPrice = Math.round(values.totalPrice * 100);
+        if (values.familyContribution != null) values.familyContribution = Math.round(values.familyContribution * 100);
 
         console.log("Submitting voyage form", values);
         await form.refineCore.onFinish(values as VoyageUpsertRequest);
@@ -196,12 +196,12 @@ const VoyagesForm = () => {
                     {/* Nom */}
                     <FormField
                         control={form.control}
-                        name="nom"
+                        name="title"
                         render={() => (
                             <FormItem>
                                 <FormLabel>Titre du voyage</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Nom" type="text" {...form.register("nom")} />
+                                    <Input placeholder="Nom" type="text" {...form.register("title")} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -211,7 +211,7 @@ const VoyagesForm = () => {
                     {/* Mode Sondage */}
                     <FormField
                         control={form.control}
-                        name="sondage"
+                        name="poll"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Sondage</FormLabel>
@@ -246,7 +246,7 @@ const VoyagesForm = () => {
                     {/* Pays (paysId) */}
                     <FormField
                         control={form.control}
-                        name="paysId"
+                        name="countryId"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Pays</FormLabel>
@@ -275,7 +275,7 @@ const VoyagesForm = () => {
                                                         <CommandItem
                                                             value={String(p.value)}
                                                             key={p.value}
-                                                            onSelect={() => form.setValue("paysId", Number(p.value), { shouldDirty: true })}
+                                                            onSelect={() => form.setValue("countryId", Number(p.value), { shouldDirty: true })}
                                                         >
                                                             {p.label}
                                                             <Check
@@ -314,7 +314,7 @@ const VoyagesForm = () => {
                     {/* Prix total (euros dans le form) */}
                     <FormField
                         control={form.control}
-                        name="prixTotal"
+                        name="totalPrice"
                         render={() => (
                             <FormItem>
                                 <FormLabel>Prix total (en €)</FormLabel>
@@ -323,7 +323,7 @@ const VoyagesForm = () => {
                                         type="number"
                                         step="0.01"
                                         placeholder="Prix total"
-                                        {...form.register("prixTotal", {
+                                        {...form.register("totalPrice", {
                                             valueAsNumber: true,
                                             setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
                                         })}
@@ -337,7 +337,7 @@ const VoyagesForm = () => {
                     {/* Participation familles (euros dans le form) */}
                     <FormField
                         control={form.control}
-                        name="participationDesFamilles"
+                        name="familyContribution"
                         render={() => (
                             <FormItem>
                                 <FormLabel>Participation des familles (en €)</FormLabel>
@@ -346,7 +346,7 @@ const VoyagesForm = () => {
                                         type="number"
                                         step="0.01"
                                         placeholder="Participation des familles"
-                                        {...form.register("participationDesFamilles", {
+                                        {...form.register("familyContribution", {
                                             valueAsNumber: true,
                                             setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
                                         })}
@@ -388,7 +388,7 @@ const VoyagesForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
-                            name="datesVoyage"
+                            name="tripDates"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Dates du voyage</FormLabel>
@@ -411,7 +411,7 @@ const VoyagesForm = () => {
                         />
                         <FormField
                             control={form.control}
-                            name="datesInscription"
+                            name="registrationPeriod"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Dates d'inscription</FormLabel>
@@ -439,7 +439,7 @@ const VoyagesForm = () => {
                         <div className="col-span-2">Nombre de participants</div>
                         <FormField
                             control={form.control}
-                            name="nombreMinParticipants"
+                            name="minParticipants"
                             render={() => (
                                 <FormItem>
                                     <FormLabel>Mini</FormLabel>
@@ -447,7 +447,7 @@ const VoyagesForm = () => {
                                         <Input
                                             type="number"
                                             placeholder="Min. participants"
-                                            {...form.register("nombreMinParticipants", { valueAsNumber: true })}
+                                            {...form.register("minParticipants", { valueAsNumber: true })}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -456,7 +456,7 @@ const VoyagesForm = () => {
                         />
                         <FormField
                             control={form.control}
-                            name="nombreMaxParticipants"
+                            name="maxParticipants"
                             render={() => (
                                 <FormItem>
                                     <FormLabel>Maxi</FormLabel>
@@ -464,7 +464,7 @@ const VoyagesForm = () => {
                                         <Input
                                             type="number"
                                             placeholder="Max. participants"
-                                            {...form.register("nombreMaxParticipants", { valueAsNumber: true })}
+                                            {...form.register("maxParticipants", { valueAsNumber: true })}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -502,7 +502,7 @@ const VoyagesForm = () => {
                     {/* Organisateurs (Multi-Select) */}
                     <FormField
                         control={form.control}
-                        name="organisateurIds"
+                        name="chaperoneIds"
                         render={({ field, fieldState }) => {
 
                             return (
@@ -533,7 +533,7 @@ const VoyagesForm = () => {
                     {/* Secteurs (checkboxes) */}
                     <FormField
                         control={form.control}
-                        name="secteurs"
+                        name="sectors"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Secteurs</FormLabel>
@@ -552,7 +552,7 @@ const VoyagesForm = () => {
                                                             if (e.target.checked) set.add(s.value);
                                                             else set.delete(s.value);
                                                             form.setValue(
-                                                                "secteurs",
+                                                                "sectors",
                                                                 Array.from(set) as Array<"CYCLE_BAC" | "CYCLE_POST_BAC">,
                                                                 { shouldDirty: true });
                                                         }}

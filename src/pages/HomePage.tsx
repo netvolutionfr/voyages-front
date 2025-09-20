@@ -59,7 +59,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Nom</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {form.refineCore.queryResult?.data.data.nom}
+                                    {form.refineCore.queryResult?.data.data.lastName}
                                 </div>
                             </div>
                         </div>
@@ -67,7 +67,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Prénom</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {form.refineCore.queryResult?.data.data.prenom}
+                                    {form.refineCore.queryResult?.data.data.firstName}
                                 </div>
                             </div>
                         </div>

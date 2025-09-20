@@ -25,15 +25,15 @@ const Voyages = () => {
     const tableInstance = useTable({
         columns,
         refineCoreProps: {
-            resource: "voyages",
+            resource: "trips",
         },
     });
 
     // Student view: list voyages open for registration (current date within the inscription window)
     const { data, isLoading: isLoadingList } = useList<IVoyage>({
-        resource: "voyages",
+        resource: "trips",
         pagination: { pageSize: 12 },
-        sorters: [{ field: "dateDepart", order: "asc" }],
+        sorters: [{ field: "departureDate", order: "asc" }],
     });
 
     const isLoading = isAdminOrTeacher

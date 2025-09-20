@@ -5,20 +5,20 @@ import { UserRoundCheck } from "lucide-react";
 
 export const usersColumns: ColumnDef<IUser>[] = [
     {
-        id: "nom",
-        accessorKey: "nom",
+        id: "lastName",
+        accessorKey: "lastName",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Nom" />
         ),
-        cell: ({ row }) => <span>{row.getValue("nom")}</span>,
+        cell: ({ row }) => <span>{row.getValue("lastName")}</span>,
     },
     {
-        id: "prenom",
-        accessorKey: "prenom",
+        id: "firstName",
+        accessorKey: "firstName",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Prénom" />
         ),
-        cell: ({ row }) => <span>{row.getValue("prenom")}</span>,
+        cell: ({ row }) => <span>{row.getValue("firstName")}</span>,
     },
     {
         id: "email",

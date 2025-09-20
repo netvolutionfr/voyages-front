@@ -43,8 +43,8 @@ const FicheRenseignements = () => {
 
     const onSubmit = async (values: ficheRenseignementFormData) => {
         // Convert date to ISO format for LocalDate compatibility
-        if (values.dateNaissance) {
-            values.dateNaissance = convertDateToISO(values.dateNaissance);
+        if (values.birthDate) {
+            values.birthDate = convertDateToISO(values.birthDate);
         }
         await form.refineCore.onFinish(values);
     };
@@ -58,13 +58,13 @@ const FicheRenseignements = () => {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
-                                name="sexe"
+                                name="gender"
                                 render={( {field }) => (
                                     <FormItem>
                                         <FormLabel>Sexe</FormLabel>
                                         <FormControl>
                                             <RadioGroup
-                                                {...register("sexe")}
+                                                {...register("gender")}
                                                 defaultValue={form.refineCore.queryResult?.data?.data.sexe}
                                                 className="flex flex-row gap-8">
                                                 <FormItem className="flex items-center gap-3">
@@ -101,13 +101,13 @@ const FicheRenseignements = () => {
                             <div className="grid grid-cols-3 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="dateNaissance"
+                                    name="birthDate"
                                     render={() => (
                                         <FormItem>
                                             <FormLabel>Date de naissance</FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    {...registerWithMask("dateNaissance", ['99/99/9999'], {
+                                                    {...registerWithMask("birthDate", ['99/99/9999'], {
                                                         required: true
                                                     })}
                                                     inputMode="numeric"

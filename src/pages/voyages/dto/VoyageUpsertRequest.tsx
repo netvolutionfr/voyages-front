@@ -1,24 +1,24 @@
 export type VoyageUpsertRequest = {
     id?: number | null;
-    nom: string;
+    title: string;
     description?: string | null;
     destination: string;
 
-    prixTotal?: number | null;           // CENTIMES pour l’API
-    participationDesFamilles?: number | null; // CENTIMES pour l’API
+    totalPrice?: number | null;           // CENTIMES pour l’API
+    familyContribution?: number | null; // CENTIMES pour l’API
     coverPhotoUrl?: string | null;
 
-    paysId: number;
+    countryId: number;
 
-    datesVoyage: { from: string; to: string };        // ISO
-    nombreMinParticipants: number;
-    nombreMaxParticipants: number;
+    tripDates: { from: string; to: string };        // ISO
+    minParticipants: number;
+    maxParticipants: number;
 
-    datesInscription?: { from: string; to: string } | null;
+    registrationPeriod?: { from: string; to: string } | null;
 
-    sondage: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
+    poll: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
 
-    organisateurIds: string[];
+    chaperoneIds: string[];
     sectionIds: string[];
-    secteurs: Array<"CYCLE_BAC"|"CYCLE_POST_BAC">;
+    sectors: Array<"CYCLE_BAC"|"CYCLE_POST_BAC">;
 };

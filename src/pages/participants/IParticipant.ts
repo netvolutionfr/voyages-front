@@ -1,9 +1,9 @@
 export type IParticipant = {
     id: number;
-    nom: string;
-    prenom: string;
+    lastName: string;
+    firtName: string;
     email: string;
-    dateNaissance: string;
-    sexe: 'M' | 'F' | 'N';
+    birthDate: string;
+    gender: 'M' | 'F' | 'N';
     telephone?: string;
 }

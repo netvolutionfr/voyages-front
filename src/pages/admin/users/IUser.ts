@@ -1,7 +1,7 @@
 export type IUser = {
     id: string; // Id sous forme de UUID
-    nom?: string;
-    prenom?: string;
+    lastName?: string;
+    firstName?: string;
     email?: string;
     telephone?: string;
     validated?: boolean;

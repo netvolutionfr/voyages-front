@@ -6,39 +6,39 @@ import {convertDateToString} from "@/lib/utils.ts";
 
 export const participantsColumns: ColumnDef<IParticipant>[] = [
     {
-        id: "nom",
-        accessorKey: "nom",
+        id: "lastName",
+        accessorKey: "lastName",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Nom" />
         ),
-        cell: ({ row }) => <span className="font-medium">{row.getValue("nom")}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.getValue("lastName")}</span>,
         enableSorting: true,
     },
     {
-        id: "prenom",
-        accessorKey: "prenom",
+        id: "firstName",
+        accessorKey: "firstName",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Prénom" />
         ),
-        cell: ({ row }) => <span className="font-medium">{row.getValue("prenom")}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.getValue("firstName")}</span>,
         enableSorting: true,
     },
     {
-        id: "dateNaissance",
-        accessorKey: "dateNaissance",
+        id: "birthDate",
+        accessorKey: "birthDate",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Date de naissance" />
         ),
-        cell: ({ row }) => <span>{convertDateToString(row.getValue("dateNaissance"))}</span>,
+        cell: ({ row }) => <span>{convertDateToString(row.getValue("birthDate"))}</span>,
         enableSorting: true,
     },
     {
-        id: "sectionLibelle",
-        accessorKey: "sectionLibelle",
+        id: "sectionLabel",
+        accessorKey: "sectionLabel",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Section" />
         ),
-        cell: ({ row }) => <span>{row.getValue("sectionLibelle")}</span>,
+        cell: ({ row }) => <span>{row.getValue("sectionLabel")}</span>,
         enableSorting: true,
     },
     {

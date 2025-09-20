@@ -28,7 +28,7 @@ const ParticipantsForm = () => {
     const { id } = useParams<{ id: string }>();
     const { options } = useSelect<ISection>({
         resource: "sections",
-        optionLabel: "libelle",
+        optionLabel: "label",
         optionValue: "id",
         pagination: {
             pageSize: 100,
@@ -37,7 +37,7 @@ const ParticipantsForm = () => {
     const isEditing = Boolean(id);
     const form = useForm({
         resolver: zodResolver(ParticipantSchema),
-        defaultValues: { sexe: "N" },
+        defaultValues: { gender: "N" },
         refineCoreProps : {
             resource: "participants",
             id: id ?? undefined,
@@ -54,9 +54,9 @@ const ParticipantsForm = () => {
 
     const onSubmit = async (values: ParticipantFormData) => {
         // Format dateNaissance to YYYY-MM-DD for backend compatibility
-        if (values.dateNaissance) {
-            const [day, month, year] = values.dateNaissance.split('/');
-            values.dateNaissance = `${year}-${month}-${day}`;
+        if (values.birthDate) {
+            const [day, month, year] = values.birthDate.split('/');
+            values.birthDate = `${year}-${month}-${day}`;
         }
         await form.refineCore.onFinish(values);
     };
@@ -72,7 +72,7 @@ const ParticipantsForm = () => {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
                     <FormField
                         control={form.control}
-                        name="sexe"
+                        name="gender"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Sexe</FormLabel>
@@ -112,14 +112,14 @@ const ParticipantsForm = () => {
                         <div className="flex-1">
                             <FormField
                                 control={form.control}
-                                name="nom"
+                                name="lastName"
                                 render={() => (
                                     <FormItem>
                                         <FormLabel>Nom</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="text"
-                                                {...register("nom")} />
+                                                {...register("lastName")} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -129,14 +129,14 @@ const ParticipantsForm = () => {
                         <div className="flex-1">
                             <FormField
                                 control={form.control}
-                                name="prenom"
+                                name="firstName"
                                 render={() => (
                                     <FormItem>
                                         <FormLabel>Prénom</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="text"
-                                                {...register("prenom")} />
+                                                {...register("firstName")} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -185,13 +185,13 @@ const ParticipantsForm = () => {
                         <div className="flex-1">
                             <FormField
                                 control={form.control}
-                                name="dateNaissance"
+                                name="birthDate"
                                 render={() => (
                                     <FormItem>
                                         <FormLabel>Date de naissance</FormLabel>
                                         <FormControl>
                                             <Input
-                                                {...registerWithMask("dateNaissance", ['99/99/9999'], {
+                                                {...registerWithMask("birthDate", ['99/99/9999'], {
                                                     required: true
                                                 })}
                                                 inputMode="numeric"

@@ -1,5 +1,5 @@
 export type ISection = {
     id: number;
-    libelle?: string;
+    label?: string;
     description?: string;
 }

@@ -34,7 +34,7 @@ const SectionsForm = () => {
     const isLoading = form.refineCore.formLoading;
 
     useEffect(() => {
-        form.setFocus("libelle");
+        form.setFocus("label");
     }, [form, isEditing, id]);
 
     const register = form.register;
@@ -55,7 +55,7 @@ const SectionsForm = () => {
 
                     <FormField
                         control={form.control}
-                        name="libelle"
+                        name="label"
                         render={() => (
                             <FormItem>
                                 <FormLabel>Libellé</FormLabel>
@@ -64,7 +64,7 @@ const SectionsForm = () => {
                                         placeholder="Libellé"
 
                                         type="text"
-                                        {...register("libelle")} />
+                                        {...register("label")} />
                                 </FormControl>
                                 <FormDescription>L'abréviation utilisée pour la section</FormDescription>
                                 <FormMessage />

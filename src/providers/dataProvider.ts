@@ -96,9 +96,9 @@ export const voyagesDataProvider: DataProvider = {
                 data: response.data,
             };
         }
-        if (resource === "voyage-preferences") {
+        if (resource === "trip-preferences") {
             try {
-                const response = await axiosInstance.post(`/voyage-preferences/${id}`, variables);
+                const response = await axiosInstance.post(`/trip-preferences/${id}`, variables);
                 return { data: response.data };
             } catch (error) {
                 return Promise.reject(error);

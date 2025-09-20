@@ -35,8 +35,8 @@ export function VoyageCard({v}: {
     v: IVoyage;
 }) {
     const cover = getCoverUrl(v.coverPhotoUrl);
-    const prixFamilles = formatCurrencyFromCents(v.participationDesFamilles);
-    const dateRange = formatDateRange(v.datesVoyage?.from, v.datesVoyage?.to);
+    const prixFamilles = formatCurrencyFromCents(v.familyContribution);
+    const dateRange = formatDateRange(v.tripDates?.from, v.tripDates?.to);
 
     const [currentUserInterest, setCurrentUserInterest] = React.useState(v.interestedByCurrentUser);
     const [countUserInterests, setCountUserInterests] = React.useState(v.interestedCount || 0);
@@ -47,7 +47,7 @@ export function VoyageCard({v}: {
 
     const toggleInterest = () => {
         setPref({
-            resource: "voyage-preferences",
+            resource: "trip-preferences",
             id: v.id,
             values: { interest: currentUserInterest ? "NO" : "YES" },
             mutationMode: "optimistic",
@@ -63,7 +63,7 @@ export function VoyageCard({v}: {
                 {cover ? (
                     <img
                         src={cover}
-                        alt={`Couverture ${v.nom}`}
+                        alt={`Couverture ${v.title}`}
                         className={cn(
                             "h-full w-full object-cover transition-transform",
                             "group-hover:scale-[1.02]"
@@ -77,7 +77,7 @@ export function VoyageCard({v}: {
                     </div>
                 )}
 
-                {v.sondage && typeof v.interestedCount === "number" && (
+                {v.poll && typeof v.interestedCount === "number" && (
                     <div className="absolute left-2 top-2 rounded-full bg-background/80 backdrop-blur px-2 py-1 text-xs border flex items-center gap-1">
                         <Heart
                             className={cn(
@@ -95,11 +95,11 @@ export function VoyageCard({v}: {
             <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                     <h3 className="text-lg font-semibold leading-snug line-clamp-2">
-                        {v.nom}
+                        {v.title}
                     </h3>
-                    {v.pays?.nom && (
+                    {v.country?.name && (
                         <Badge variant="secondary" className="shrink-0">
-                            {v.pays.nom}
+                            {v.country.name}
                         </Badge>
                     )}
                 </div>
@@ -120,9 +120,9 @@ export function VoyageCard({v}: {
                 </div>
 
                 {/* Badges secteurs */}
-                {Array.isArray(v.secteurs) && v.secteurs.length > 0 && (
+                {Array.isArray(v.sectors) && v.sectors.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                        {v.secteurs.map((s) => (
+                        {v.sectors.map((s) => (
                             <Badge key={s} variant="outline" className="text-[11px]">
                                 {s === "CYCLE_BAC"
                                     ? "Cycle bac"
@@ -139,7 +139,7 @@ export function VoyageCard({v}: {
                     <div className="flex flex-wrap gap-1.5">
                         {v.sections.slice(0, 3).map((s) => (
                             <Badge key={s.id} variant="secondary" className="text-[11px]">
-                                {s.libelle}
+                                {s.label}
                             </Badge>
                         ))}
                         {v.sections.length > 3 && (
@@ -154,7 +154,7 @@ export function VoyageCard({v}: {
             {/* Footer / Actions */}
             <CardFooter className="flex items-center justify-between">
                 <div className="text-xs text-muted-foreground">
-                    Min: {v.nombreMinParticipants} • Max: {v.nombreMaxParticipants}
+                    Min: {v.minParticipants} • Max: {v.maxParticipants}
                 </div>
 
                 <Button size="sm" asChild>

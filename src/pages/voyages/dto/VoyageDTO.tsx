@@ -1,33 +1,33 @@
 export type VoyageDTO = {
     id: number;
-    nom: string;
+    title: string;
     description: string;
     destination: string;
-    pays: {
+    country: {
         id: number;
-        nom?: string;
+        name?: string;
     }
-    paysNom?: string;
+    countryName?: string;
 
-    participationDesFamilles: number;  // en CENTIMES côté API
-    prixTotal?: number;           // en CENTIMES côté API
+    familyContribution: number;  // en CENTIMES côté API
+    totalPrice?: number;           // en CENTIMES côté API
     coverPhotoUrl?: string;
-    secteurs?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
+    sectors?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
 
-    datesVoyage: { from: string; to: string }; // ISO
-    nombreMinParticipants: number;
-    nombreMaxParticipants: number;
+    tripDates: { from: string; to: string }; // ISO
+    minParticipants: number;
+    maxParticipants: number;
 
-    datesInscription?: { from: string; to: string }; // ISO
+    registrationPeriod?: { from: string; to: string }; // ISO
 
-    sondage: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
+    poll: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
 
-    sections?: Array<{ publicId: string; libelle: string }>;
-    organisateurs?: Array<{ publicId: string; nom: string }>;
-    documentsObligatoires?: Array<{ id: number; nom: string }>;
+    sections?: Array<{ publicId: string; label: string }>;
+    chaperones?: Array<{ publicId: string; fullName: string }>;
+    mandatoryDocuments?: Array<{ id: number; name: string }>;
     participants?: Array<{
-        id: number; nom: string; prenom: string; email: string;
-        dateNaissance: string; sexe: 'M' | 'F' | 'N'; telephone?: string;
+        id: number; lastName: string; firstName: string; email: string;
+        birthDate: string; gender: 'M' | 'F' | 'N'; telephone?: string;
     }>;
     updatedAt: string;
 }

@@ -39,7 +39,7 @@ export default function ImportCsvPage() {
                                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                             />
                             <p className="text-sm text-muted-foreground mt-2">
-                                En-têtes attendus : role, nom, prenom, email, telephone, sexe, section, dateNaissance, parent1_nom, parent1_prenom, parent1_email, parent1_tel, parent2_nom, parent2_prenom, parent2_email, parent2_tel
+                                En-têtes attendus : role, lastName, firstName, email, telephone, gender, section, birthDate, parent1_lastName, parent1_firstName, parent1_email, parent1_tel, parent2_lastName, parent2_firstName, parent2_email, parent2_tel
                             </p>
                         </div>
                         <Button type="submit" disabled={!file || isLoading}>

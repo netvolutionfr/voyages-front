@@ -26,7 +26,7 @@ const SectionsAdmin = () => {
     return (
         <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Gestion des sections</h1>
-            <DataTable columns={sectionsColumns} table={tableInstance} entity="sections" filter="libelle" />
+            <DataTable columns={sectionsColumns} table={tableInstance} entity="sections" filter="label" />
         </div>
     );
 }

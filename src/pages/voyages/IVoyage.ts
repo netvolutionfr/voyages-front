@@ -2,29 +2,29 @@ import type {IPays} from "@/pages/voyages/IPays.ts";
 
 export type IVoyage = {
     id: number;
-    nom: string;
+    title: string;
     description: string;
     destination: string;
-    pays?: IPays;
-    participationDesFamilles: number;  // en CENTIMES côté API
-    prixTotal?: number;           // en CENTIMES côté API
+    country?: IPays;
+    familyContribution: number;  // en CENTIMES côté API
+    totalPrice?: number;           // en CENTIMES côté API
     coverPhotoUrl?: string;
-    secteurs?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
+    sectors?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
 
-    datesVoyage: { from: Date; to: Date; };
-    nombreMinParticipants: number;
-    nombreMaxParticipants: number;
+    tripDates: { from: Date; to: Date; };
+    minParticipants: number;
+    maxParticipants: number;
 
-    datesInscription: { from: Date; to: Date; };
+    registrationPeriod: { from: Date; to: Date; };
 
-    sondage: boolean;
+    poll: boolean;
 
-    sections?: Array<{ id: number; libelle: string }>;
-    organisateurs?: Array<{ id: number; nom: string }>;
-    documentsObligatoires?: Array<{ id: number; nom: string }>;
+    sections?: Array<{ id: number; label: string }>;
+    chaperones?: Array<{ id: number; nom: string }>;
+    mandatoryDocuments?: Array<{ id: number; label: string }>;
     participants?: Array<{
-        id: number; nom: string; prenom: string; email: string;
-        dateNaissance: string; sexe: 'M' | 'F' | 'N'; telephone?: string;
+        id: number; lastName: string; firstNale: string; email: string;
+        birthDate: string; gender: 'M' | 'F' | 'N'; telephone?: string;
     }>;
     interestedCount?: number; // nombre de personnes intéressées (si sondage)
     interestedByCurrentUser: boolean;

@@ -28,7 +28,7 @@ function ActionsCell({item}: { item: ISection }) {
             },
             {
                 onSuccess: () => {
-                    toast.success(`Section ${item.libelle} supprimée !`);
+                    toast.success(`Section ${item.label} supprimée !`);
                 },
                 onError: (error) => {
                     toast.error(`Erreur suppression de la section : ${error.message}`);
@@ -53,7 +53,7 @@ function ActionsCell({item}: { item: ISection }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Êtes-vous sûr(e) ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Cette action supprimera définitivement la section <strong>{item.libelle}</strong> et
+                            Cette action supprimera définitivement la section <strong>{item.label}</strong> et
                             ne peut pas être annulée.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

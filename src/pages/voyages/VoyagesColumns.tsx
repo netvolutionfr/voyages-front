@@ -31,15 +31,15 @@ export const voyagesColumns: ColumnDef<IVoyage>[] = [
         enableHiding: false,
     },
     {
-        id: "nom",
-        accessorKey: "nom",
+        id: "title",
+        accessorKey: "title",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Nom" />
+            <DataTableColumnHeader column={column} title="Titre" />
         ),
         meta: {
             filterOperator: "contains",
         },
-        cell: ({ row }) => <span className="font-medium">{row.getValue("nom")}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.getValue("title")}</span>,
         enableSorting: true,
     },
     {
@@ -51,20 +51,28 @@ export const voyagesColumns: ColumnDef<IVoyage>[] = [
         cell: ({ row }) => <span>{row.getValue("destination")}</span>,
     },
     {
-        id: "pays.nom",
-        accessorKey: "pays.nom",
+        id: "country.name",
+        accessorKey: "country.name",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Pays" />
         ),
-        cell: ({ row }) => <span>{row.getValue("pays.nom")}</span>,
+        cell: ({ row }) => <span>{row.getValue("country.name")}</span>,
     },
     {
-        id: "participationDesFamilles",
-        accessorKey: "participationDesFamilles",
+        id: "familyContribution",
+        accessorKey: "familyContribution",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Participation des familles" />
+            <DataTableColumnHeader column={column} title="Prix" />
         ),
-        cell: ({ row }) => <span>{formatCurrencyFromCents(row.getValue("participationDesFamilles"))}</span>,
+        cell: ({ row }) => <span>{formatCurrencyFromCents(row.getValue("familyContribution"))}</span>,
+    },
+    {
+        id: "interestedCount",
+        accessorKey: "interestedCount",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Likes" />
+        ),
+        cell: ({ row }) => <span>{row.getValue("interestedCount")}</span>,
     },
     {
         id: "actions",

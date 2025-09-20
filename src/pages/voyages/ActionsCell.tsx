@@ -23,12 +23,12 @@ function ActionsCell({item}: { item: ISection }) {
     const handleDelete = () => {
         deleteItem(
             {
-                resource: "voyages",
+                resource: "trips",
                 id: item.id,
             },
             {
                 onSuccess: () => {
-                    toast.success(`Voyage ${item.libelle} supprimé !`);
+                    toast.success(`Voyage ${item.label} supprimé !`);
                 },
                 onError: (error) => {
                     toast.error(`Erreur suppression du voyage : ${error.message}`);
@@ -53,7 +53,7 @@ function ActionsCell({item}: { item: ISection }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Êtes-vous sûr(e) ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Cette action supprimera définitivement le voyage <strong>{item.libelle}</strong> et
+                            Cette action supprimera définitivement le voyage <strong>{item.label}</strong> et
                             ne peut pas être annulée.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

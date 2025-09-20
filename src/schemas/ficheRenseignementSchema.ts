@@ -4,9 +4,9 @@ import {SECTIONS} from "@/config/sections";
 const dateRegex = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/
 
 export const ficheRenseignementSchema = z.object({
-    sexe: z.enum(["M", "F", "N"]),
+    gender: z.enum(["M", "F", "N"]),
     telephone: z.string().min(10, 'Téléphone requis'),
-    dateNaissance: z.string()
+    birthDate: z.string()
         .regex(dateRegex, 'Format jj/mm/aaaa invalide')
         .refine(val => {
             const [day, month, year] = val.split('/').map(Number)

@@ -30,15 +30,15 @@ export const sectionsColumns: ColumnDef<ISection>[] = [
         enableHiding: false,
     },
     {
-        id: "libelle",
-        accessorKey: "libelle",
+        id: "label",
+        accessorKey: "label",
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Libellé" />
         ),
         meta: {
             filterOperator: "contains",
         },
-        cell: ({ row }) => <span className="font-medium">{row.getValue("libelle")}</span>,
+        cell: ({ row }) => <span className="font-medium">{row.getValue("label")}</span>,
         enableSorting: true,
     },
     {
