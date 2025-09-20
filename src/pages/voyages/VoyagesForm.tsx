@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
     Form,
-    FormControl,
+    FormControl, FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -35,6 +35,7 @@ import type {VoyageDTO} from "@/pages/voyages/dto/VoyageDTO.tsx";
 import type {DateRange} from "react-day-picker";
 import type {SubmitHandler, Resolver} from "react-hook-form";
 import {MultiSelect} from "@/components/ui/multi-select.tsx";
+import {Switch} from "@/components/ui/switch.tsx";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -109,6 +110,7 @@ const VoyagesForm = () => {
             organisateurIds: [],
             sectionIds: [],
             secteurs: [],
+            sondage: false,
         },
         shouldFocusError: true,
     });
@@ -202,6 +204,26 @@ const VoyagesForm = () => {
                                     <Input placeholder="Nom" type="text" {...form.register("nom")} />
                                 </FormControl>
                                 <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Mode Sondage */}
+                    <FormField
+                        control={form.control}
+                        name="sondage"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Sondage</FormLabel>
+                                <FormDescription>
+                                    Si activé, le voyage est en mode sondage (il apparaît dans la liste avec un bouton "Je suis intéressé").
+                                </FormDescription>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                </FormControl>
                             </FormItem>
                         )}
                     />

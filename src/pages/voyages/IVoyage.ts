@@ -17,6 +17,8 @@ export type IVoyage = {
 
     datesInscription: { from: Date; to: Date; };
 
+    sondage: boolean;
+
     sections?: Array<{ id: number; libelle: string }>;
     organisateurs?: Array<{ id: number; nom: string }>;
     documentsObligatoires?: Array<{ id: number; nom: string }>;
@@ -24,4 +26,6 @@ export type IVoyage = {
         id: number; nom: string; prenom: string; email: string;
         dateNaissance: string; sexe: 'M' | 'F' | 'N'; telephone?: string;
     }>;
+    interestedCount?: number; // nombre de personnes intéressées (si sondage)
+    interestedByCurrentUser: boolean;
 }
