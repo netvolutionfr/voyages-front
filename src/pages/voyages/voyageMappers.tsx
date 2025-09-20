@@ -31,5 +31,6 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
                 to:   v.datesInscription.to   ?? new Date().toISOString(),
             }
             : null,
+        sondage: v.sondage ?? false,
     };
 }

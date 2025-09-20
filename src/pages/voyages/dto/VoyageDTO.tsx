@@ -20,6 +20,8 @@ export type VoyageDTO = {
 
     datesInscription?: { from: string; to: string }; // ISO
 
+    sondage: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
+
     sections?: Array<{ publicId: string; libelle: string }>;
     organisateurs?: Array<{ publicId: string; nom: string }>;
     documentsObligatoires?: Array<{ id: number; nom: string }>;
