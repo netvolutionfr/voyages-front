@@ -25,6 +25,7 @@ export const VoyageSchema = z.object({
     organisateurIds: z.array(z.string().min(1)).default([]),
     sectionIds: z.array(z.string()).default([]),
     secteurs: z.array(z.enum(["CYCLE_BAC","CYCLE_POST_BAC"])).default([]),
+    sondage: z.boolean().default(false),
 })
     .superRefine((v, ctx) => {
         // comparaisons sur strings ISO → convertis localement en Date pour la validation

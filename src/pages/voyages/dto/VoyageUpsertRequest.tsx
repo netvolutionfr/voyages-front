@@ -16,6 +16,8 @@ export type VoyageUpsertRequest = {
 
     datesInscription?: { from: string; to: string } | null;
 
+    sondage: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
+
     organisateurIds: string[];
     sectionIds: string[];
     secteurs: Array<"CYCLE_BAC"|"CYCLE_POST_BAC">;

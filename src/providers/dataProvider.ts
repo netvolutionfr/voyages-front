@@ -34,6 +34,19 @@ function buildListParams(params: GetListParams) {
         if (s.operator === "contains" && s.value) {
             search.set("q", s.value);
         }
+        if (s.operator === "eq" && s.value !== undefined && s.value !== null && s.value !== "") {
+            search.set(s.field, String(s.value));
+        }
+        if (s.operator === "gte" && s.value !== undefined && s.value !== null && s.value !== "") {
+            search.set(`${s.field}.gte`, String(s.value));
+        }
+        if (s.operator === "lte" && s.value !== undefined && s.value !== null && s.value !== "") {
+            search.set(`${s.field}.lte`, String(s.value));
+        }
+        if (s.operator === "in" && Array.isArray(s.value) && s.value.length > 0) {
+            // ex: ?field.in=v1,v2,v3
+            search.set(`${s.field}.in`, (s.value as (string | number)[]).join(","));
+        }
     })
 
     return search;
@@ -94,7 +107,9 @@ export const voyagesDataProvider: DataProvider = {
     },
     getList: async ({ resource, pagination, sorters, filters }) => {
         try {
+            console.log("getList", { resource, pagination, sorters, filters });
             const params = buildListParams({ resource, pagination, sorters, filters });
+            console.log("-> params", params.toString());
             const url = `/${resource}?${params.toString()}`;
             const response = await axiosInstance.get(url);
 
