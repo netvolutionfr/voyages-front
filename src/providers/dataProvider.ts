@@ -123,7 +123,7 @@ export const voyagesDataProvider: DataProvider = {
 
             return {
                 data: response.data.content,
-                total: response.data.totalElements,
+                total: response.data.page.totalElements,
             }
         } catch (error) {
             return Promise.reject(error);

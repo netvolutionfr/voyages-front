@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {type BaseRecord, type HttpError, useSelect} from "@refinedev/core";
+import {type BaseRecord, type HttpError, useList, useSelect} from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -36,6 +36,7 @@ import type {DateRange} from "react-day-picker";
 import type {SubmitHandler, Resolver} from "react-hook-form";
 import {MultiSelect} from "@/components/ui/multi-select.tsx";
 import {Switch} from "@/components/ui/switch.tsx";
+import {ClassesMultiPicker, type Cycle, type YearTag} from "@/components/ui/class-multi-picker.tsx";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -43,7 +44,13 @@ const secteursAll = [
     { value: "CYCLE_POST_BAC", label: "Cycle post-bac" },
 ] as const;
 
-type SectionOption = { publicId: string; label: string };
+type SectionOption = {
+    publicId: string;
+    label: string
+    description: string;
+    cycle: string;
+    year: string;
+};
 type UserOption    = { publicId: string; fullName: string };
 
 const isoNow = () => new Date().toISOString();
@@ -63,12 +70,9 @@ const VoyagesForm = () => {
     });
 
     // Sections (multi)
-    const { options: sectionOptions } = useSelect<SectionOption>({
+    const { data: sectionOptions } = useList<SectionOption>({
         resource: "sections",
-        optionLabel: "label",
-        optionValue: "publicId",
         pagination: { pageSize: 500 },
-        sort: [{ field: "label", order: "asc" }],
     });
 
     // Organisateurs (multi) : profs + admins
@@ -482,15 +486,17 @@ const VoyagesForm = () => {
                                 <FormItem>
                                     <FormLabel>Sections concernées</FormLabel>
                                     <FormControl>
-                                        <MultiSelect
-                                            options={sectionOptions}
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value ?? []}
-                                            placeholder="Choisir des sections"
-                                            responsive={true}
-                                            autoSize={true}
-                                            maxCount={0}
-                                            hideSelectAll={true}
+                                        <ClassesMultiPicker
+                                            options={sectionOptions?.data?.map(s => ({
+                                                id: s.publicId,
+                                                label: s.label,
+                                                description: s.description,
+                                                cycle: s.cycle as Cycle,
+                                                year: s.year as YearTag
+                                            })) || []}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Sélectionner des classes…"
                                         />
                                     </FormControl>
                                     <FormMessage />
