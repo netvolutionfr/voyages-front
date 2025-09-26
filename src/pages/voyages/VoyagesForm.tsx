@@ -28,7 +28,6 @@ import {dtoToForm} from "@/pages/voyages/voyageMappers";
 
 import { fr } from "react-day-picker/locale";
 
-import axiosInstance from "@/lib/axios";
 import imageCompression from "browser-image-compression";
 import type {VoyageUpsertRequest} from "@/pages/voyages/dto/VoyageUpsertRequest.tsx";
 import type {VoyageDTO} from "@/pages/voyages/dto/VoyageDTO.tsx";
@@ -37,6 +36,7 @@ import type {SubmitHandler, Resolver} from "react-hook-form";
 import {MultiSelect} from "@/components/ui/multi-select.tsx";
 import {Switch} from "@/components/ui/switch.tsx";
 import {ClassesMultiPicker, type Cycle, type YearTag} from "@/components/ui/class-multi-picker.tsx";
+import {api} from "@/lib/axios.ts";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -160,7 +160,7 @@ const VoyagesForm = () => {
         });
 
         // 2) URL pré-signée
-        const presignRes = await axiosInstance.get(
+        const presignRes = await api.get(
             `/files/presign`,
             { params: { filename: compressed.name, contentType: compressed.type } }
         );

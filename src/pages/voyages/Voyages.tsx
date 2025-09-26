@@ -1,96 +1,92 @@
 import React from "react";
-import type {ColumnDef} from "@tanstack/react-table";
-import {useTable} from "@refinedev/react-table";
-import {useList} from "@refinedev/core";
-import {DataTable} from "@/components/ui/data-table.tsx";
-import type {IVoyage} from "@/pages/voyages/IVoyage.ts";
-import {voyagesColumns} from "@/pages/voyages/VoyagesColumns.tsx";
-import {keycloak} from "@/providers/authProvider.ts";
-import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card.tsx";
-import {Skeleton} from "@/components/ui/skeleton.tsx";
-import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
-import {VoyageCard} from "@/pages/voyages/VoyageCard.tsx";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useTable } from "@refinedev/react-table";
+import { useList, useCan } from "@refinedev/core";
+import { DataTable } from "@/components/ui/data-table";
+import type { IVoyage } from "@/pages/voyages/IVoyage";
+import { voyagesColumns } from "@/pages/voyages/VoyagesColumns";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { VoyageCard } from "@/pages/voyages/VoyageCard";
 
+const Voyages: React.FC = () => {
+    // 1) Demande d’autorisation : “édition voyages” = profil Admin/Teacher dans nos règles
+    const { data: canEditRes, isLoading: canLoading } = useCan({
+        resource: "voyages",
+        action: "edit",
+    });
 
-const Voyages = () => {
+    const isAdminOrTeacher = canEditRes?.can === true;
 
-
-    const columns =
-        React.useMemo <ColumnDef <IVoyage>[]> (() => voyagesColumns, []);
-
-    const userRoles: string[] = keycloak.tokenParsed?.realm_access?.roles || [];
-    const isAdminOrTeacher = userRoles.includes("admin") || userRoles.includes("teacher");
-
-    // Admin view: keep the existing management table
+    // 2) Table gestion (admin/teacher)
+    const columns = React.useMemo<ColumnDef<IVoyage>[]>(() => voyagesColumns, []);
     const tableInstance = useTable({
         columns,
         refineCoreProps: {
-            resource: "trips",
+            resource: "trips", // ton nom d’endpoint REST
         },
     });
 
-    // Student view: list voyages open for registration (current date within the inscription window)
+    // 3) Grille “élève/parent”
     const { data, isLoading: isLoadingList } = useList<IVoyage>({
         resource: "trips",
         pagination: { pageSize: 12 },
         sorters: [{ field: "departureDate", order: "asc" }],
     });
 
-    const isLoading = isAdminOrTeacher
-        ? tableInstance.refineCore.tableQuery?.isLoading
-        : isLoadingList;
+    // 4) Loading global : tient compte du temps de `useCan`
+    const tableIsLoading = tableInstance.refineCore.tableQuery?.isLoading ?? false;
+    const isLoading = canLoading
+        ? true
+        : isAdminOrTeacher
+            ? tableIsLoading
+            : isLoadingList;
 
     if (isLoading) {
-        if (isAdminOrTeacher) {
-            return (<LoadingSpinner />)
-        } else {
-            return (
-                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                        <Card key={i} className="overflow-hidden">
-                            <Skeleton className="h-40 w-full" />
-                            <CardHeader className="space-y-2">
-                                <Skeleton className="h-5 w-3/4" />
-                                <Skeleton className="h-4 w-1/2" />
-                            </CardHeader>
-                            <CardContent>
-                                <Skeleton className="h-4 w-full mb-2" />
-                                <Skeleton className="h-4 w-2/3" />
-                            </CardContent>
-                            <CardFooter>
-                                <Skeleton className="h-9 w-24" />
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
-            );
-        }
-    }
-
-    if (!isAdminOrTeacher) {
-        // const voyagesOuverts = (data?.data || []).filter((v) => {
-        //     const debut = new Date(v.datesInscription.from + 'T00:00:00Z');
-        //     const fin = new Date(v.datesInscription.to + 'T23:59:59Z');
-        //     return today >= debut && today <= fin;
-        // });
-        const voyages = data?.data || [];
-
-        return (
+        return isAdminOrTeacher ? (
+            <LoadingSpinner />
+        ) : (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {voyages.map((v) => {
-                    return (
-                        <VoyageCard v={v} />
-                    );
-                })}
+                {Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="overflow-hidden">
+                        <Skeleton className="h-40 w-full" />
+                        <CardHeader className="space-y-2">
+                            <Skeleton className="h-5 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                        </CardHeader>
+                        <CardContent>
+                            <Skeleton className="h-4 w-full mb-2" />
+                            <Skeleton className="h-4 w-2/3" />
+                        </CardContent>
+                        <CardFooter>
+                            <Skeleton className="h-9 w-24" />
+                        </CardFooter>
+                    </Card>
+                ))}
             </div>
         );
     }
 
+    // 5) Vue élève/parent
+    if (!isAdminOrTeacher) {
+        const voyages = data?.data ?? [];
+        return (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {voyages.map((v) => (
+                    <VoyageCard key={v.id} v={v} />
+                ))}
+            </div>
+        );
+    }
+
+    // 6) Vue admin/teacher (table gestion)
     return (
         <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-bold">Gestion des voyages</h1>
             <DataTable columns={voyagesColumns} table={tableInstance} entity="voyages" filter="nom" />
         </div>
     );
-}
+};
+
 export default Voyages;

@@ -1,24 +1,28 @@
-import axios from "axios";
-import {keycloak} from "@/providers/authProvider.ts";
+import axios, { AxiosError, type AxiosInstance } from "axios";
 
-const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL
+export const api: AxiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+    withCredentials: true, // ⬅️ très important pour envoyer le cookie httpOnly
+    headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest", // utile côté Spring pour différencier AJAX
+    },
 });
 
-axiosInstance.interceptors.request.use(async (config) => {
-    if (keycloak?.token) {
-        if (keycloak.isTokenExpired?.()) {
-            try {
-                await keycloak.updateToken(10);
-            } catch (err) {
-                console.error("Erreur lors du rafraîchissement du token", err);
+// (Optionnel) Si tu as un cookie CSRF (ex: "XSRF-TOKEN") posé par le backend :
+api.defaults.xsrfCookieName = "XSRF-TOKEN";
+api.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
+
+// Interceptor de réponse : si 401 → redirige vers /login
+api.interceptors.response.use(
+    (res) => res,
+    (error: AxiosError) => {
+        if (error.response?.status === 401) {
+            // Option : ne redirige pas si déjà sur /login
+            if (window.location.pathname !== "/login") {
+                window.location.assign("/login");
             }
         }
-
-        config.headers.Authorization = `Bearer ${keycloak.token}`;
-    }
-
-    return config;
-});
-
-export default axiosInstance;
+        return Promise.reject(error);
+    },
+);

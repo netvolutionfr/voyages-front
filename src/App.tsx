@@ -1,9 +1,9 @@
 import './App.css'
 import {Route, Routes} from "react-router-dom";
 import {Authenticated, Refine} from "@refinedev/core";
-import {authProvider} from "@/providers/authProvider.ts";
+import {authProvider} from "@/auth/authProvider.ts";
 import routerProvider from "@refinedev/react-router";
-import {accessControlProvider} from "@/providers/accessControlProvider.ts";
+import {accessControlProvider} from "@/auth/accessControlProvider.ts";
 import DashboardLayout from "@/components/layout/DashboardLayout.tsx";
 import ProfilLayout from "@/pages/profil/ProfilLayout.tsx";
 import HomePage from "@/pages/HomePage.tsx";
@@ -25,74 +25,112 @@ import ParticipantView from "@/pages/participants/ParticipantView.tsx";
 import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
 import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
 import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
-import FirstLoginPage from "@/pages/FirstLoginPage.tsx";
 import {publicDataProvider} from "@/providers/publicDataProvider.ts";
-import AfterFirstLogin from "@/pages/AfterFirstLogin.tsx";
 import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
 
-function App() {
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import ActivationPage from "@/pages/ActivationPage.tsx";
+
+
+export default function App() {
     return (
-            <Refine
-                routerProvider={routerProvider}
-                dataProvider={{
-                    default: voyagesDataProvider,
-                    public: publicDataProvider,
-                }}
-                authProvider={authProvider}
-                accessControlProvider={accessControlProvider}
-                resources={resources}
-            >
-                <Routes>
-                    <Route element={
+        <Refine
+            routerProvider={routerProvider}
+            dataProvider={{
+                default: voyagesDataProvider,
+                public: publicDataProvider,
+            }}
+            authProvider={authProvider}
+            accessControlProvider={accessControlProvider}
+            resources={resources}
+        >
+            <Routes>
+                {/* Routes publiques */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path='/activate' element={<ActivationPage />} />
+
+                {/* Routes protégées */}
+                <Route
+                    element={
                         <Authenticated key={location.pathname}>
                             <DashboardLayout />
-                        </Authenticated>}>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/profil" element={<ProfilLayout />}>
-                            <Route index element={<FicheRenseignements />} />
-                            <Route path="sanitaire" element={<FicheSanitaire />} />
-                            <Route path="parents" element={<FicheParents />} />
-                        </Route>
-                        <Route path="/voyages" element={<Voyages />} />
-                        <Route path="/voyages/create" element={<VoyagesForm />} />
-                        <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
-                        <Route path="/voyages/:id" element={<Voyages />} />
-                        <Route path="/documents" element={<Documents />} />
-                        <Route path="/participants" element={<Participants />} />
-                        <Route path="/participants/:id" element={<ParticipantView />} />
-                        <Route path="/participants/create" element={<ParticipantsForm />} />
-                        <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
-                        <Route path="/admin/participants" element={
-                                <RequireAdmin>
-                                    <ParticipantsAdmin />
-                                </RequireAdmin>} />
-                        <Route path="/admin/sections" element={
-                                <RequireAdmin>
-                                    <SectionsAdmin />
-                                </RequireAdmin>} />
-                        <Route path="/admin/sections/create" element={
-                                <RequireAdmin>
-                                    <SectionsForm />
-                                </RequireAdmin>} />
-                        <Route path="/admin/sections/edit/:id" element={
-                                <RequireAdmin>
-                                    <SectionsForm />
-                                </RequireAdmin>} />
-                        <Route path="/admin/users" element={
+                        </Authenticated>
+                    }
+                >
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/profil" element={<ProfilLayout />}>
+                        <Route index element={<FicheRenseignements />} />
+                        <Route path="sanitaire" element={<FicheSanitaire />} />
+                        <Route path="parents" element={<FicheParents />} />
+                    </Route>
+
+                    <Route path="/voyages" element={<Voyages />} />
+                    <Route path="/voyages/create" element={<VoyagesForm />} />
+                    <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
+                    <Route path="/voyages/:id" element={<Voyages />} />
+
+                    <Route path="/documents" element={<Documents />} />
+
+                    <Route path="/participants" element={<Participants />} />
+                    <Route path="/participants/:id" element={<ParticipantView />} />
+                    <Route path="/participants/create" element={<ParticipantsForm />} />
+                    <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
+
+                    <Route
+                        path="/admin/participants"
+                        element={
+                            <RequireAdmin>
+                                <ParticipantsAdmin />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/sections"
+                        element={
+                            <RequireAdmin>
+                                <SectionsAdmin />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/sections/create"
+                        element={
+                            <RequireAdmin>
+                                <SectionsForm />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/sections/edit/:id"
+                        element={
+                            <RequireAdmin>
+                                <SectionsForm />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/users"
+                        element={
                             <RequireAdmin>
                                 <UsersAdmin />
-                            </RequireAdmin>} />
-                        <Route path="/admin/users/import" element={
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/users/import"
+                        element={
                             <RequireAdmin>
                                 <ImportCsvPage />
-                            </RequireAdmin>} />
-                    </Route>
-                    <Route path="/premier-acces" element={<FirstLoginPage />} />
-                    <Route path="/apres-premier-acces" element={<AfterFirstLogin />} />
-                    <Route path="/403" element={<Error403 />} />
-                    <Route path="*" element={<Error404 />} />
-                </Routes>
-            </Refine>
+                            </RequireAdmin>
+                        }
+                    />
+                </Route>
+
+                <Route path="/403" element={<Error403 />} />
+                <Route path="*" element={<Error404 />} />
+            </Routes>
+        </Refine>
     );
 }
-export default App;
