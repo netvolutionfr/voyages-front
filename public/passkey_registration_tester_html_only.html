@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Passkey Registration Tester</title>
+  <style>
+    :root { --bg:#0b1020; --card:#121831; --muted:#9aa3b2; --text:#e6e9ef; --accent:#71a7ff; }
+    html,body{height:100%}
+    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:linear-gradient(180deg,#0b1020,#0f1430); color:var(--text);}
+    .wrap{max-width:880px; margin:40px auto; padding:0 16px}
+    .card{background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:18px 18px 6px; box-shadow:0 10px 30px rgba(0,0,0,.3)}
+    h1{font-size:clamp(20px,4vw,28px); margin:0 0 12px}
+    .muted{color:var(--muted)}
+    label{display:block; font-size:13px; margin:10px 0 6px; color:#cbd5e1}
+    input,textarea,select{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.15); background:#0e1430; color:var(--text)}
+    input::placeholder{color:#7a8699}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin:16px 0}
+    button{cursor:pointer; border:1px solid rgba(255,255,255,.15); background:linear-gradient(180deg,#1b2350,#151c44); color:var(--text); padding:10px 14px; border-radius:12px; font-weight:600}
+    button.primary{background:linear-gradient(180deg,#2673ff,#1a52c9); border-color:#2f66ff}
+    pre{white-space:pre-wrap; word-break:break-word; background:#0a0f24; border:1px solid rgba(255,255,255,.08); padding:12px; border-radius:12px; max-height:360px; overflow:auto}
+    .ok{color:#7ef27e}
+    .err{color:#ff7a7a}
+    .pill{display:inline-block; font-size:12px; padding:2px 8px; border:1px solid rgba(255,255,255,.15); border-radius:999px; margin-left:8px}
+    .footer{margin-top:10px; font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Passkey Registration Tester <span class="pill">Local / HTTPS only</span></h1>
+    <p class="muted">Minimal UI pour tester <code>GET /api/auth/challenge</code> → <code>navigator.credentials.create()</code> → <code>POST /api/webauthn/register/finish</code> avec votre JWT. ⚠️ Le backend doit renvoyer un <code>userEntity</code> complet (modèle Apple-like/pending).</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Base URL de l'API</label>
+          <input id="baseUrl" placeholder="https://campusaway.fr ou http://localhost:8080" value="http://localhost:8080" />
+        </div>
+        <div>
+          <label>JWT (Bearer)</label>
+          <input id="jwt" placeholder="eyJhbGciOi..." />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Email utilisateur (inscription)</label>
+          <input id="email" placeholder="alice@example.com" value="stanis@netvolution.fr" />
+        </div>
+        <div>
+          <label>Attestation</label>
+          <select id="attestation"><option value="none">none</option><option value="indirect">indirect</option><option value="direct">direct</option><option value="enterprise">enterprise</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Timeout (ms)</label>
+          <input id="timeout" type="number" value="60000" />
+        </div>
+      </div>
+
+      <div class="btns">
+        <button id="btnChallenge">1) GET /api/auth/challenge</button>
+        <button id="btnCreate" class="primary">2) Créer la passkey</button>
+        <button id="btnFinish">3) POST /api/webauthn/register/finish</button>
+      </div>
+
+      <label>Journal</label>
+      <pre id="log"></pre>
+      <div class="footer muted">⚠️ WebAuthn nécessite HTTPS (ou <code>http://localhost</code>). Si vous ouvrez ce fichier directement, servez-le via un petit serveur statique (ex. <code>python -m http.server 8081</code>) puis visitez <code>http://localhost:8081</code>.</div>
+    </div>
+  </div>
+
+<script>
+// ---------- Helpers: base64url <-> ArrayBuffer ----------
+// Accept both base64 *and* base64url
+const b64anyToBuf = (b64ish) => {
+  let s = b64ish.trim();
+  // If it's JSON-encoded (quoted) with URL-safe chars, normalize to std base64
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = '='.repeat((4 - (s.length % 4)) % 4);
+  const b64 = s + pad;
+  const str = atob(b64);
+  const buf = new ArrayBuffer(str.length);
+  const view = new Uint8Array(buf);
+  for (let i = 0; i < str.length; i++) view[i] = str.charCodeAt(i);
+  return buf;
+};
+const bufToB64url = (buf) => {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  const b64 = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/,'');
+  return b64;
+};
+const textToBuf = (txt) => new TextEncoder().encode(txt);
+
+// ---------- Tiny logger ----------
+const logEl = document.getElementById('log');
+const log = (msg, type) => {
+  const time = new Date().toLocaleTimeString();
+  logEl.textContent += `\n[${time}] ${msg}`;
+  logEl.scrollTop = logEl.scrollHeight;
+};
+const logJSON = (label, obj) => log(`${label}:\n` + JSON.stringify(obj, null, 2));
+
+// ---------- UI elements ----------
+const baseUrlEl = document.getElementById('baseUrl');
+const jwtEl = document.getElementById('jwt');
+const attestationEl = document.getElementById('attestation');
+const timeoutEl = document.getElementById('timeout');
+const emailEl = document.getElementById('email');
+
+let pubKeyOptionsFromAPI = null;   // JSON reçu du GET /api/auth/challenge
+let webauthnCredential = null;     // Résultat de navigator.credentials.create
+
+// ---------- 1) Fetch challenge ----------
+async function fetchChallenge() {
+  const baseURL = baseUrlEl.value.trim().replace(/\/$/, '');
+  if (!baseURL) return log('Base URL manquante', 'err');
+
+  try {
+    log('Appel POST /api/webauthn/register/options ...');
+    const res = await fetch(`${baseURL}/api/webauthn/register/options`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(jwtEl.value ? { 'Authorization': `Bearer ${jwtEl.value}` } : {}) },
+        body: JSON.stringify({ email: emailEl?.value?.trim() || '' }) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const options = await res.json();
+    logJSON('Options (brutes) reçues', options);
+
+    // On tolère les variations de schéma: { publicKey: {...} } ou directement {...}
+    const publicKey = options.publicKey ?? options;
+
+    // Si l'API ne fixe pas certains champs, autoriser un fallback depuis l'UI
+    if (attestationEl.value) publicKey.attestation = attestationEl.value;
+    const t = parseInt(timeoutEl.value, 10);
+    if (!Number.isNaN(t)) publicKey.timeout = t;
+
+    // Convertir les champs base64url -> ArrayBuffer pour le navigateur
+    // Accept challenge as string or as { value: "..." }
+let ch = publicKey.challenge;
+if (ch && typeof ch === 'object' && typeof ch.value === 'string') ch = ch.value;
+publicKey.challenge = typeof ch === 'string' ? b64anyToBuf(ch) : ch;
+
+// Sanitize optional fields that must NOT be null
+if (publicKey.hints == null) delete publicKey.hints; // must be sequence if present
+if (publicKey.extensions == null) delete publicKey.extensions; // must be object if present
+if (publicKey.excludeCredentials == null) publicKey.excludeCredentials = []; // array, not null
+// Strip legacy U2F-only extensions if present during registration
+if (publicKey.extensions) {
+  const e = publicKey.extensions;
+  if ('appid' in e) { log('ℹ️ Ignoring legacy extension: extensions.appid (registration)', 'err'); delete e.appid; }
+  if ('appidExclude' in e) { log('ℹ️ Ignoring legacy extension: extensions.appidExclude (registration)', 'err'); delete e.appidExclude; }
+}
+
+// Ensure timeout is a number
+if (typeof publicKey.timeout === 'string') { const n = Number(publicKey.timeout); if (!Number.isNaN(n)) publicKey.timeout = n; }
+    if (publicKey.user && typeof publicKey.user.id === 'string') {
+  publicKey.user.id = b64anyToBuf(publicKey.user.id);
+}
+    if (Array.isArray(publicKey.excludeCredentials)) {
+      publicKey.excludeCredentials = publicKey.excludeCredentials.map(c => ({
+        ...c,
+        id: typeof c.id === 'string' ? b64urlToBuf(c.id) : c.id,
+      }));
+    }
+
+    // Sauvegarder pour l'étape 2
+    pubKeyOptionsFromAPI = publicKey;
+    log('Challenge prêt ✅', 'ok');
+  } catch (e) {
+    log(`Erreur challenge: ${e.message}`, 'err');
+  }
+}
+
+// ---------- 2) Create passkey ----------
+async function createPasskey() {
+  if (!pubKeyOptionsFromAPI) return log('Veuillez d\'abord récupérer le challenge (étape 1).', 'err');
+  try {
+    log('Appel navigator.credentials.create ...');
+    const cred = await navigator.credentials.create({ publicKey: pubKeyOptionsFromAPI });
+    if (!cred) throw new Error('Création annulée ou impossible');
+
+    webauthnCredential = cred;
+
+    // Affichage résumé
+    const payloadPreview = {
+      id: cred.id,
+      type: cred.type,
+      rawId: bufToB64url(cred.rawId),
+      response: {
+        attestationObject: bufToB64url(cred.response.attestationObject),
+        clientDataJSON: bufToB64url(cred.response.clientDataJSON),
+        transports: (typeof cred.response.getTransports === 'function') ? cred.response.getTransports() : undefined,
+      },
+      clientExtensionResults: cred.getClientExtensionResults?.() ?? {},
+    };
+    logJSON('Credential (preview encodé b64url)', payloadPreview);
+    log('Passkey créée localement ✅', 'ok');
+  } catch (e) {
+    if (e.name === 'NotAllowedError') log('Action annulée par l\'utilisateur ou timeout.', 'err');
+    else log(`Erreur create(): ${e.message}`, 'err');
+  }
+}
+
+// ---------- 3) Finish (POST backend) ----------
+async function postFinish() {
+  if (!webauthnCredential) return log('Créez d\'abord la passkey (étape 2).', 'err');
+  const baseURL = baseUrlEl.value.trim().replace(/\/$/, '');
+  if (!baseURL) return log('Base URL manquante', 'err');
+
+  // Construire le JSON attendu par l'API Spring (b64url everywhere)
+  const body = {
+    id: webauthnCredential.id,
+    rawId: bufToB64url(webauthnCredential.rawId),
+    type: webauthnCredential.type,
+    response: {
+      attestationObject: bufToB64url(webauthnCredential.response.attestationObject),
+      clientDataJSON: bufToB64url(webauthnCredential.response.clientDataJSON),
+      transports: (typeof webauthnCredential.response.getTransports === 'function') ? webauthnCredential.response.getTransports() : undefined,
+    },
+    clientExtensionResults: webauthnCredential.getClientExtensionResults?.() ?? {},
+  };
+
+  try {
+    log('POST /api/webauthn/register/finish ...');
+    const res = await fetch(`${baseURL}/api/webauthn/register/finish`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(jwtEl.value ? { 'Authorization': `Bearer ${jwtEl.value}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+    const txt = await res.text();
+    log(`Réponse finish: HTTP ${res.status}`);
+    try { logJSON('Corps', JSON.parse(txt)); } catch { log('Corps (texte)\n' + txt); }
+    if (res.ok) log('Enregistrement terminé ✅', 'ok');
+  } catch (e) {
+    log(`Erreur finish: ${e.message}`, 'err');
+  }
+}
+
+// ---------- Wire buttons ----------
+btnChallenge.addEventListener('click', fetchChallenge);
+btnCreate.addEventListener('click', createPasskey);
+btnFinish.addEventListener('click', postFinish);
+
+</script>
+</body>
+</html>
