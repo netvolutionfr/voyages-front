@@ -12,11 +12,6 @@ function readCookie(name: string): string | null {
     return m ? decodeURIComponent(m[1]) : null;
 }
 async function xsrfHeader(): Promise<Record<string, string>> {
-    await fetch(`${API_URL}/api/auth/csrf`, {
-        method: "GET",
-        credentials: "include",
-        headers: { "Accept": "application/json" },
-    });
     const token = readCookie("XSRF-TOKEN");
     return token ? { "X-XSRF-TOKEN": token } : {};
 }
@@ -45,8 +40,8 @@ export async function beginRegistration(token: string): Promise<unknown> {
 // 1) Récupérer les options du serveur
     const res = await authApi(`/webauthn/register/options`, {
         method: "POST",
-        headers: { "Accept": "application/json" },
-        body: JSON.stringify({ token }),
+        credentials: "include",
+        headers: { "Accept": "application/json" }
     });
     if (!res.ok) throw new Error(`Impossible d'obtenir les options (HTTP ${res.status})`);
     const options: ServerRegistrationOptions = await res.json();
