@@ -24,7 +24,7 @@ export default function LoginPage() {
     const handlePasskeyLogin = async (): Promise<void> => {
         try {
             setLoading(true);
-            await beginAuthentication(email || undefined);
+            await beginAuthentication();
             go({ to: "/", type: "path" });
         } catch (e) {
             const msg = e instanceof Error ? e.message : "Échec de l’authentification";
