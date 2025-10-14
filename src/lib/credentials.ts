@@ -53,18 +53,23 @@ export interface ServerPublicKeyCredentialUserEntity {
     displayName: string;
 }
 
-
-export interface ServerRegistrationOptions {
-    challenge: string; // base64url
+export type ServerRegistrationOptions = {
     rp: PublicKeyCredentialRpEntity;
-    user: ServerPublicKeyCredentialUserEntity;
+    user: { id: string | { value: string }; name: string; displayName?: string };
+    challenge: string | { value: string };
     pubKeyCredParams: PublicKeyCredentialParameters[];
     timeout?: number;
-    attestation?: AttestationConveyancePreference;
+    excludeCredentials?: Array<{
+        type: PublicKeyCredentialType;
+        id: string | { value: string };
+        transports?: AuthenticatorTransport[];
+    }>;
     authenticatorSelection?: AuthenticatorSelectionCriteria;
-    excludeCredentials?: ServerPublicKeyCredentialDescriptor[];
-}
-
+    attestation?: AttestationConveyancePreference;
+    // champs additionnels côté serveur qu'on ignorera
+    hints?: unknown;
+    extensions?: Record<string, unknown> | null;
+};
 
 export interface AttestationResponsePayload {
     id: string;

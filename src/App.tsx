@@ -30,7 +30,6 @@ import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
 
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
-import ActivationPage from "@/pages/ActivationPage.tsx";
 
 
 export default function App() {
@@ -49,7 +48,6 @@ export default function App() {
                 {/* Routes publiques */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path='/activate' element={<ActivationPage />} />
 
                 {/* Routes protégées */}
                 <Route
