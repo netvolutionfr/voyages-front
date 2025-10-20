@@ -119,7 +119,7 @@ const HomePage = () => {
                                                                             <FormItem>
                                                                                 <FormLabel>Téléphone</FormLabel>
                                                                                 <FormControl>
-                                                                                    <PhoneInput defaultCountry="FR" {...field} value={me.telephone}/>
+                                                                                    <PhoneInput defaultCountry="FR" {...field} value={me.telephone as string}/>
                                                                                 </FormControl>
                                                                                 <FormMessage />
                                                                             </FormItem>

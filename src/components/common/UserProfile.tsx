@@ -17,11 +17,11 @@ const UserProfile = () => {
     return (
         <div className="p-4 border rounded-md">
             <h2 className="text-xl font-bold">Profil de l'utilisateur</h2>
-            <p><strong>Nom complet :</strong> {user.name}</p>
-            <p><strong>Prénom :</strong> {user.given_name}</p>
-            <p><strong>Nom de famille :</strong> {user.family_name}</p>
+            <p><strong>Nom complet :</strong> {user.firstName} {user.lastName}</p>
+            <p><strong>Prénom :</strong> {user.firstName}</p>
+            <p><strong>Nom de famille :</strong> {user.lastName}</p>
             <p><strong>Email :</strong> {user.email}</p>
-            <p><strong>Rôles :</strong> {user.realm_access.roles.join(", ")}</p>
+            <p><strong>Rôle :</strong> {user.role}</p>
         </div>
     );
 };
