@@ -265,31 +265,6 @@ export async function beginAuthenticationOneStep(): Promise<CredentialRequestRes
 export async function finishAuthenticationOneStep(
     credential: CredentialRequestResponse
 ): Promise<AuthFinishResponse> {
-    // AuthnFinishRequest[
-    // id=J1aQEQEyHV3QxtF6mGAlonEmiZY,
-    // rawId=J1aQEQEyHV3QxtF6mGAlonEmiZY,
-    // type=public-key,
-    // response=Response[
-    //      clientDataJSON=eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiU1NmWTRBZUdwcElBSDJ4VVlLckRkWkVvaHl1SWRpckhETHFXNWFLcU95WSIsIm9yaWdpbiI6Imh0dHBzOi8vY2FtcHVzYXdheS5mciJ9,
-    //      authenticatorData=ZU4o1QP2Br4QTh4gxxKSPjwJWoINqJjGMjEnWttcvCQdAAAAAA,
-    //      signature=MEYCIQDr2n0VWvV_UmuEFIRCh3lsQht61LWQ9ho1hHU2TeftHAIhAKRd03AonVPXcJysEIDVPUWUFFEQG5GgK3wkEknvIgMQ,
-    //      userHandle=T0ROa09EQXlaall0T0RKaE9TMDBORFpqTFRneFpESXRPV1F6TkRWbE1qUTRNek5s],
-    //      clientExtensionResults={}
-    // ],
-
-    // "credential":{
-    //      "id":"1chL0JS7tFyK83UqDTUv1zHPysQ",
-    //      "rawId":"1chL0JS7tFyK83UqDTUv1zHPysQ",
-    //      "type":"public-key",
-    //      "response":{
-    //          "authenticatorData":"SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MdAAAAAA",
-    //          "clientDataJSON":"eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQUFBQUJ3QUFBQUFBQUFBQUFBQU9BQUFMQ2dBQUFBIiwib3JpZ2luIjoiaHR0cDovL2xvY2FsaG9zdDo1MTczIiwiY3Jvc3NPcmlnaW4iOmZhbHNlLCJvdGhlcl9rZXlzX2Nhbl9iZV9hZGRlZF9oZXJlIjoiZG8gbm90IGNvbXBhcmUgY2xpZW50RGF0YUpTT04gYWdhaW5zdCBhIHRlbXBsYXRlLiBTZWUgaHR0cHM6Ly9nb28uZ2wveWFiUGV4In0",
-    //          "signature":"MEUCIQCIEIZpObkbmX91_lTNdEwTf-BBApvr_M_W9GdLWe_BCAIgZXCJrdVXN8KtUTw8s6-_9z979DKFY3M2_riT_DUeQJw",
-    //          "userHandle":"ZDkxYmI4MzYtYzkwZS00ZWQ4LWJkY2YtN2MxMDMyZGQxMjJh"
-    //      },
-    //      "clientExtensionResults":{}
-    //      }
-
     const authenticationRequest = {
         id: credential.id,
         rawId: credential.rawId,
