@@ -6,7 +6,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { data, isLoading } = useCan({
         resource: "admin",
-        action: "access",
+        action: "show",
     });
 
     if (isLoading) {

@@ -1,9 +1,9 @@
 export type Role = "ADMIN" | "TEACHER" | "STUDENT" | "PARENT" | "USER";
 
-export type Identity = {
+export interface Me {
     id: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    firstName?: string;
-    lastName?: string;
-    roles: Role[]; // <-- renvoie ça depuis /me côté Spring
-};
+    telephone?: string | null;
+}

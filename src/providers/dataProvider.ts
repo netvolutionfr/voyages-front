@@ -1,6 +1,5 @@
 import type {DataProvider, GetListParams} from "@refinedev/core";
-import { api } from "@/lib/axios";
-
+import {api} from "@/auth/api.ts";
 /**
  * Construit les params Spring:
  * - Pagination: page (0/1-based selon config), size
@@ -51,21 +50,11 @@ function buildListParams(params: GetListParams) {
 export const voyagesDataProvider: DataProvider = {
     getOne: async ({ resource, id }) => {
         if (resource === "me") {
-            const response = await api.get("/api/me");
-            const data = response.data;
-            if (!data.telephone) {
-                data.telephone = "";
-            }
-            return {
-                data: data,
-            };
+            return await api.get("/me");
         }
 
         try {
-            const response = await api.get(`/api/${resource}/${id}`);
-            return {
-                data: response.data,
-            };
+            return await api.get(`/${resource}/${id}`);
         } catch (error) {
             return Promise.reject(error);
         }
@@ -73,13 +62,10 @@ export const voyagesDataProvider: DataProvider = {
 
     create: async ({ resource, variables }) => {
         try {
-            const isForm = typeof FormData !== "undefined" && variables instanceof FormData;
-            const response = await api.post(
-                `/api/${resource}`,
-                variables,
-                isForm ? undefined : { /* keep as-is; JSON par défaut */ }
+            return await api.post(
+                `/${resource}`,
+                variables
             );
-            return { data: response.data };
         } catch (error) {
             return Promise.reject(error);
         }
@@ -87,24 +73,17 @@ export const voyagesDataProvider: DataProvider = {
 
     update: async ({ resource, id, variables }) => {
         if (resource === "me") {
-            const response = await api.post("/api/me", variables);
-            return {
-                data: response.data,
-            };
+            return await api.post("/me", variables);
         }
         if (resource === "trip-preferences") {
             try {
-                const response = await api.post(`/api/trip-preferences/${id}`, variables);
-                return { data: response.data };
+                return await api.post(`/trip-preferences/${id}`, variables);
             } catch (error) {
                 return Promise.reject(error);
             }
         }
         try {
-            const response = await api.put(`/api/${resource}/${id}`, variables);
-            return {
-                data: response.data,
-            };
+            return await api.put(`/${resource}/${id}`, variables);
         } catch (error) {
             return Promise.reject(error);
         }
@@ -114,12 +93,12 @@ export const voyagesDataProvider: DataProvider = {
             console.log("getList", { resource, pagination, sorters, filters });
             const params = buildListParams({ resource, pagination, sorters, filters });
             console.log("-> params", params.toString());
-            const url = `/api/${resource}?${params.toString()}`;
-            const response = await api.get(url);
+            const url = `/${resource}?${params.toString()}`;
+            const response: {content: [], page: { totalElements: number }} = await api.get(url);
 
             return {
-                data: response.data.content,
-                total: response.data.page.totalElements,
+                data: response.content,
+                total: response.page.totalElements,
             }
         } catch (error) {
             return Promise.reject(error);
@@ -128,10 +107,7 @@ export const voyagesDataProvider: DataProvider = {
     getMany: () => Promise.reject("Not implemented"),
     deleteOne: async ({ resource, id }) => {
         try {
-            const response = await api.delete(`/api/${resource}/${id}`);
-            return {
-                data: response.data,
-            };
+            return await api.delete(`/${resource}/${id}`);
         } catch (error) {
             return Promise.reject(error);
         }

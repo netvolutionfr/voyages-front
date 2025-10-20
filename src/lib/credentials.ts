@@ -82,3 +82,46 @@ export interface AttestationResponsePayload {
     };
     clientExtensionResults: AuthenticationExtensionsClientOutputs;
 }
+
+export type FinishOneStepResponse = {
+    tokenType: string;     // "Bearer"
+    accessToken: string;   // JWT
+    expiresIn: number;     // 900
+    user: {
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: "PENDING" | "USER" | "ADMIN" | string;
+        status: "PENDING" | "ACTIVE" | string;
+    };
+};
+
+export type CredentialCreationResponse = {
+    id: string;
+    rawId: string; // base64url
+    type: PublicKeyCredentialType;
+    response: {
+        attestationObject: string; // base64url
+        clientDataJSON: string; // base64url
+        transports?: string[];
+    };
+    authenticatorAttachment?: AuthenticatorAttachment | null;
+};
+
+export type RegistrationRequest = {
+    username: string; // email
+    userId: string; // base64url
+    credential: CredentialCreationResponse;
+}
+
+export type RegistrationOptionsPayload = {
+    email: string;
+    displayName?: string | null;
+    registrationRequest: RegistrationRequest;
+};
+
+export type FinishResult = {
+    email: string;
+    status?: "PENDING" | "ACTIVE"
+};

@@ -84,7 +84,7 @@ const Voyages: React.FC = () => {
     return (
         <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-bold">Gestion des voyages</h1>
-            <DataTable columns={voyagesColumns} table={tableInstance} entity="voyages" filter="nom" />
+            <DataTable columns={voyagesColumns} table={tableInstance} entity="voyages" filter="title" />
         </div>
     );
 };

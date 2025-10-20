@@ -15,6 +15,8 @@ import {useForm} from "@refinedev/react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useEffect, useState} from "react";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import type {Me} from "@/auth/types.ts";
+import type {HttpError} from "@refinedev/core";
 
 const formSchema = z.object({
     telephone: z.string().min(10, 'Téléphone requis'),
@@ -22,7 +24,7 @@ const formSchema = z.object({
 type formData = z.infer<typeof formSchema>;
 
 const HomePage = () => {
-    const form = useForm({
+    const form = useForm<Me, HttpError, { telephone: string }>({
         resolver: zodResolver(formSchema),
         refineCoreProps : {
             resource: "me",
@@ -33,6 +35,16 @@ const HomePage = () => {
         shouldFocusError: true,
     });
     const [open, setOpen] = useState(false);
+
+    const me = { ...form.refineCore.queryResult?.data} as Me;
+
+    // Remplir le champ quand les données arrivent
+    useEffect(() => {
+        if (me?.telephone) {
+            form.reset({ telephone: me.telephone });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [me?.telephone]);
 
     useEffect(() => {
         form.setFocus("telephone");
@@ -50,7 +62,7 @@ const HomePage = () => {
         <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
         <p>Bienvenue sur votre tableau de bord. Ici, vous pouvez gérer vos informations personnelles et accéder à vos données.</p>
         {form.refineCore.queryResult?.isError && <p>Une erreur est survenue lors du chargement des données.</p>}
-        {form.refineCore.queryResult?.data && (
+        {me && (
             <>
                 <div className="p-6 bg-white rounded-lg shadow-md mt-4">
                     <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
@@ -59,7 +71,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Nom</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {form.refineCore.queryResult?.data.data.lastName}
+                                    {me.lastName}
                                 </div>
                             </div>
                         </div>
@@ -67,7 +79,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Prénom</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {form.refineCore.queryResult?.data.data.firstName}
+                                    {me.firstName}
                                 </div>
                             </div>
                         </div>
@@ -75,7 +87,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Email</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {form.refineCore.queryResult?.data.data.email}
+                                    {me.email}
                                 </div>
                             </div>
                         </div>
@@ -83,7 +95,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Téléphone</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    <div className="flex">{form.refineCore.queryResult?.data.data.telephone}</div>
+                                    <div className="flex">{me.telephone}</div>
                                     <Dialog open={open} onOpenChange={setOpen}>
                                         <DialogTrigger asChild>
                                             <Button variant="link"><IconEdit/></Button>
@@ -107,7 +119,7 @@ const HomePage = () => {
                                                                             <FormItem>
                                                                                 <FormLabel>Téléphone</FormLabel>
                                                                                 <FormControl>
-                                                                                    <PhoneInput defaultCountry="FR" {...field} value={form.refineCore.queryResult?.data?.data.telephone}/>
+                                                                                    <PhoneInput defaultCountry="FR" {...field} value={me.telephone}/>
                                                                                 </FormControl>
                                                                                 <FormMessage />
                                                                             </FormItem>

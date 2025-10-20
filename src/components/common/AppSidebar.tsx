@@ -16,11 +16,10 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         return <LoadingSpinner />;
     }
 
-    const isAdmin = user?.realm_access.roles.includes("admin")
-    const isParent = user?.realm_access.roles.includes("parent")
-    const isProf = user?.realm_access.roles.includes("teacher");
-    const isEleve = user?.realm_access.roles.includes("student");
-    console.log("User roles:", user?.realm_access.roles);
+    const isAdmin = user?.role == "ADMIN";
+    const isParent = user?.role === "PARENT";
+    const isProf = user?.role === "TEACHER";
+    const isEleve = user?.role === "STUDENT";
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -30,7 +29,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
+                            <a href="/">
                                 <IconGlobe className="!size-5" />
                                 <span className="text-base font-semibold">Voyages</span>
                             </a>

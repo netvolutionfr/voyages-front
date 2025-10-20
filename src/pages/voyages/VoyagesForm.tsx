@@ -36,7 +36,7 @@ import type {SubmitHandler, Resolver} from "react-hook-form";
 import {MultiSelect} from "@/components/ui/multi-select.tsx";
 import {Switch} from "@/components/ui/switch.tsx";
 import {ClassesMultiPicker, type Cycle, type YearTag} from "@/components/ui/class-multi-picker.tsx";
-import {api} from "@/lib/axios.ts";
+import {api} from "@/auth/api.ts";
 
 /** Enum front pour rester synchro avec le back */
 const secteursAll = [
@@ -160,7 +160,7 @@ const VoyagesForm = () => {
         });
 
         // 2) URL pré-signée
-        const presignRes = await api.get(
+        const presignRes: {data: {url: string, key: string}} = await api.get(
             `/files/presign`,
             { params: { filename: compressed.name, contentType: compressed.type } }
         );

@@ -1,7 +1,7 @@
 import type {ColumnDef} from "@tanstack/react-table";
 import {DataTableColumnHeader} from "@/components/ui/data-table-column-header.tsx";
 import type {IUser} from "@/pages/admin/users/IUser.ts";
-import { UserRoundCheck } from "lucide-react";
+import {UserCheck, UserLock} from "lucide-react";
 
 export const usersColumns: ColumnDef<IUser>[] = [
     {
@@ -37,19 +37,25 @@ export const usersColumns: ColumnDef<IUser>[] = [
         cell: ({ row }) => <span>{row.getValue("telephone")}</span>,
     },
     {
-        id: "validated",
-        accessorKey: "validated",
+        id: "status",
+        accessorKey: "status",
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Validé" />
+            <DataTableColumnHeader column={column} title="Statut" />
         ),
         cell: ({ row }) => (
-            row.getValue("validated")
+            row.getValue("status") === "ACTIVE"
                 ? (
                     <div className="flex justify-center items-center">
-                        <UserRoundCheck size={18} />
+                        <UserCheck size={18} />
                     </div>
                 )
-                : null
+                : row.getValue("status") === "PENDING"
+                    ? (
+                        <div className="flex justify-center items-center">
+                            <UserLock size={18} />
+                        </div>
+                    )
+                    : null
         ),
     },
     {

@@ -1,13 +1,14 @@
 // Interface pour les données de l'utilisateur
 interface User {
-    name: string;
-    given_name: string;
-    family_name: string;
+    fullName: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    realm_access: {
-        roles: string[];
-    };
+    publicId: string;
+    role: string;
     avatar?: string; // Calculé à partir de Gravatar
+    telephone?: string | null;
+    validated?: boolean | null;
 }
 
 export type { User };

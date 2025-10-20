@@ -1,11 +1,12 @@
 import type { AccessControlProvider, CanParams } from "@refinedev/core";
-import { fetchMe } from "./session";
-import type { Role } from "./types";
+import type {Role} from "./types";
 import { RULES, type CrudAction } from "./rbac";
+import {getIdentityCached} from "@/auth/session.ts";
+import {fetchMe} from "@/auth/me.ts";
 
-function hasSomeRole(userRoles: Role[], required?: Role[]): boolean {
+function hasSomeRole(userRole: "ADMIN" | "TEACHER" | "PARENT" | "STUDENT" | "USER" | undefined, required?: Role[] | undefined): boolean {
     if (!required || required.length === 0) return true; // si aucune règle, accès autorisé par défaut pour la ressource définie
-    return required.some((r) => userRoles.includes(r));
+    return required.some((r) => userRole === r);
 }
 
 function normalizeAction(action?: string): CrudAction | undefined {
@@ -16,35 +17,32 @@ function normalizeAction(action?: string): CrudAction | undefined {
     return allowed.find((x) => x === a);
 }
 
+
 export const accessControlProvider: AccessControlProvider = {
-    can: async ({ resource, action}: CanParams) => {
-        // 1) Auth requise
-        const me = await fetchMe();
-        if (!me) {
-            return { can: false, reason: "Non authentifié" };
+    can: async ({ resource, action }: CanParams) => {
+        // 1) identité (JWT -> cache -> /me)
+        const me = await getIdentityCached(fetchMe);
+        console.log("Me dans ACL:", me);
+        console.log("Vérification ACL pour", me?.email, "sur", resource, "/", action);
+        if (!me) return { can: false, reason: "Non authentifié" };
+        if (me.status && me.status !== "ACTIVE") {
+            return { can: false, reason: "Compte non activé" };
         }
 
         const act = normalizeAction(action);
         const rulesForResource = resource ? RULES[resource] : undefined;
 
-        // 2) Si aucune règle pour la ressource → par défaut **refus**
         if (!resource || !rulesForResource) {
+            console.log(`Ressource non autorisée: ${resource}`);
             return { can: false, reason: "Ressource non autorisée" };
         }
-
-        // 3) Si l'action n’est pas listée → refus par défaut (sécurisé)
-        if (!act) {
+        if (!act || !(act in rulesForResource)) {
+            console.log(`Action non autorisée: ${action} sur ressource ${resource}`);
             return { can: false, reason: "Action non autorisée" };
         }
 
-        const requiredRoles = rulesForResource[act];
-
-        // 4) (Optionnel) Règle de propriété : si on veut autoriser l’édition de “son” objet
-        // Exemple : si pas les rôles requis mais l'utilisateur est propriétaire du record
-        // Nécessite que Refine passe params.record ou params.id et que tu vérifies côté API.
-        // Ici on reste simple : uniquement RBAC par rôles.
-
-        const ok = hasSomeRole(me.roles, requiredRoles);
+        const requiredRoles = rulesForResource[act] as Role[] | undefined;
+        const ok = hasSomeRole(me.role, requiredRoles);
         return ok ? { can: true } : { can: false, reason: "Rôle insuffisant" };
     },
 };

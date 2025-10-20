@@ -1,64 +1,33 @@
-import { useEffect, useRef, useState } from "react";
-import { useGo } from "@refinedev/core";
-import { beginAuthentication } from "@/auth/passkeys";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {RegisterPasskeyFlow} from "@/components/common/RegisterPasskeyFlow.tsx";
+import PasskeyInfo from "@/components/common/PasskeyInfo.tsx";
+import {LoginPasskeyFlow} from "@/components/common/LoginPasskeyFlow.tsx";
+import type {FinishResult} from "@/lib/credentials.ts";
+import {useNavigate} from "react-router-dom";
 
 export default function LoginPage() {
     const [supported, setSupported] = useState<boolean | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
+    const navigate = useNavigate();
 
-    const go = useGo();
-    const abortRef = useRef<AbortController | null>(null);
 
-    // 1) Détection support + auto sign-in (Conditional UI)
+    const handleSuccess = async (r: FinishResult) => {
+        console.log("register success", r);
+        if (r.status === "PENDING") {
+            navigate("/otp", { replace: true });
+        } else {
+            navigate("/", { replace: true });
+        }
+    };
+
     useEffect(() => {
-        let mounted = true;
         (async () => {
             const webauthnOK =
                 "PublicKeyCredential" in window &&
                 (await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false));
-            if (!mounted) return;
-            setSupported(!!webauthnOK);
-
-            if (webauthnOK) {
-                abortRef.current?.abort();
-                const ac = new AbortController();
-                abortRef.current = ac;
-
-                // Lancement silencieux : affichera la feuille/suggestion si une passkey existe
-                beginAuthentication({ conditional: true, signal: ac.signal })
-                    .then(() => {
-                        if (!mounted) return;
-                        go({ to: "/", type: "path" });
-                    })
-                    .catch((err) => {
-                        // Ne pas alerter ici : l’utilisateur a pu juste ignorer la suggestion
-                        console.debug("Conditional UI: pas de connexion automatique", err?.message ?? err);
-                    });
-            }
+            setSupported(webauthnOK);
         })();
-
-        return () => {
-            mounted = false;
-            abortRef.current?.abort();
-        };
-    }, [go]);
-
-    // 2) Bouton explicite (mediation: "required")
-    const handlePasskeyLogin = async (): Promise<void> => {
-        try {
-            setLoading(true);
-            await beginAuthentication({ conditional: false });
-            go({ to: "/", type: "path" });
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : "Échec de l’authentification";
-            alert("1 " + msg);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, []);
 
     return (
         <div className="min-h-screen grid place-items-center p-6">
@@ -67,21 +36,27 @@ export default function LoginPage() {
                     <CardTitle>Connexion</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Button onClick={handlePasskeyLogin} disabled={supported === false || loading} className="w-full">
-                        {loading ? "Connexion..." : "Se connecter avec une passkey"}
-                    </Button>
+                    <LoginPasskeyFlow
+                        disabled={supported === false}
+                        onSuccess={handleSuccess}
+                    />
 
                     <div className="text-center text-xs text-muted-foreground">— ou —</div>
 
                     <RegisterPasskeyFlow
                         disabled={supported === false}
-                        onSuccess={() => go({ to: "/", type: "path" })}
+                        onSuccess={handleSuccess}
                     />
 
                     {supported === false && (
-                        <p className="text-sm text-muted-foreground">Passkeys non prises en charge sur cet appareil/navigateur.</p>
+                        <p className="text-sm text-muted-foreground">
+                            Passkeys non prises en charge sur cet appareil ou navigateur.
+                        </p>
                     )}
+
+                    <PasskeyInfo />
                 </CardContent>
             </Card>
         </div>
-    );}
+    );
+}

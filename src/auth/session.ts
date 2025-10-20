@@ -1,28 +1,62 @@
-import type {Identity} from "@/auth/types.ts";
+import {readAuth} from "@/auth/token.ts";
 
-const API_URL = import.meta.env.VITE_API_URL;
+export type Identity = {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role?: "ADMIN" | "TEACHER" | "PARENT" | "STUDENT" | "USER";
+    status?: "ACTIVE" | "PENDING";
+};
 
-type MeCache = { me: Identity; expiresAt: number } | null;
-let _cache: MeCache = null;
+let memIdentity: { value: Identity | null; expiresAt: number } | null = null;
 
-export async function fetchMe(force: boolean = false): Promise<Identity | null> {
-    const now = Date.now();
-    if (!force && _cache && _cache.expiresAt > now) return _cache.me;
-
-    const res = await fetch(`${API_URL}/me`, {
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-    });
-
-    if (!res.ok) {
-        _cache = null;
+export function decodeJwtPayload<T = any>(jwt?: string): T | null {
+    if (!jwt) return null;
+    try {
+        const [, b64] = jwt.split(".");
+        const json = atob(b64.replace(/-/g, "+").replace(/_/g, "/"));
+        return JSON.parse(decodeURIComponent(escape(json))) as T;
+    } catch {
         return null;
     }
-    const me = (await res.json()) as Identity;
-    _cache = { me, expiresAt: now + 60_000 }; // TTL 60s
-    return me;
 }
 
-export function clearMeCache(): void {
-    _cache = null;
+export function setIdentityCache(id: Identity | null, ttlMs = 60_000) {
+    memIdentity = { value: id, expiresAt: Date.now() + ttlMs };
+}
+
+export function clearIdentityCache() {
+    memIdentity = null;
+}
+
+/** Renvoie l'identité en lecture rapide (JWT), ou null si insuffisant */
+export function getIdentityFromJwt(): Identity | null {
+    const auth = readAuth();
+    const p = decodeJwtPayload<any>(auth?.accessToken);
+    if (!p) return null;
+    // adapter les champs selon ton contrat de JWT
+    return {
+        id: p.sub,
+        email: p.email,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        role: p.role,           // ou dériver depuis p.roles[0]
+        status: p.status,
+    };
+}
+
+/** Renvoie l'identité (cache mémoire 60s) ou null si indisponible */
+export async function getIdentityCached(fetcher: () => Promise<Identity | null>): Promise<Identity | null> {
+    if (memIdentity && memIdentity.expiresAt > Date.now()) return memIdentity.value;
+    // 1) Fast-path via JWT
+    const fromJwt = getIdentityFromJwt();
+    if (fromJwt && fromJwt.role) {
+        setIdentityCache(fromJwt);
+        return fromJwt;
+    }
+    // 2) Fallback réseau
+    const id = await fetcher().catch(() => null);
+    setIdentityCache(id);
+    return id;
 }

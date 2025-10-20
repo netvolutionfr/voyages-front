@@ -16,7 +16,7 @@ export default function RegisterPage() {
         if (!email) { alert("Merci d’indiquer un email"); return; }
         try {
             setLoading(true);
-            const res = await authApi(`/api/auth/register-request`, {
+            const res = await authApi(`/auth/register-request`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email })

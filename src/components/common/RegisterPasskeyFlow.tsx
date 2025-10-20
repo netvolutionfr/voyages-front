@@ -5,11 +5,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-    beginRegistrationOneStep,
-    type CredentialCreationResponse,
+    beginRegistration,
     finishRegistrationOneStep,
-    type RegistrationOptionsPayload
 } from "@/auth/passkeys";
+import type {
+    CredentialCreationResponse,
+    FinishOneStepResponse,
+    FinishResult,
+    RegistrationOptionsPayload
+} from "@/lib/credentials.ts";
+import {saveAuth} from "@/auth/token.ts";
+import {getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
 
 type Phase = "idle" | "creating" | "email" | "finishing";
 
@@ -18,11 +24,10 @@ export function RegisterPasskeyFlow({
                                         onSuccess,
                                     }: {
     disabled?: boolean;
-    onSuccess: () => void;
+    onSuccess: (r: FinishResult) => void;
 }) {
     const [phase, setPhase] = useState<Phase>("idle");
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [credResponse, setCredResponse ] = useState<CredentialCreationResponse | null>(null);
     const [email, setEmail] = useState("");
     const [error, setError] = useState<string | null>(null);
 
@@ -30,10 +35,6 @@ export function RegisterPasskeyFlow({
         try {
             setError(null);
             setPhase("creating");
-            // 1) Create passkey immediately (no dialog yet)
-            const cred: CredentialCreationResponse = await beginRegistrationOneStep();
-            setCredResponse(cred);
-            // 2) Open dialog ONLY AFTER creation to collect email
             setPhase("email");
             setDialogOpen(true);
         } catch (e) {
@@ -43,21 +44,45 @@ export function RegisterPasskeyFlow({
     };
 
     const finish = async () => {
-        if (!credResponse) return;
         try {
             setError(null);
             setPhase("finishing");
+
+            // 1) Création de la passkey côté device
+            const cred: CredentialCreationResponse = await beginRegistration(email);
+
+            // 2) Payload pour le backend
             const registrationRequest = {
                 username: email,
-                userId: credResponse.rawId,
-                credential: credResponse
+                userId: cred.rawId,
+                credential: cred
             }
-            await finishRegistrationOneStep({ email, displayName: null, registrationRequest} as RegistrationOptionsPayload);
+
+            // 3) Finish one-step
+            const res: FinishOneStepResponse = await finishRegistrationOneStep({
+                email,
+                displayName: null,
+                registrationRequest,
+            } as RegistrationOptionsPayload);
+
+            // 4) Stocker le JWT
+            saveAuth({
+                tokenType: res.tokenType,
+                accessToken: res.accessToken,
+                expiresIn: res.expiresIn
+            });
+            setIdentityCache(getIdentityFromJwt());
+
+            // 5) Nettoyage UI puis remonter le statut
             setDialogOpen(false);
             setPhase("idle");
+            const savedEmail = email;
             setEmail("");
-            setCredResponse(null);
-            onSuccess();
+
+            onSuccess({
+                email: savedEmail,
+                status: res.user.status as "PENDING" | "ACTIVE",
+            });
         } catch (e) {
             setPhase("email");
             setError(e instanceof Error ? e.message : "Échec de la finalisation");
@@ -70,7 +95,6 @@ export function RegisterPasskeyFlow({
             setPhase("idle");
             setEmail("");
             setError(null);
-            setCredResponse(null);
         }
     };
 
@@ -86,7 +110,7 @@ export function RegisterPasskeyFlow({
                     <DialogHeader>
                         <DialogTitle>Associer votre e-mail</DialogTitle>
                         <DialogDescription>
-                            La passkey est créée sur cet appareil. Entrez votre e-mail pour lier votre compte.
+                            La passkey va être créée sur cet appareil. Entrez votre e-mail pour lier votre compte.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -111,7 +135,7 @@ export function RegisterPasskeyFlow({
                             Annuler
                         </Button>
                         <Button onClick={finish} disabled={!email || phase === "finishing"}>
-                            {phase === "finishing" ? "Association…" : "Associer"}
+                            {phase === "finishing" ? "Création en cours…" : "Créer la passkey"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

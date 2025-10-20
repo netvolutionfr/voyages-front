@@ -1,5 +1,5 @@
 import './App.css'
-import {Route, Routes} from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
 import {Authenticated, Refine} from "@refinedev/core";
 import {authProvider} from "@/auth/authProvider.ts";
 import routerProvider from "@refinedev/react-router";
@@ -30,6 +30,7 @@ import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
 
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import OtpPage from "@/pages/OtpPage.tsx";
 
 
 export default function App() {
@@ -48,6 +49,16 @@ export default function App() {
                 {/* Routes publiques */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+
+                {/* Route OTP, restreinte par un JWT temporaire */}
+                <Route path="/otp" element={
+                    <Authenticated
+                        key={location.pathname}
+                        fallback={<Navigate to="/login" replace />}
+                    >
+                        <OtpPage />
+                    </Authenticated>
+                } />
 
                 {/* Routes protégées */}
                 <Route
