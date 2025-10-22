@@ -1,6 +1,7 @@
 // src/auth/http.ts
 import { readAuth, saveAuth, clearAuth, isAccessExpired } from "@/auth/token";
 import {getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
+import {isBodyLike} from "@/auth/api.ts";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,16 +21,15 @@ async function refreshIfNeeded(): Promise<boolean> {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ refreshToken: auth.refreshToken }),
+            body: JSON.stringify({ refresh_token: auth.refreshToken }),
         }).then(async (r) => {
             if (!r.ok) return null;
             const data = await r.json();
-            // attendu: { tokenType, accessToken, expiresIn, refreshToken? }
             saveAuth({
-                tokenType: data.tokenType,
-                accessToken: data.accessToken,
-                expiresIn: data.expiresIn,
-                refreshToken: data.refreshToken ?? auth.refreshToken, // rotation éventuelle
+                tokenType: data.token_type,
+                accessToken: data.access_token,
+                expiresIn: data.expires_in,
+                refreshToken: data.refresh_token // rotation donc nouveau refresh token
             });
             setIdentityCache(getIdentityFromJwt());
             return r;
@@ -41,21 +41,35 @@ async function refreshIfNeeded(): Promise<boolean> {
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
     const url = path.startsWith("http") ? path : `${API_URL}${path}`;
-    const auth = readAuth();
 
-    // tenter refresh proactif si expiré
+    // 1) Lire l'état courant
+    let auth = readAuth();
+
+    // 2) Refresh proactif si expiré
     if (auth && isAccessExpired(auth)) {
         const ok = await refreshIfNeeded();
-        if (!ok) clearAuth();
+        if (!ok) {
+            clearAuth();
+        }
+        // 🔑 Re-lire l’auth après refresh pour récupérer le NOUVEL access token
+        auth = readAuth();
     }
 
-    const headers: HeadersInit = {
-        "Content-Type": "application/json",
-        ...(init.headers || {}),
+    const headersObj: Record<string, string> = {
+        ...toRecord(init.headers),
         ...(auth ? { Authorization: `${auth.tokenType} ${auth.accessToken}` } : {}),
     };
 
-    let res = await fetch(url, { ...init, headers, credentials: "include" });
+    if (init.body !== undefined) {
+        if (!isBodyLike(init.body)) {
+            headersObj["Content-Type"] = "application/json";
+        } else {
+            delete headersObj["Content-Type"];
+            delete headersObj["content-type" as keyof typeof headersObj];
+        }
+    }
+
+    let res = await fetch(url, { ...init, headers: headersObj, credentials: "include" });
 
     // si 401 → tenter refresh et rejouer
     if (res.status === 401) {
@@ -63,7 +77,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
         if (refreshed) {
             const auth2 = readAuth();
             const headers2: HeadersInit = {
-                ...headers,
+                ...headersObj,
                 ...(auth2 ? { Authorization: `${auth2.tokenType} ${auth2.accessToken}` } : {}),
             };
             res = await fetch(url, { ...init, headers: headers2, credentials: "include" });
@@ -73,4 +87,11 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
         }
     }
     return res;
+}
+
+function toRecord(h?: HeadersInit): Record<string, string> {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h))     return Object.fromEntries(h);
+    return { ...h };
 }

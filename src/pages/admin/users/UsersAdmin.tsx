@@ -37,7 +37,7 @@ const UsersAdmin = () => {
                     </Link>
                 </Button>
             </div>
-        <DataTable columns={usersColumns} table={tableInstance} entity="users" filter="nom" createButon={false} />
+        <DataTable columns={usersColumns} table={tableInstance} entity="users" filter="lastName" createButon={false} />
         </div>
     );
 }

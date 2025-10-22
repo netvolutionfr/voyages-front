@@ -22,8 +22,6 @@ export const accessControlProvider: AccessControlProvider = {
     can: async ({ resource, action }: CanParams) => {
         // 1) identité (JWT -> cache -> /me)
         const me = await getIdentityCached(fetchMe);
-        console.log("Me dans ACL:", me);
-        console.log("Vérification ACL pour", me?.email, "sur", resource, "/", action);
         if (!me) return { can: false, reason: "Non authentifié" };
         if (me.status && me.status !== "ACTIVE") {
             return { can: false, reason: "Compte non activé" };

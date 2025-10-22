@@ -33,7 +33,7 @@ function buildUrl(path: string, params?: Record<string, unknown>) {
 }
 
 // Détecter FormData/Blob pour ne PAS forcer Content-Type
-function isBodyLike(b: unknown): b is BodyInit {
+export function isBodyLike(b: unknown): b is BodyInit {
     return b instanceof FormData || b instanceof Blob || b instanceof URLSearchParams;
 }
 

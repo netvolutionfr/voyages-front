@@ -90,9 +90,7 @@ export const voyagesDataProvider: DataProvider = {
     },
     getList: async ({ resource, pagination, sorters, filters }) => {
         try {
-            console.log("getList", { resource, pagination, sorters, filters });
             const params = buildListParams({ resource, pagination, sorters, filters });
-            console.log("-> params", params.toString());
             const url = `/${resource}?${params.toString()}`;
             const response: {content: [], page: { totalElements: number }} = await api.get(url);
 
