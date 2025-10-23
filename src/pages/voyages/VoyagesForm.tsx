@@ -160,11 +160,11 @@ const VoyagesForm = () => {
         });
 
         // 2) URL pré-signée
-        const presignRes: {data: {url: string, key: string}} = await api.get(
+        const presignRes: {url: string, key: string} = await api.get(
             `/files/presign`,
             { params: { filename: compressed.name, contentType: compressed.type } }
         );
-        const { url, key } = presignRes.data;
+        const { url, key } = presignRes;
 
         // 3) PUT sur MinIO
         const putRes = await fetch(url, { method: "PUT", body: compressed, headers: { "Content-Type": compressed.type } });
