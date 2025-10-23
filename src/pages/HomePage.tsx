@@ -36,7 +36,7 @@ const HomePage = () => {
     });
     const [open, setOpen] = useState(false);
 
-    const me = { ...form.refineCore.queryResult?.data} as Me;
+    const me = { ...form.refineCore.queryResult?.data?.data} as Me;
 
     // Remplir le champ quand les données arrivent
     useEffect(() => {

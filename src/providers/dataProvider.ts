@@ -1,4 +1,11 @@
-import type {DataProvider, GetListParams} from "@refinedev/core";
+import type {
+    BaseRecord,
+    CreateParams, CreateResponse,
+    DataProvider, DeleteOneParams, DeleteOneResponse,
+    GetListParams, GetListResponse,
+    GetOneParams,
+    GetOneResponse, UpdateParams, UpdateResponse
+} from "@refinedev/core";
 import {api} from "@/auth/api.ts";
 /**
  * Construit les params Spring:
@@ -48,67 +55,98 @@ function buildListParams(params: GetListParams) {
 }
 
 export const voyagesDataProvider: DataProvider = {
-    getOne: async ({ resource, id }) => {
-        if (resource === "me") {
-            return await api.get("/me");
-        }
-
+    // GET /:resource/:id  (+ cas spécial /me)
+    getOne: async <
+        TData extends BaseRecord = BaseRecord
+    >(
+        { resource, id }: GetOneParams
+    ): Promise<GetOneResponse<TData>> => {
         try {
-            return await api.get(`/${resource}/${id}`);
+            const data = resource === "me"
+                ? await api.get<TData>("/me")
+                : await api.get<TData>(`/${resource}/${id}`);
+            return { data };
         } catch (error) {
             return Promise.reject(error);
         }
     },
 
-    create: async ({ resource, variables }) => {
+    // POST /:resource
+    create: async <
+        TData extends BaseRecord = BaseRecord,
+        TVariables = unknown
+    >(
+        { resource, variables }: CreateParams<TVariables>
+    ): Promise<CreateResponse<TData>> => {
         try {
-            return await api.post(
-                `/${resource}`,
-                variables
-            );
+            const data = await api.post<TData>(`/${resource}`, variables);
+            return { data };
         } catch (error) {
             return Promise.reject(error);
         }
     },
 
-    update: async ({ resource, id, variables }) => {
-        if (resource === "me") {
-            return await api.post("/me", variables);
-        }
-        if (resource === "trip-preferences") {
-            try {
-                return await api.post(`/trip-preferences/${id}`, variables);
-            } catch (error) {
-                return Promise.reject(error);
+    // PUT /:resource/:id  (+ cas spéciaux /me et /trip-preferences/:id)
+    update: async <
+        TData extends BaseRecord = BaseRecord,
+        TVariables = unknown
+    >(
+        { resource, id, variables }: UpdateParams<TVariables>
+    ): Promise<UpdateResponse<TData>> => {
+        try {
+            if (resource === "me") {
+                const data = await api.post<TData>("/me", variables);
+                return { data };
             }
-        }
-        try {
-            return await api.put(`/${resource}/${id}`, variables);
+            if (resource === "trip-preferences") {
+                const data = await api.post<TData>(`/trip-preferences/${id}`, variables);
+                return { data };
+            }
+            const data = await api.put<TData>(`/${resource}/${id}`, variables);
+            return { data };
         } catch (error) {
             return Promise.reject(error);
         }
     },
-    getList: async ({ resource, pagination, sorters, filters }) => {
+
+    // GET /:resource?…  (Spring Pageable: { content, page.totalElements })
+    getList: async <
+        TData extends BaseRecord = BaseRecord
+    >(
+        params: GetListParams
+    ): Promise<GetListResponse<TData>> => {
         try {
-            const params = buildListParams({ resource, pagination, sorters, filters });
-            const url = `/${resource}?${params.toString()}`;
-            const response: {content: [], page: { totalElements: number }} = await api.get(url);
+            const { resource, pagination, sorters, filters } = params;
+            const qs = buildListParams({ resource, pagination, sorters, filters });
+            const url = `/${resource}?${qs.toString()}`;
+
+            const response = await api.get<{ content: TData[]; page: { totalElements: number } }>(url);
 
             return {
                 data: response.content,
                 total: response.page.totalElements,
-            }
+            };
         } catch (error) {
             return Promise.reject(error);
         }
     },
+
     getMany: () => Promise.reject("Not implemented"),
-    deleteOne: async ({ resource, id }) => {
-        try {
-            return await api.delete(`/${resource}/${id}`);
-        } catch (error) {
-            return Promise.reject(error);
-        }
+
+    // DELETE /:resource/:id
+
+    deleteOne: async <
+        TData extends BaseRecord = BaseRecord,
+        TVariables = object
+    >(
+        params: DeleteOneParams<TVariables>
+    ): Promise<DeleteOneResponse<TData>> => {
+        const { resource, id } = params; // ← destructure ici, pas dans la signature
+        const data = await api.delete<TData>(`/${resource}/${id}`);
+        // si l'API fait 204 No Content :
+        // const data = undefined as unknown as TData;
+        return { data };
     },
+
     getApiUrl: () => import.meta.env.VITE_API_URL,
 };
