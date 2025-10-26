@@ -38,6 +38,7 @@ import {Switch} from "@/components/ui/switch.tsx";
 import {ClassesMultiPicker, type Cycle, type YearTag} from "@/components/ui/class-multi-picker.tsx";
 import {api} from "@/auth/api.ts";
 import {AspectRatio} from "@/components/ui/aspect-ratio.tsx";
+import {InputGroup, InputGroupAddon, InputGroupInput, InputGroupText} from "@/components/ui/input-group.tsx";
 
 /** Enum front pour rester synchro avec le back */
 type SectionOption = {
@@ -164,10 +165,10 @@ const VoyagesForm = () => {
     };
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
-        // Adapter les valeurs du form (euros → centimes)
-        if (values.familyContribution != null) values.familyContribution = Math.round(values.familyContribution * 100);
+        if (values.familyContribution != null) {
+            values.familyContribution = Math.round(values.familyContribution * 100);
+        }
 
-        console.log("Submitting voyage form", values);
         await form.refineCore.onFinish(values as VoyageUpsertRequest);
     };
 
@@ -310,15 +311,31 @@ const VoyagesForm = () => {
                             <FormItem>
                                 <FormLabel>Participation des familles (en €)</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Participation des familles"
-                                        {...form.register("familyContribution", {
-                                            valueAsNumber: true,
-                                            setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
-                                        })}
-                                    />
+                                    <InputGroup>
+                                        <InputGroupAddon>
+                                            <InputGroupText>€</InputGroupText>
+                                        </InputGroupAddon>
+                                        <InputGroupInput
+                                            placeholder="0.00"
+                                            {...form.register("familyContribution", {
+                                                setValueAs: (v) => {
+                                                    if (v === "" || v == null) return undefined;
+
+                                                    // Gestion des virgules en entrée
+                                                    v = v.toString().replace(",", ".");
+
+                                                    // 1. Convertit en nombre (avec les flottants imparfaits)
+                                                    const num = Number(v);
+
+                                                    // 2. Arrondit proprement à 2 décimales. toFixed() retourne une string
+                                                    const fixedString = num.toFixed(2);
+
+                                                    // 3. Reconvertit en Number pour la validation Zod
+                                                    return Number(fixedString);
+                                                }
+                                            })}
+                                        />
+                                    </InputGroup>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

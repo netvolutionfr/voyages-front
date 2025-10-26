@@ -18,14 +18,7 @@ export const resources: IResourceItem[] = [
 
     // Ressources d'administration, protégées
     {
-        name: "participants",
-        list: "/participants",
-        show: "/participants/:id",
-        create: "/participants/create",
-        edit: "/participants/edit/:id",
-    },
-    {
-        name: "voyages",
+        name: "trips",
         list: "/voyages",
         show: "/voyages/:id",
         create: "/voyages/create",

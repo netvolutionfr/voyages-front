@@ -42,3 +42,18 @@ export function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
     const sep = base.endsWith("/") ? "" : "/";
     return `${base}${sep}${coverPhotoUrl}`;
 }
+
+// "50", "50.0", "50,00", " 1 234,5 " -> 5000, 123450, etc.
+export function eurosToCents(input: string | number | null | undefined): number {
+    if (input == null) return 0;
+    const s = String(input).trim().replace(/\s/g, "").replace(",", ".");
+    if (!/^\d+(\.\d{1,2})?$/.test(s)) throw new Error("Montant invalide");
+    const [intPart, decPart = ""] = s.split(".");
+    const cents = parseInt(intPart, 10) * 100 + parseInt((decPart + "00").slice(0, 2), 10);
+    return cents;
+}
+
+export function centsToEuroString(cents: number): string {
+    return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" })
+        .format(cents / 100);
+}
