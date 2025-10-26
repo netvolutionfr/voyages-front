@@ -31,6 +31,7 @@ import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import OtpPage from "@/pages/OtpPage.tsx";
+import VoyageDetail from "@/pages/voyages/VoyageDetail.tsx";
 
 
 export default function App() {
@@ -78,7 +79,7 @@ export default function App() {
                     <Route path="/voyages" element={<Voyages />} />
                     <Route path="/voyages/create" element={<VoyagesForm />} />
                     <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
-                    <Route path="/voyages/:id" element={<Voyages />} />
+                    <Route path="/voyages/:id" element={<VoyageDetail />} />
 
                     <Route path="/documents" element={<Documents />} />
 
