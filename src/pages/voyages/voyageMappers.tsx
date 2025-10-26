@@ -9,13 +9,11 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
         countryId: v.country.id ?? undefined,
 
         // Centimes API → € dans le form
-        totalPrice: v.totalPrice != null ? v.totalPrice / 100 : undefined,
         familyContribution: v.familyContribution != null ? v.familyContribution / 100 : undefined,
 
         coverPhotoUrl: v.coverPhotoUrl ?? null,
         chaperoneIds: v.chaperones?.map(o => o.publicId) ?? [],
         sectionIds: v.sections?.map(s => s.publicId) ?? [],
-        sectors: v.sectors ?? [],
 
         minParticipants: v.minParticipants ?? 1,
         maxParticipants: v.maxParticipants ?? 1,
@@ -25,10 +23,10 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
             from: v.tripDates?.from ?? new Date().toISOString(),
             to:   v.tripDates?.to   ?? new Date().toISOString(),
         },
-        registrationPeriod: v.registrationPeriod
+        registrationDates: v.registrationDates
             ? {
-                from: v.registrationPeriod.from ?? new Date().toISOString(),
-                to:   v.registrationPeriod.to   ?? new Date().toISOString(),
+                from: v.registrationDates.from ?? new Date().toISOString(),
+                to:   v.registrationDates.to   ?? new Date().toISOString(),
             }
             : null,
         poll: v.poll ?? false,

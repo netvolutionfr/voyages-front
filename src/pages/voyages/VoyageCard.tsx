@@ -3,7 +3,7 @@ import {useUpdate} from "@refinedev/core";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn, formatCurrencyFromCents } from "@/lib/utils";
+import {cn, formatCurrencyFromCents, getCoverUrl} from "@/lib/utils";
 import { Heart } from "lucide-react";
 import type { IVoyage } from "./IVoyage";
 import React from "react";
@@ -14,14 +14,6 @@ type Preference = {
     userId: string;
     interest: "YES" | "NO";
 };
-
-function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
-    if (!coverPhotoUrl) return undefined;
-    if (/^https?:\/\//i.test(coverPhotoUrl)) return coverPhotoUrl;
-    const base = import.meta.env.VITE_FILES_BASE || "";
-    const sep = base.endsWith("/") ? "" : "/";
-    return `${base}${sep}${coverPhotoUrl}`;
-}
 
 function formatDateRange(from?: Date, to?: Date) {
     if (!from || !to) return "";
@@ -118,21 +110,6 @@ export function VoyageCard({v}: {
                     <span className="text-muted-foreground">Participation familles:&nbsp;</span>
                     <span className="font-medium">{prixFamilles}</span>
                 </div>
-
-                {/* Badges secteurs */}
-                {Array.isArray(v.sectors) && v.sectors.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                        {v.sectors.map((s) => (
-                            <Badge key={s} variant="outline" className="text-[11px]">
-                                {s === "CYCLE_BAC"
-                                    ? "Cycle bac"
-                                    : s === "CYCLE_POST_BAC"
-                                        ? "Post-bac"
-                                        : s}
-                            </Badge>
-                        ))}
-                    </div>
-                )}
 
                 {/* Badges sections */}
                 {Array.isArray(v.sections) && v.sections.length > 0 && (

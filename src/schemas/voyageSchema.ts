@@ -16,25 +16,23 @@ export const VoyageSchema = z.object({
     destination: z.string().min(1),
     countryId: z.number().int().positive(),
     tripDates: rangeISO,
-    registrationPeriod: rangeISO.nullable().optional(),
+    registrationDates: rangeISO.nullable().optional(),
     minParticipants: z.number().int().min(1),
     maxParticipants: z.number().int().min(1),
     description: z.string().nullable().optional(),
-    totalPrice: z.number().min(0).nullable().optional(),
     familyContribution: z.number().min(0).nullable().optional(),
     coverPhotoUrl: z.string().nullable().optional(),
     chaperoneIds: z.array(z.string().min(1)).default([]),
     sectionIds: z.array(z.string()).default([]),
-    sectors: z.array(z.enum(["CYCLE_BAC","CYCLE_POST_BAC"])).default([]),
     poll: z.boolean().default(false),
 })
     .superRefine((v, ctx) => {
         // comparaisons sur strings ISO → convertis localement en Date pour la validation
         const toD = (s?: string) => (s ? new Date(s) : undefined);
-        const i = v.registrationPeriod;
+        const i = v.registrationDates;
         const voyFrom = toD(v.tripDates.from);
         if (i?.to && voyFrom && new Date(i.to) >= voyFrom) {
-            ctx.addIssue({ code: "custom", path: ["registrationPeriod"], message: "Les inscriptions doivent se terminer avant le début du voyage." });
+            ctx.addIssue({ code: "custom", path: ["registrationDates"], message: "Les inscriptions doivent se terminer avant le début du voyage." });
         }
         if (v.minParticipants > v.maxParticipants) {
             ctx.addIssue({ code: "custom", path: ["maxParticipants"], message: "Le maximum doit être ≥ au minimum." });

@@ -7,15 +7,13 @@ export type IVoyage = {
     destination: string;
     country?: IPays;
     familyContribution: number;  // en CENTIMES côté API
-    totalPrice?: number;           // en CENTIMES côté API
     coverPhotoUrl?: string;
-    sectors?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
 
     tripDates: { from: Date; to: Date; };
     minParticipants: number;
     maxParticipants: number;
 
-    registrationPeriod: { from: Date; to: Date; };
+    registrationDates: { from: Date; to: Date; };
 
     poll: boolean;
 

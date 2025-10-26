@@ -34,3 +34,11 @@ export function parseCurrencyToCents(value: string): number | null {
   }
   return Math.round(floatValue * 100);
 }
+
+export function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
+    if (!coverPhotoUrl) return undefined;
+    if (/^https?:\/\//i.test(coverPhotoUrl)) return coverPhotoUrl;
+    const base = import.meta.env.VITE_FILES_BASE || "";
+    const sep = base.endsWith("/") ? "" : "/";
+    return `${base}${sep}${coverPhotoUrl}`;
+}

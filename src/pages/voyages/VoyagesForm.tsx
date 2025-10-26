@@ -18,8 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { ChevronsUpDown, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {ChevronsUpDown, Check, ImageIcon} from "lucide-react";
+import {cn, getCoverUrl} from "@/lib/utils";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 import type { IPays } from "@/pages/voyages/IPays";
@@ -37,13 +37,9 @@ import {MultiSelect} from "@/components/ui/multi-select.tsx";
 import {Switch} from "@/components/ui/switch.tsx";
 import {ClassesMultiPicker, type Cycle, type YearTag} from "@/components/ui/class-multi-picker.tsx";
 import {api} from "@/auth/api.ts";
+import {AspectRatio} from "@/components/ui/aspect-ratio.tsx";
 
 /** Enum front pour rester synchro avec le back */
-const secteursAll = [
-    { value: "CYCLE_BAC", label: "Cycle bac" },
-    { value: "CYCLE_POST_BAC", label: "Cycle post-bac" },
-] as const;
-
 type SectionOption = {
     publicId: string;
     label: string
@@ -59,6 +55,9 @@ const isoPlusDays = (n: number) => new Date(Date.now() + n*864e5).toISOString();
 const VoyagesForm = () => {
     const { id } = useParams<{ id: string }>();
     const isEditing = Boolean(id);
+    const [coverPreview, setCoverPreview] = useState<string | null | undefined>(null);
+    const [tripStartDate, setTripStartDate] = useState<Date>(new Date());
+    const [registerStartDate, setRegisterStartDate] = useState<Date>(new Date());
 
     // Pays
     const { options: paysOptions } = useSelect<IPays>({
@@ -103,17 +102,15 @@ const VoyagesForm = () => {
             title: "",
             description: null,
             destination: "",
-            totalPrice: null,
             familyContribution: null,
             coverPhotoUrl: null,
             countryId: 0, // ou undefined si tu rends ce champ optional dans le schéma
             tripDates: { from: isoNow(), to: isoPlusDays(7) },
             minParticipants: 1,
             maxParticipants: 1,
-            registrationPeriod: null, // { from: Date, to: Date } | null | undefined
+            registrationDates: null, // { from: Date, to: Date } | null | undefined
             chaperoneIds: [],
             sectionIds: [],
-            sectors: [],
             poll: false,
         },
         shouldFocusError: true,
@@ -127,7 +124,11 @@ const VoyagesForm = () => {
 
     useEffect(() => {
         if (!isEditing || !record) return;
-        console.log("Reset form with record", dtoToForm(record));
+        setCoverPreview(record.coverPhotoUrl ? getCoverUrl(record.coverPhotoUrl) : null);
+        setTripStartDate(new Date(record.tripDates.from));
+        if (record.registrationDates) {
+            setRegisterStartDate(new Date(record.registrationDates.from));
+        }
         form.reset(dtoToForm(record));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditing, record?.id, record?.updatedAt]);
@@ -137,20 +138,7 @@ const VoyagesForm = () => {
     }, [form]);
 
 
-    useEffect(() => {
-        const sub = form.watch((v, info) => {
-            console.log("[WATCH]", info.name, v.chaperoneIds, v);
-        });
-        return () => sub.unsubscribe();
-    }, [form]);
-
-    useEffect(() => {
-        console.log("[FORMSTATE] errors", form.formState.errors);
-    }, [form.formState.errors]);
-
-
     /** Upload direct vers MinIO via presigned URL */
-    const [coverPreview, setCoverPreview] = useState<string | null>(null);
     const handleCoverUpload = async (file: File) => {
         // Compression de l'image
         const compressed = await imageCompression(file, {
@@ -177,7 +165,6 @@ const VoyagesForm = () => {
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {
         // Adapter les valeurs du form (euros → centimes)
-        if (values.totalPrice != null) values.totalPrice = Math.round(values.totalPrice * 100);
         if (values.familyContribution != null) values.familyContribution = Math.round(values.familyContribution * 100);
 
         console.log("Submitting voyage form", values);
@@ -315,29 +302,6 @@ const VoyagesForm = () => {
                         )}
                     />
 
-                    {/* Prix total (euros dans le form) */}
-                    <FormField
-                        control={form.control}
-                        name="totalPrice"
-                        render={() => (
-                            <FormItem>
-                                <FormLabel>Prix total (en €)</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Prix total"
-                                        {...form.register("totalPrice", {
-                                            valueAsNumber: true,
-                                            setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
-                                        })}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     {/* Participation familles (euros dans le form) */}
                     <FormField
                         control={form.control}
@@ -370,6 +334,22 @@ const VoyagesForm = () => {
                                 <FormLabel>Photo de couverture</FormLabel>
                                 <FormControl>
                                     <div className="flex items-center gap-4">
+                                        <div className="w-64">
+                                            <AspectRatio ratio={16 / 9} className="rounded-lg border bg-muted/30 overflow-hidden">
+                                                {coverPreview ? (
+                                                    <img
+                                                        src={coverPreview}
+                                                        alt="Photo de couverture"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                                                        <ImageIcon className="h-8 w-8 opacity-60" />
+                                                        <span className="text-sm">Aucune image</span>
+                                                    </div>
+                                                )}
+                                            </AspectRatio>
+                                        </div>
                                         <Input
                                             type="file"
                                             accept="image/*"
@@ -378,9 +358,6 @@ const VoyagesForm = () => {
                                                 if (f) await handleCoverUpload(f);
                                             }}
                                         />
-                                        {coverPreview && (
-                                            <img src={coverPreview} alt="Aperçu" className="h-16 w-24 object-cover rounded" />
-                                        )}
                                     </div>
                                 </FormControl>
                                 <FormMessage />
@@ -407,15 +384,17 @@ const VoyagesForm = () => {
                                                 { field.onChange(range ?? { from: undefined, to: undefined });}
                                             }
                                             disabled={(date) => date < new Date()}
+                                            defaultMonth={tripStartDate}
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
+                                )
+                            }
                         />
                         <FormField
                             control={form.control}
-                            name="registrationPeriod"
+                            name="registrationDates"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Dates d'inscription</FormLabel>
@@ -425,16 +404,18 @@ const VoyagesForm = () => {
                                             locale={fr}
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
-                                            selected={field.value as unknown as DateRange ?? undefined}
+                                            selected={field.value as unknown as DateRange}
                                             onSelect={(range) => field.onChange(range ?? null)}
                                             disabled={(date) =>
                                                 date < new Date(new Date().setDate(new Date().getDate() - 1))
                                             }
+                                            defaultMonth={registerStartDate}
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
+                                )
+                            }
                         />
                     </div>
 
@@ -534,44 +515,6 @@ const VoyagesForm = () => {
                                 </FormItem>
                             );
                         }}
-                    />
-
-                    {/* Secteurs (checkboxes) */}
-                    <FormField
-                        control={form.control}
-                        name="sectors"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Secteurs</FormLabel>
-                                <FormControl>
-                                    <div className="flex flex-col gap-2">
-                                        {secteursAll.map((s) => {
-                                            const current: string[] = field.value || [];
-                                            const checked = current.includes(s.value);
-                                            return (
-                                                <label key={s.value} className="inline-flex items-center gap-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={checked}
-                                                        onChange={(e) => {
-                                                            const set = new Set(current);
-                                                            if (e.target.checked) set.add(s.value);
-                                                            else set.delete(s.value);
-                                                            form.setValue(
-                                                                "sectors",
-                                                                Array.from(set) as Array<"CYCLE_BAC" | "CYCLE_POST_BAC">,
-                                                                { shouldDirty: true });
-                                                        }}
-                                                    />
-                                                    {s.label}
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
                     />
 
                     <Button className="mr-2" variant="outline" asChild>

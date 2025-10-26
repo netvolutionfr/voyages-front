@@ -10,15 +10,13 @@ export type VoyageDTO = {
     countryName?: string;
 
     familyContribution: number;  // en CENTIMES côté API
-    totalPrice?: number;           // en CENTIMES côté API
     coverPhotoUrl?: string;
-    sectors?: Array<"CYCLE_BAC" | "CYCLE_POST_BAC">;
 
     tripDates: { from: string; to: string }; // ISO
     minParticipants: number;
     maxParticipants: number;
 
-    registrationPeriod?: { from: string; to: string }; // ISO
+    registrationDates?: { from: string; to: string }; // ISO
 
     poll: boolean; // indique si le voyage est en mode sondage (dates non confirmées)
 
