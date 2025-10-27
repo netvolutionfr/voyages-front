@@ -14,7 +14,6 @@ import Error403 from "@/pages/error/403.tsx";
 import Error404 from "@/pages/error/404.tsx";
 import RequireAdmin from "@/components/RequireAdmin.tsx";
 import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
-import FicheSanitaire from "@/pages/profil/FicheSanitaire.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
 import ParticipantsAdmin from "@/pages/admin/participants/ParticipantsAdmin.tsx";
@@ -32,6 +31,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import OtpPage from "@/pages/OtpPage.tsx";
 import VoyageDetail from "@/pages/voyages/VoyageDetail.tsx";
+import StudentHealthForm from "@/pages/profil/StudentHealthForm.tsx";
 
 
 export default function App() {
@@ -70,9 +70,9 @@ export default function App() {
                     }
                 >
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/sanitaire" element={<StudentHealthForm />} />
                     <Route path="/profil" element={<ProfilLayout />}>
                         <Route index element={<FicheRenseignements />} />
-                        <Route path="sanitaire" element={<FicheSanitaire />} />
                         <Route path="parents" element={<FicheParents />} />
                     </Route>
 

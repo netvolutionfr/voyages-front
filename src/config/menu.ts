@@ -1,16 +1,23 @@
 import {
     IconDashboard,
     IconDirections,
+    IconCheckupList,
+    IconSchool,
+    IconUser,
+    IconUsers,
     IconId,
-    IconSchool, IconUser,
-    IconUsers
 } from "@tabler/icons-react";
 
 export const menuEleves = [
     {
-        title: "Tableau de bord",
+        title: "Accueil",
         url: "/",
         icon: IconDashboard,
+    },
+    {
+        title: "Fiche santé",
+        url: "/sanitaire",
+        icon: IconCheckupList,
     },
     {
         title: "Voyages",

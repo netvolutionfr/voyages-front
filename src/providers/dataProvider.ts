@@ -62,9 +62,16 @@ export const voyagesDataProvider: DataProvider = {
         { resource, id }: GetOneParams
     ): Promise<GetOneResponse<TData>> => {
         try {
-            const data = resource === "me"
-                ? await api.get<TData>("/me")
-                : await api.get<TData>(`/${resource}/${id}`);
+            let path = `/${resource}/${id}`;
+            if (resource === "me") {
+                path ="/me";
+            }
+            if (resource === "me/health-form") {
+                path ="/me/health-form";
+            }
+            console.log(path);
+            console.log(resource);
+            const data = await api.get<TData>(path);
             return { data };
         } catch (error) {
             return Promise.reject(error);
