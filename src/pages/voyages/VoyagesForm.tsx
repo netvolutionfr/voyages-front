@@ -394,6 +394,7 @@ const VoyagesForm = () => {
                                         <Calendar
                                             mode="range"
                                             locale={fr}
+                                            timeZone="UTC"
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
                                             selected={field.value as unknown as DateRange}
@@ -419,6 +420,7 @@ const VoyagesForm = () => {
                                         <Calendar
                                             mode="range"
                                             locale={fr}
+                                            timeZone="UTC"
                                             className="bg-transparent p-0"
                                             buttonVariant="outline"
                                             selected={field.value as unknown as DateRange}

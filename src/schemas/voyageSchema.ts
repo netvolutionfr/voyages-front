@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // accepte Date|string en entrée, sort une string ISO, valide ISO 8601
 const dateTimeISO = z.preprocess(
-    (val) => (val instanceof Date ? val.toISOString() : val),
+    (val) => (val instanceof Date ? val.toISOString().split('T')[0] : val),
     z.string()
 );
 

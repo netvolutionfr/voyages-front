@@ -69,8 +69,6 @@ export const voyagesDataProvider: DataProvider = {
             if (resource === "me/health-form") {
                 path ="/me/health-form";
             }
-            console.log(path);
-            console.log(resource);
             const data = await api.get<TData>(path);
             return { data };
         } catch (error) {
