@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useOne, useUpdate } from "@refinedev/core";
+import {useOne, useUpdate, useCreate, type HttpError} from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,16 +8,23 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {Heart, Calendar as CalendarIcon, MapPin, Users, FileText, ChevronLeft, ShieldCheck, Clock} from "lucide-react";
+import {
+    Heart, Calendar as CalendarIcon, MapPin, Users, FileText, ChevronLeft, ShieldCheck, Clock
+} from "lucide-react";
 import type { IVoyage } from "@/pages/voyages/IVoyage";
 import { cn, formatCurrencyFromCents, getCoverUrl } from "@/lib/utils";
 
-// --- Helpers ---
+/** Shadcn dialog & checkbox **/
+import {
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+
+/* --- Helpers --- */
 function toDate(d?: Date | string): Date | undefined {
     if (!d) return undefined;
     return d instanceof Date ? d : new Date(d);
 }
-
 function formatDateRange(from?: Date | string, to?: Date | string) {
     if (!from || !to) return "";
     const f = toDate(from)!;
@@ -25,13 +32,15 @@ function formatDateRange(from?: Date | string, to?: Date | string) {
     const fmt = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
     return `${fmt.format(f)} → ${fmt.format(t)}`;
 }
-
 function within(now: Date, from?: Date | string, to?: Date | string) {
     const F = from ? toDate(from) : undefined;
     const T = to ? toDate(to) : undefined;
     if (!F || !T) return false;
     return now >= F && now <= T;
 }
+
+type TripRegistrationRequest = { tripId: number; agreeToCommitments: boolean };
+type TripRegistrationResponse = { id: number; tripId: number; status: string };
 
 export default function VoyageDetail() {
     const { id } = useParams();
@@ -51,7 +60,6 @@ export default function VoyageDetail() {
     const [countUserInterests, setCountUserInterests] = React.useState<number>(voyage?.interestedCount ?? 0);
 
     React.useEffect(() => {
-        // sync when fetched/refetched
         if (voyage) {
             setCurrentUserInterest(voyage.interestedByCurrentUser);
             setCountUserInterests(voyage.interestedCount ?? 0);
@@ -63,7 +71,6 @@ export default function VoyageDetail() {
     const toggleInterest = () => {
         if (!voyage?.id) return;
         const next = !currentUserInterest;
-        // optimistic
         setCurrentUserInterest(next);
         setCountUserInterests((c) => (next ? c + 1 : Math.max(0, c - 1)));
 
@@ -71,26 +78,21 @@ export default function VoyageDetail() {
             resource: "trip-preferences",
             id: voyage.id,
             values: { interest: next ? "YES" : "NO" },
-            mutationMode: "pessimistic", // server is source of truth; we already set local optimistic state above
+            mutationMode: "pessimistic",
         }, {
             onError: () => {
-                // rollback on error
                 setCurrentUserInterest(!next);
                 setCountUserInterests((c) => (!next ? c + 1 : Math.max(0, c - 1)));
             },
-            onSuccess: () => {
-                // Optionally refetch to sync counts
-                refetch();
-            }
+            onSuccess: () => refetch()
         });
     };
 
     // Registration flow
-    // type RegistrationPayload = { voyageId: number };
-    // type RegistrationResponse = { id: number; voyageId: number };
-    // const { mutate: createRegistration, isLoading: isSigningUp } = useCreate<RegistrationResponse, RegistrationPayload>();
-    const [registered] = React.useState<boolean>(false);
+    const [registered, setRegistered] = React.useState<boolean>(false);
     const [signupError, setSignupError] = React.useState<string | null>(null);
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [agree, setAgree] = React.useState(false);
 
     const canRegister = React.useMemo(() => {
         if (!voyage) return false;
@@ -98,21 +100,40 @@ export default function VoyageDetail() {
         return within(now, voyage.registrationDates?.from, voyage.registrationDates?.to);
     }, [voyage]);
 
-    const handleSignup = () => {
-        if (!voyage?.id) return;
+    const { mutate: createRegistration, isLoading: isSigningUp } =
+        useCreate<TripRegistrationResponse, HttpError, TripRegistrationRequest>();
+
+    const openSignupDialog = () => {
         setSignupError(null);
-        // createRegistration({
-        //     resource: "registrations", // ⬅️ adaptez ce nom de ressource à votre API si besoin
-        //     values: { voyageId: voyage.id },
-        // }, {
-        //     onSuccess: () => {
-        //         setRegistered(true);
-        //     },
-        //     onError: (e) => {
-        //         const msg = e instanceof Error ? e.message : "Inscription impossible";
-        //         setSignupError(msg);
-        //     }
-        // });
+        setAgree(false);
+        setDialogOpen(true);
+    };
+
+    const confirmSignup = () => {
+        if (!voyage?.id || !agree) return;
+        setSignupError(null);
+
+        createRegistration(
+            {
+                resource: "trip/registrations",
+                values: { tripId: voyage.id, agreeToCommitments: true },
+            },
+            {
+                onSuccess: () => {
+                    setRegistered(true);
+                    setDialogOpen(false);
+                    refetch(); // pour rafraîchir les compteurs / flags éventuels
+                },
+                onError: (e) => {
+                    const status = e?.status ?? e?.response?.status;
+                    let msg = "Inscription impossible.";
+                    if (status === 409) msg = "Vous êtes déjà inscrit à ce voyage.";
+                    else if (status === 403) msg = "Les inscriptions ne sont pas ouvertes.";
+                    else if (status === 404) msg = "Voyage introuvable.";
+                    setSignupError(msg);
+                }
+            }
+        );
     };
 
     if (!Number.isFinite(numericId)) {
@@ -198,7 +219,7 @@ export default function VoyageDetail() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 {/* Main */}
                 <div className="md:col-span-2 space-y-4">
-                    {/* Zone synthèse au-dessus des formalités */}
+                    {/* Synthèse */}
                     <Card>
                         <CardHeader>
                             <h2 className="text-lg font-medium">{voyage.title}</h2>
@@ -225,16 +246,12 @@ export default function VoyageDetail() {
                             </div>
                             <Separator />
                             <div className="prose prose-sm max-w-none">
-                                {voyage.description ? (
-                                    <p>{voyage.description}</p>
-                                ) : (
-                                    <p className="text-muted-foreground">Aucune description.</p>
-                                )}
+                                {voyage.description ? <p>{voyage.description}</p> : <p className="text-muted-foreground">Aucune description.</p>}
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Documents requis */}
+                    {/* Formalités */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
@@ -273,21 +290,11 @@ export default function VoyageDetail() {
                                             </div>
 
                                             <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-3">
-                                                {f.acceptedMime?.length ? (
-                                                    <span>Types acceptés : {f.acceptedMime.join(", ")}</span>
-                                                ) : null}
-                                                {typeof f.maxSizeMb === "number" ? (
-                                                    <span>Taille max : {f.maxSizeMb} Mo</span>
-                                                ) : null}
-                                                {typeof f.retentionDays === "number" ? (
-                                                    <span>Conservation : {f.retentionDays} j</span>
-                                                ) : null}
-                                                {f.storeScan ? (
-                                                    <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5"/>Scan conservé</span>
-                                                ) : null}
-                                                {f.manuallyAdded ? (
-                                                    <span>Ajout manuel</span>
-                                                ) : null}
+                                                {f.acceptedMime?.length ? (<span>Types acceptés : {f.acceptedMime.join(", ")}</span>) : null}
+                                                {typeof f.maxSizeMb === "number" ? (<span>Taille max : {f.maxSizeMb} Mo</span>) : null}
+                                                {typeof f.retentionDays === "number" ? (<span>Conservation : {f.retentionDays} j</span>) : null}
+                                                {f.storeScan ? (<span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5"/>Scan conservé</span>) : null}
+                                                {f.manuallyAdded ? (<span>Ajout manuel</span>) : null}
                                             </div>
 
                                             {f.notes && <p className="mt-2 text-sm">{f.notes}</p>}
@@ -331,8 +338,13 @@ export default function VoyageDetail() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" onClick={handleSignup} disabled={!canRegister || registered /*|| isSigningUp */}>
-                                {registered ? "Inscrit ✅" : /*isSigningUp ? "Inscription..." : */ "S'inscrire"}
+                            {/* Bouton ouvre le modal */}
+                            <Button
+                                className="w-full"
+                                onClick={openSignupDialog}
+                                disabled={!canRegister || registered}
+                            >
+                                {registered ? "Inscrit ✅" : "S'inscrire"}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -347,8 +359,9 @@ export default function VoyageDetail() {
                                 <ul className="space-y-2">
                                     {voyage.chaperones.map((c) => (
                                         <li key={c.publicId} className="flex items-center gap-3">
-                                            <Avatar className="h-8 w-8"><AvatarFallback>{(c?.firstName?.[0]?.toUpperCase() ?? '') + (c?.lastName?.[0]?.toUpperCase() ?? '')}
-                                            </AvatarFallback></Avatar>
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarFallback>{(c?.firstName?.[0]?.toUpperCase() ?? '') + (c?.lastName?.[0]?.toUpperCase() ?? '')}</AvatarFallback>
+                                            </Avatar>
                                             <span>{c.firstName} {c.lastName}</span>
                                         </li>
                                     ))}
@@ -374,6 +387,39 @@ export default function VoyageDetail() {
                     )}
                 </div>
             </div>
+
+            {/* Modal d'inscription */}
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmer votre inscription</DialogTitle>
+                        <DialogDescription>
+                            En vous inscrivant à <strong>{voyage.title}</strong>, vous reconnaissez que :
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                <li>Votre place n’est pas garantie avant validation par l’établissement.</li>
+                                <li>Vous vous engagez à régler la participation financière dans les délais.</li>
+                                <li>Vous fournirez tous les documents requis dans les délais.</li>
+                            </ul>
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex items-start gap-2 mt-2">
+                        <Checkbox id="agree" checked={agree} onCheckedChange={(v) => setAgree(Boolean(v))} />
+                        <label htmlFor="agree" className="text-sm leading-none">
+                            J’ai lu et j’accepte ces engagements.
+                        </label>
+                    </div>
+
+                    <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                            <Button variant="outline">Annuler</Button>
+                        </DialogClose>
+                        <Button onClick={confirmSignup} disabled={!agree || isSigningUp}>
+                            {isSigningUp ? "Inscription..." : "Confirmer l’inscription"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
