@@ -6,7 +6,7 @@ import {apiFetch} from "@/auth/http.ts";
 
 type PreviewState = {
     open: boolean;
-    url?: string;      // /api/me/documents/{uuid}/preview
+    url?: string;      // /api/... ou URL présignée
     mime?: string;     // ex: image/png, application/pdf
     title?: string;
 };
@@ -16,9 +16,10 @@ export function useDocumentPreview() {
     const [state, setState] = React.useState<PreviewState>({ open: false });
 
     const open = (docPublicId: string, mime?: string, title?: string) => {
-        const url = `/me/documents/${encodeURIComponent(docPublicId)}/preview`;
+        const url = `/documents/${encodeURIComponent(docPublicId)}/preview`;
         setState({ open: true, url, mime, title });
     };
+
     const close = () => setState((s) => ({ ...s, open: false }));
 
     return { state, open, close };

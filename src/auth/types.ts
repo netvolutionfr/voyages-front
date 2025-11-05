@@ -5,5 +5,6 @@ export interface Me {
     firstName: string;
     lastName: string;
     email: string;
+    role: Role;
     telephone?: string | null;
 }

@@ -16,7 +16,6 @@ import RequireAdmin from "@/components/RequireAdmin.tsx";
 import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
-import ParticipantsAdmin from "@/pages/admin/participants/ParticipantsAdmin.tsx";
 import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
 import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
 import Participants from "@/pages/participants/Participants.tsx";
@@ -32,6 +31,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import OtpPage from "@/pages/OtpPage.tsx";
 import VoyageDetail from "@/pages/voyages/VoyageDetail.tsx";
 import StudentHealthForm from "@/pages/profil/StudentHealthForm.tsx";
+import VoyageDashboard from "@/pages/voyages/VoyageDashboard.tsx";
 
 
 export default function App() {
@@ -80,6 +80,7 @@ export default function App() {
                     <Route path="/voyages/create" element={<VoyagesForm />} />
                     <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
                     <Route path="/voyages/:id" element={<VoyageDetail />} />
+                    <Route path="/voyages/detail/:id" element={<VoyageDashboard />} />
 
                     <Route path="/documents" element={<Documents />} />
 
@@ -88,14 +89,6 @@ export default function App() {
                     <Route path="/participants/create" element={<ParticipantsForm />} />
                     <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
 
-                    <Route
-                        path="/admin/participants"
-                        element={
-                            <RequireAdmin>
-                                <ParticipantsAdmin />
-                            </RequireAdmin>
-                        }
-                    />
                     <Route
                         path="/admin/sections"
                         element={

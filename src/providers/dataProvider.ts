@@ -3,38 +3,38 @@ import type {
     CreateParams, CreateResponse,
     DataProvider, DeleteOneParams, DeleteOneResponse,
     GetListParams, GetListResponse,
-    GetOneParams,
-    GetOneResponse, UpdateParams, UpdateResponse
+    GetOneParams, GetOneResponse,
+    UpdateParams, UpdateResponse,
 } from "@refinedev/core";
-import {api} from "@/auth/api.ts";
+import { api } from "@/auth/api.ts";
+
 /**
- * Construit les params Spring:
- * - Pagination: page (0/1-based selon config), size
+ * Construit les params Spring standards :
+ * - Pagination: page (0-based), size
  * - Tri: ?sort=field,asc&sort=other,desc
- * - Recherche q (facultative)
+ * - Filtres usuels: q (contains), field= (eq), field.gte, field.lte, field.in=v1,v2
+ * + Merge d'un objet "extra" (pour des flags comme includeDocSummary, tripId, sortKey, activeOnly, etc.)
  */
-function buildListParams(params: GetListParams) {
+function buildListParams(params: GetListParams, extra?: Record<string, unknown>) {
     const { pagination, sorters, filters } = params;
     const search = new URLSearchParams();
 
-    // Pagination (Refine est 1-based). Spring par défaut est 0-based.
+    // Pagination (Refine est 1-based, Spring est 0-based)
     const current = pagination?.current ?? 1;
     const pageSize = pagination?.pageSize ?? 10;
-
-    search.set("page", String(current - 1)); // Spring est 0-based
+    search.set("page", String(current - 1));
     search.set("size", String(pageSize));
 
     // Tri multi-colonnes
     (sorters ?? []).forEach((s) => {
         const order = s.order?.toLowerCase() === "desc" ? "desc" : "asc";
-        // IMPORTANT: le champ doit correspondre à la propriété triable côté JPA
         search.append("sort", `${s.field},${order}`);
     });
 
-    // Recherche
+    // Filtres usuels
     (filters ?? []).forEach((s) => {
         if (s.operator === "contains" && s.value) {
-            search.set("q", s.value);
+            search.set("q", String(s.value));
         }
         if (s.operator === "eq" && s.value !== undefined && s.value !== null && s.value !== "") {
             search.set(s.field, String(s.value));
@@ -46,33 +46,112 @@ function buildListParams(params: GetListParams) {
             search.set(`${s.field}.lte`, String(s.value));
         }
         if (s.operator === "in" && Array.isArray(s.value) && s.value.length > 0) {
-            // ex: ?field.in=v1,v2,v3
             search.set(`${s.field}.in`, (s.value as (string | number)[]).join(","));
         }
-    })
+    });
+
+    // Extra (flags et paramètres spécifiques)
+    if (extra) {
+        Object.entries(extra).forEach(([k, v]) => {
+            if (v === undefined || v === null || v === "") return;
+            // Les booléens/numériques/strings passent en string
+            search.set(k, String(v));
+        });
+    }
 
     return search;
 }
 
+// --- Types utiles pour sérialiser les réponses paginées connues ---
+type PageMeta = { totalElements: number };
+
+type PagedResponse<T> = {
+    content: T[];
+    page: PageMeta;
+};
+
+// Types API (extraits de ton OpenAPI)
+type SectionMiniDTO = { id: number; label: string };
+type DocumentsSummaryDTO = { required: number; provided: number; missing: number };
+type UserMiniDTO = {
+    publicId: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+    telephone?: string;
+    section?: SectionMiniDTO;
+};
+export type TripRegistrationAdminViewDTO = {
+    registrationId: number;
+    registeredAt: string;
+    status: string;
+    user: UserMiniDTO;
+    documentsSummary?: DocumentsSummaryDTO;
+};
+export type DocumentsAdminDTO = {
+    userId: number;
+    tripId: number;
+    summary: DocumentsSummaryDTO;
+    items: Array<{
+        documentType: { id: number; code?: string; label: string };
+        required: boolean;
+        provided: boolean;
+        providedAt?: string;
+        lastObject?: { id: string; size: number; mime: string; previewable: boolean };
+    }>;
+};
+export type HealthFormAdminDTO = {
+    exists: boolean;
+    content?: string;
+};
+
 export const voyagesDataProvider: DataProvider = {
-    // GET /:resource/:id  (+ cas spécial /me)
-    getOne: async <
-        TData extends BaseRecord = BaseRecord
-    >(
-        { resource, id }: GetOneParams
+    // GET /:resource/:id  (+ cas spéciaux)
+    getOne: async <TData extends BaseRecord = BaseRecord>(
+        { resource, id, meta }: GetOneParams
     ): Promise<GetOneResponse<TData>> => {
         try {
-            let path = `/${resource}/${id}`;
+            // Cas spéciaux simples déjà en place
             if (resource === "me") {
-                path ="/me";
+                const data = await api.get<TData>("/me");
+                return { data };
             }
             if (resource === "me/health-form") {
-                path ="/me/health-form";
+                const data = await api.get<TData>("/me/health-form");
+                return { data };
             }
             if (resource === "me/documents") {
-                path ="/me/documents";
+                const data = await api.get<TData>("/me/documents");
+                return { data };
             }
-            const data = await api.get<TData>(path);
+
+            // --- Nouveaux cas pour le dashboard ---
+            // Documents par user pour un voyage : /users/{userId}/documents?tripId=...
+            if (resource === "admin-user-documents") {
+                const tripId = meta?.tripId;
+                const qs = new URLSearchParams();
+                if (tripId !== undefined) qs.set("tripId", String(tripId));
+                const data = await api.get<TData>(`/users/${id}/documents?${qs.toString()}`);
+                return { data };
+            }
+
+            // Fiche sanitaire : /users/{userId}/health-form?tripId=...
+            if (resource === "admin-user-health") {
+                const tripId = meta?.tripId;
+                const qs = new URLSearchParams();
+                if (tripId !== undefined) qs.set("tripId", String(tripId));
+                const data = await api.get<TData>(`/users/${id}/health-form?${qs.toString()}`);
+                return { data };
+            }
+
+            // URL de prévisualisation document : /users/documents/{docId}/preview-url
+            if (resource === "admin-document-preview-url") {
+                const data = await api.get<TData>(`/users/documents/${id}/preview-url`);
+                return { data };
+            }
+
+            // Fallback générique
+            const data = await api.get<TData>(`/${resource}/${id}`);
             return { data };
         } catch (error) {
             return Promise.reject(error);
@@ -80,10 +159,7 @@ export const voyagesDataProvider: DataProvider = {
     },
 
     // POST /:resource
-    create: async <
-        TData extends BaseRecord = BaseRecord,
-        TVariables = unknown
-    >(
+    create: async <TData extends BaseRecord = BaseRecord, TVariables = unknown>(
         { resource, variables }: CreateParams<TVariables>
     ): Promise<CreateResponse<TData>> => {
         try {
@@ -94,11 +170,8 @@ export const voyagesDataProvider: DataProvider = {
         }
     },
 
-    // PUT /:resource/:id  (+ cas spéciaux /me et /trip-preferences/:id)
-    update: async <
-        TData extends BaseRecord = BaseRecord,
-        TVariables = unknown
-    >(
+    // PUT/POST /:resource/:id  (+ cas spéciaux /me, /trip-preferences/:id)
+    update: async <TData extends BaseRecord = BaseRecord, TVariables = unknown>(
         { resource, id, variables }: UpdateParams<TVariables>
     ): Promise<UpdateResponse<TData>> => {
         try {
@@ -118,21 +191,81 @@ export const voyagesDataProvider: DataProvider = {
     },
 
     // GET /:resource?…  (Spring Pageable: { content, page.totalElements })
-    getList: async <
-        TData extends BaseRecord = BaseRecord
-    >(
+    getList: async <TData extends BaseRecord = BaseRecord>(
         params: GetListParams
     ): Promise<GetListResponse<TData>> => {
         try {
-            const { resource, pagination, sorters, filters } = params;
-            const qs = buildListParams({ resource, pagination, sorters, filters });
-            const url = `/${resource}?${qs.toString()}`;
+            const { resource, pagination, sorters, filters, meta } = params;
 
-            const response = await api.get<{ content: TData[]; page: { totalElements: number } }>(url);
+            // --- Liste des inscriptions admin ---
+            // Endpoint: /trips/registrations
+            // Filtres supportés: status, q, sectionId, includeDocSummary (bool), tripId (si dispo côté back)
+            if (resource === "admin-registrations") {
+                // includeDocSummary par défaut à true (utile pour le dashboard)
+                const extra: Record<string, unknown> = {
+                    includeDocSummary: meta?.includeDocSummary ?? true,
+                };
+
+                // On laisse passer d’éventuels flags/valeurs depuis meta.query
+                if (meta?.query && typeof meta.query === "object") {
+                    Object.assign(extra, meta.query);
+                }
+
+                // Et on traduit quelques filtres “classiques” si fournis via `filters`
+                // - status (eq)
+                // - sectionId (eq)
+                // - tripId (eq)
+                // - q (contains)
+                (filters ?? []).forEach((f) => {
+                    if (f.operator === "eq" && f.value !== undefined && f.value !== null && f.value !== "") {
+                        if (["status", "sectionId", "tripId"].includes(f.field)) {
+                            extra[f.field] = f.value;
+                        }
+                    }
+                    if (f.operator === "contains" && f.value) {
+                        extra["q"] = String(f.value);
+                    }
+                });
+
+                const qs = buildListParams({ resource, pagination, sorters, filters }, extra);
+                const url = `/trips/registrations?${qs.toString()}`;
+                const response = await api.get<PagedResponse<TData>>(url);
+
+                return {
+                    data: response.content,
+                    total: response.page?.totalElements ?? response.content.length,
+                };
+            }
+
+            // --- Liste des sections ---
+            // Endpoint: /sections
+            // On veut généralement activeOnly=true, sortKey="yearLabel"
+            if (resource === "sections") {
+                const extra: Record<string, unknown> = {
+                    activeOnly: meta?.activeOnly ?? true,
+                    sortKey: meta?.sortKey ?? "yearLabel",
+                };
+                if (meta?.query && typeof meta.query === "object") {
+                    Object.assign(extra, meta.query);
+                }
+                const qs = buildListParams({ resource, pagination, sorters, filters }, extra);
+                const url = `/sections?${qs.toString()}`;
+                const response = await api.get<PagedResponse<TData>>(url);
+
+                return {
+                    data: response.content,
+                    total: response.page?.totalElements ?? response.content.length,
+                };
+            }
+
+            // --- Fallback générique pageable ---
+            const qs = buildListParams({ resource, pagination, sorters, filters }, meta?.query);
+            const url = `/${resource}?${qs.toString()}`;
+            const response = await api.get<PagedResponse<TData>>(url);
 
             return {
-                data: response.content,
-                total: response.page.totalElements,
+                data: response.content ?? (Array.isArray(response) ? (response as unknown as TData[]) : []),
+                total: response.page?.totalElements ?? (Array.isArray(response) ? (response as unknown as TData[]).length : 0),
             };
         } catch (error) {
             return Promise.reject(error);
@@ -142,17 +275,11 @@ export const voyagesDataProvider: DataProvider = {
     getMany: () => Promise.reject("Not implemented"),
 
     // DELETE /:resource/:id
-
-    deleteOne: async <
-        TData extends BaseRecord = BaseRecord,
-        TVariables = object
-    >(
+    deleteOne: async <TData extends BaseRecord = BaseRecord, TVariables = object>(
         params: DeleteOneParams<TVariables>
     ): Promise<DeleteOneResponse<TData>> => {
-        const { resource, id } = params; // ← destructure ici, pas dans la signature
+        const { resource, id } = params;
         const data = await api.delete<TData>(`/${resource}/${id}`);
-        // si l'API fait 204 No Content :
-        // const data = undefined as unknown as TData;
         return { data };
     },
 

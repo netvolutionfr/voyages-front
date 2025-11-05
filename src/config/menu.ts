@@ -56,14 +56,9 @@ export const menuProfs = [
         icon: IconDashboard,
     },
     {
-        title: "Gestion des Voyages",
+        title: "Voyages",
         url: "/voyages",
         icon: IconDirections,
-    },
-    {
-        title: "Participants",
-        url: "/participants",
-        icon: IconUsers,
     },
 ];
 
@@ -72,11 +67,6 @@ export const menuAdmin = [
         title: "Voyages",
         url: "/voyages",
         icon: IconDirections,
-    },
-    {
-        title: "Participants",
-        url: "/admin/participants",
-        icon: IconUsers,
     },
     {
         title: "Sections",

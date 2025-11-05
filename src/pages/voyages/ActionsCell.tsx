@@ -1,8 +1,8 @@
-import { useDelete } from "@refinedev/core";
+import {useDelete, useGetIdentity} from "@refinedev/core";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button.tsx";
-import { EditIcon, TrashIcon } from "lucide-react";
+import {ClipboardList, EditIcon, TrashIcon} from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,11 +16,19 @@ import {
 } from "@/components/ui/alert-dialog.tsx";
 import {Link} from "react-router-dom";
 import type {ISection} from "@/pages/admin/sections/ISection.ts";
+import type {User} from "@/type/User.ts";
 
 function ActionsCell({item}: { item: ISection }) {
     const { mutate: deleteItem } = useDelete<ISection>();
+    const { data: user } = useGetIdentity<User>();
+
+    const isAdmin = user?.role == "ADMIN";
 
     const handleDelete = () => {
+        if (!isAdmin) {
+            toast.error("Vous n'avez pas la permission de supprimer cette section.");
+            return;
+        }
         deleteItem(
             {
                 resource: "trips",
@@ -39,10 +47,16 @@ function ActionsCell({item}: { item: ISection }) {
     return (
         <div className="flex gap-2">
             <Button variant="outline" asChild>
+                <Link to={`/voyages/detail/${item.id}`}>
+                    <ClipboardList />
+                </Link>
+            </Button>
+            <Button variant="outline" asChild>
                 <Link to={`/voyages/edit/${item.id}`}>
                     <EditIcon/>
                 </Link>
             </Button>
+            {isAdmin?
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="outline" color="destructive">
@@ -63,6 +77,7 @@ function ActionsCell({item}: { item: ISection }) {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            :null}
         </div>
     )
 }

@@ -58,7 +58,7 @@ const HomePage = () => {
     };
 
     return (
-    <>
+    <div className="flex flex-col gap-4 text-sm">
         <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
         <p>Bienvenue sur votre tableau de bord. Ici, vous pouvez gérer vos informations personnelles et accéder à vos données.</p>
         {form.refineCore.queryResult?.isError && <p>Une erreur est survenue lors du chargement des données.</p>}
@@ -66,7 +66,7 @@ const HomePage = () => {
             <>
                 <div className="p-6 bg-white rounded-lg shadow-md mt-4">
                     <h2 className="text-xl font-semibold mb-4">Vos informations</h2>
-                    <div className="grid grid-cols-[min-content,1fr,min-content] gap-x-6 gap-y-4 items-center">
+                    <div className="grid grid-cols-[min-content,1fr,min-content] gap-x-6 gap-y-2 items-center">
                         <div className="flex items-center gap-4">
                             <div className="w-24 text-gray-500 font-medium">Nom</div>
                             <div className="flex-1 text-gray-800">
@@ -84,6 +84,14 @@ const HomePage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
+                            <div className="w-24 text-gray-500 font-medium">Profil</div>
+                            <div className="flex-1 text-gray-800">
+                                <div className="flex items-center">
+                                    {me.role == "TEACHER" ? "Enseignant" : (me.role == "ADMIN" ? "Administrateur" : (me.role == "STUDENT" ? "Élève" : "Parent"))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
                             <div className="w-24 text-gray-500 font-medium">Email</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
@@ -95,10 +103,10 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Téléphone</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    <div className="flex">{me.telephone}</div>
+                                    {me.telephone}
                                     <Dialog open={open} onOpenChange={setOpen}>
                                         <DialogTrigger asChild>
-                                            <Button variant="link"><IconEdit/></Button>
+                                            <Button variant="link" className="p-0 h-6"><IconEdit/></Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[425px]">
                                             <Form {...form}>
@@ -145,7 +153,7 @@ const HomePage = () => {
                 </div>
             </>
         )}
-    </>
+    </div>
     );
 };
 

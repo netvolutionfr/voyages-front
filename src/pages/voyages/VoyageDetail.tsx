@@ -115,7 +115,7 @@ export default function VoyageDetail() {
 
         createRegistration(
             {
-                resource: "trip/registrations",
+                resource: "trips/registrations",
                 values: { tripId: voyage.id, agreeToCommitments: true },
             },
             {

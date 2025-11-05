@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, AlertCircle, FileText, FolderOpen, Clock } from "lucide-react";
+import {CheckCircle2, AlertCircle, FileText, FolderOpen, Clock, ScanSearch} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/auth/api.ts";
 import { DocumentPreviewDialog, useDocumentPreview } from "@/components/common/DocumentPreviewDialog.tsx";
@@ -354,7 +354,7 @@ export default function Documents() {
                                                             )
                                                         }
                                                     >
-                                                        Aperçu
+                                                        <ScanSearch />
                                                     </Button>
                                                 </div>
 
