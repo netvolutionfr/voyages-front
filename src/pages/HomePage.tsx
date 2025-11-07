@@ -35,6 +35,7 @@ const HomePage = () => {
         shouldFocusError: true,
     });
     const [open, setOpen] = useState(false);
+    const [roleInFrench, setRoleInFrench] = useState<string>("");
 
     const me = { ...form.refineCore.queryResult?.data?.data} as Me;
 
@@ -42,6 +43,29 @@ const HomePage = () => {
     useEffect(() => {
         if (me?.telephone) {
             form.reset({ telephone: me.telephone });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [me?.telephone]);
+
+    // Remplir le champ quand les données arrivent
+    useEffect(() => {
+        if (me?.role) {
+            switch (me.role) {
+                case "TEACHER":
+                    setRoleInFrench("Enseignant");
+                    break;
+                case "ADMIN":
+                    setRoleInFrench("Administrateur");
+                    break;
+                case "STUDENT":
+                    setRoleInFrench("Élève");
+                    break;
+                case "PARENT":
+                    setRoleInFrench("Parent");
+                    break;
+                default:
+                    setRoleInFrench("");
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [me?.telephone]);
@@ -87,7 +111,7 @@ const HomePage = () => {
                             <div className="w-24 text-gray-500 font-medium">Profil</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">
-                                    {me.role == "TEACHER" ? "Enseignant" : (me.role == "ADMIN" ? "Administrateur" : (me.role == "STUDENT" ? "Élève" : "Parent"))}
+                                    {roleInFrench}
                                 </div>
                             </div>
                         </div>
