@@ -50,6 +50,22 @@ export const sectionsColumns: ColumnDef<ISection>[] = [
         cell: ({ row }) => <span>{row.getValue("description")}</span>,
     },
     {
+        id: "cycle",
+        accessorKey: "cycle",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Cycle" />
+        ),
+        cell: ({ row }) => <span>{row.getValue("cycle")}</span>,
+    },
+    {
+        id: "year",
+        accessorKey: "year",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Année scolaire" />
+        ),
+        cell: ({ row }) => <span>{row.getValue("year")}</span>,
+    },
+    {
         id: "actions",
         header: "Actions",
         cell: ({row}) => <ActionsCell item={row.original as ISection} />

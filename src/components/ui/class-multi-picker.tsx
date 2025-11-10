@@ -19,25 +19,28 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, ChevronDown } from "lucide-react";
 
 export type Cycle =
-    | "COLLEGE"
-    | "LYCEE_GENERAL"
-    | "LYCEE_TECHNO"
-    | "LYCEE_PRO"
     | "BTS"
-    | "ALTERNANCE"
-    | "PREPA";
+    | "FC"
+    | "LYCEE_GENERAL"
+    | "LYCEE_PRO"
+    | "PREPA"
+    | "SUPERIEUR";
+
 
 export type YearTag =
-    | "TROISIEME"
+    | "TROISIEME_PRO"
+    | "LYCEE_PRO"
     | "SECONDE"
+    | "SECONDE_PRO"
     | "PREMIERE"
+    | "PREMIERE_PRO"
     | "TERMINALE"
+    | "TERMINALE_PRO"
     | "BTS1"
     | "BTS2"
-    | "B3"
-    | "B4"
-    | "B5"
-    | "PREPA";
+    | "FC"
+    | "PREPA"
+    | "SUPERIEUR";
 
 export type ClasseOption = {
     id: string;
@@ -57,16 +60,15 @@ type Props = {
 
 // lib: aide au regroupement
 const cycleLabel: Record<Cycle, string> = {
-    COLLEGE: "Collège",
-    LYCEE_GENERAL: "Lycée général",
-    LYCEE_TECHNO: "Lycée technologique",
-    LYCEE_PRO: "Lycée professionnel",
     BTS: "BTS",
-    ALTERNANCE: "Alternants (B3–B5)",
+    FC: "Formation continue",
+    LYCEE_GENERAL: "Lycée général et technologique",
+    LYCEE_PRO: "Lycée professionnel",
     PREPA: "Classes prépa",
+    SUPERIEUR: "Enseignement supérieur",
 };
 
-const yearOrder: YearTag[] = ["TROISIEME","SECONDE","PREMIERE","TERMINALE","BTS1","BTS2","B3","B4","B5","PREPA"];
+const yearOrder: YearTag[] = ["TROISIEME_PRO","SECONDE", "SECONDE_PRO","PREMIERE", "PREMIERE_PRO","TERMINALE", "TERMINALE_PRO","BTS1","BTS2","PREPA", "FC", "SUPERIEUR"];
 
 export function ClassesMultiPicker({ options, value, onChange, placeholder = "Choisir des classes..." }: Props) {
     const [open, setOpen] = React.useState(false);
@@ -192,7 +194,7 @@ export function ClassesMultiPicker({ options, value, onChange, placeholder = "Ch
                         {/* Facettes */}
                         <div className="p-2 border-b space-y-2">
                             <div className="flex flex-wrap gap-2">
-                                {(["COLLEGE","LYCEE_GENERAL","LYCEE_TECHNO","LYCEE_PRO","BTS","ALTERNANCE","PREPA"] as Cycle[]).map((c) => {
+                                {(["BTS", "FC", "LYCEE_GENERAL", "LYCEE_PRO", "PREPA", "SUPERIEUR"] as Cycle[]).map((c) => {
                                     const active = !!cycleFacet?.includes(c);
                                     return (
                                         <Badge
