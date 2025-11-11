@@ -124,6 +124,22 @@ const HomePage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
+                            <div className="w-24 text-gray-500 font-medium">Date de naissance</div>
+                            <div className="flex-1 text-gray-800">
+                                <div className="flex items-center">
+                                    {me.birthDate ? new Date(me.birthDate).toLocaleDateString("fr-FR") : "—"} ({me.birthDate ? Math.floor((new Date().getTime() - new Date(me.birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)) : "—"} ans)
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="w-24 text-gray-500 font-medium">Genre</div>
+                            <div className="flex-1 text-gray-800">
+                                <div className="flex items-center">
+                                    {me.gender}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
                             <div className="w-24 text-gray-500 font-medium">Téléphone</div>
                             <div className="flex-1 text-gray-800">
                                 <div className="flex items-center">

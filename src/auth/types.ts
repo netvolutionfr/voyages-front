@@ -5,6 +5,8 @@ export interface Me {
     firstName: string;
     lastName: string;
     email: string;
+    gender: "M" | "F" | "N";
+    birthDate: string; // ISO string
     role: Role;
     telephone?: string | null;
 }
