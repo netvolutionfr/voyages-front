@@ -18,9 +18,6 @@ import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
 import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
 import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
-import Participants from "@/pages/participants/Participants.tsx";
-import ParticipantView from "@/pages/participants/ParticipantView.tsx";
-import ParticipantsForm from "@/pages/participants/ParticipantsForm.tsx";
 import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
 import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
 import {publicDataProvider} from "@/providers/publicDataProvider.ts";
@@ -32,6 +29,7 @@ import OtpPage from "@/pages/OtpPage.tsx";
 import VoyageDetail from "@/pages/voyages/VoyageDetail.tsx";
 import StudentHealthForm from "@/pages/profil/StudentHealthForm.tsx";
 import VoyageDashboard from "@/pages/voyages/VoyageDashboard.tsx";
+import UsersForm from "@/pages/admin/users/UsersForm.tsx";
 
 
 export default function App() {
@@ -84,11 +82,6 @@ export default function App() {
 
                     <Route path="/documents" element={<Documents />} />
 
-                    <Route path="/participants" element={<Participants />} />
-                    <Route path="/participants/:id" element={<ParticipantView />} />
-                    <Route path="/participants/create" element={<ParticipantsForm />} />
-                    <Route path="/participants/edit/:id" element={<ParticipantsForm />} />
-
                     <Route
                         path="/admin/sections"
                         element={
@@ -118,6 +111,22 @@ export default function App() {
                         element={
                             <RequireAdmin>
                                 <UsersAdmin />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/users/create"
+                        element={
+                            <RequireAdmin>
+                                <UsersForm />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/users/edit/:id"
+                        element={
+                            <RequireAdmin>
+                                <UsersForm />
                             </RequireAdmin>
                         }
                     />
