@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {DocumentPreviewDialog, useDocumentPreview} from "@/components/common/DocumentPreviewDialog.tsx";
 import {FileUser, ScanSearch} from "lucide-react";
+import HealthFormView from "@/components/HealthFormView.tsx";
 
 // ---- Types (reprennent ceux du provider) ----
 type DateRangeDTO = { from: string; to: string };
@@ -472,18 +473,5 @@ function DocumentsList({ data }: { data?: DocumentsAdminDTO }) {
 
             <DocumentPreviewDialog state={preview.state} onClose={preview.close} />
         </>
-    );
-}
-
-function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
-    if (!data?.exists) {
-        return <div className="text-sm text-muted-foreground">Aucune fiche sanitaire transmise.</div>;
-    }
-    return (
-        <div className="prose prose-sm max-w-none">
-            {data.content?.trim()?.startsWith("<")
-                ? <div dangerouslySetInnerHTML={{ __html: data.content! }} />
-                : <pre className="whitespace-pre-wrap text-sm">{data.content}</pre>}
-        </div>
     );
 }

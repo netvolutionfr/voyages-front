@@ -4,7 +4,6 @@ export interface StudentHealthFormResponse {
     id: UUID;
     studentPublicId: UUID | null;
     allergies: Allergies | null;
-    diet: Diet | null;
     treatments: Treatments | null;
     emergencyContacts: EmergencyContacts | null;
     consentHospitalization: boolean;
@@ -20,7 +19,6 @@ export interface StudentHealthFormResponse {
 
 export interface StudentHealthFormUpsertRequest {
     allergies: Allergies | null;
-    diet: Diet | null;
     treatments: Treatments | null;
     emergencyContacts: EmergencyContacts | null;
     consentHospitalization: boolean;
@@ -33,14 +31,6 @@ export interface Allergies {
     drug?: string[] | null;
     food?: string[] | null;
     other?: string[] | null;
-    notes?: string | null;
-}
-
-export interface Diet {
-    vegetarian?: boolean | null;
-    noPork?: boolean | null;
-    lactoseIntolerant?: boolean | null;
-    glutenFree?: boolean | null;
     notes?: string | null;
 }
 
