@@ -49,4 +49,5 @@ export type IVoyage = {
     }>;
     interestedCount?: number; // nombre de personnes intéressées (si sondage)
     interestedByCurrentUser: boolean;
+    registeredByCurrentUser: boolean;
 }

@@ -89,7 +89,6 @@ export default function VoyageDetail() {
     };
 
     // Registration flow
-    const [registered, setRegistered] = React.useState<boolean>(false);
     const [signupError, setSignupError] = React.useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [agree, setAgree] = React.useState(false);
@@ -120,7 +119,6 @@ export default function VoyageDetail() {
             },
             {
                 onSuccess: () => {
-                    setRegistered(true);
                     setDialogOpen(false);
                     refetch(); // pour rafraîchir les compteurs / flags éventuels
                 },
@@ -254,7 +252,7 @@ export default function VoyageDetail() {
                     {/* Formalités */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <h2 className="text-lg font-medium">Formalités & documents requis</h2>
                                 <div className="text-sm text-muted-foreground">{voyage.formalities?.length ?? 0} élément(s)</div>
                             </div>
@@ -264,10 +262,10 @@ export default function VoyageDetail() {
                                 <ul className="space-y-3">
                                     {voyage.formalities.map((f) => (
                                         <li key={f.id} className="rounded-lg border p-3">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="flex items-start gap-2">
-                                                    <FileText className="h-4 w-4 mt-0.5" />
-                                                    <div>
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                                <div className="flex items-start gap-2 flex-1 min-w-0">
+                                                    <FileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                    <div className="flex-1 min-w-0">
                                                         <div className="font-medium leading-snug">
                                                             {f.documentType?.label || f.documentType?.abr || "Document"}
                                                         </div>
@@ -276,7 +274,7 @@ export default function VoyageDetail() {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-wrap gap-1.5 shrink-0">
+                                                <div className="flex flex-wrap gap-1.5 sm:shrink-0">
                                                     <Badge variant={f.required ? "default" : "secondary"}>
                                                         {f.required ? "Obligatoire" : "Optionnel"}
                                                     </Badge>
@@ -342,9 +340,9 @@ export default function VoyageDetail() {
                             <Button
                                 className="w-full"
                                 onClick={openSignupDialog}
-                                disabled={!canRegister || registered}
+                                disabled={!canRegister || voyage.registeredByCurrentUser}
                             >
-                                {registered ? "Inscrit ✅" : "S'inscrire"}
+                                {voyage.registeredByCurrentUser ? "Inscription faite ✅" : "S'inscrire"}
                             </Button>
                         </CardFooter>
                     </Card>
