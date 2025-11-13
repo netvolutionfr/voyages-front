@@ -431,7 +431,9 @@ function DocumentsList({ data }: { data?: DocumentsAdminDTO }) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {(data?.items ?? []).map((it) => (
+                        {(data?.items ?? [])
+                            .filter((it) => it.required)
+                            .map((it) => (
                             <TableRow key={it.documentType.id}>
                                 <TableCell className="font-medium">{it.documentType.label}</TableCell>
                                 <TableCell>{it.required ? <Badge variant="secondary">Oui</Badge> : "—"}</TableCell>
