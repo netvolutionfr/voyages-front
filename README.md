@@ -2,7 +2,7 @@
 
 Résumé
 
-Projet frontend React + TypeScript basé sur Vite. Cette application fournit l'interface d'administration et utilisateur pour gérer des voyages, participants et profils. Elle utilise TailwindCSS pour le style, Refine pour les composants d'administration et Keycloak pour l'authentification.
+Projet frontend React + TypeScript basé sur Vite. Cette application fournit l'interface d'administration et utilisateur pour gérer des voyages, participants et profils. Elle utilise TailwindCSS pour le style, Refine pour les composants d'administration et un provider d'authentification interne basé sur des JWT fournis par l'API.
 
 Prérequis
 
@@ -38,7 +38,7 @@ pnpm install
 Créez un fichier .env à la racine si nécessaire (ne pas committer) et ajoutez les variables attendues par le projet, p. ex. :
 
 - REACT_APP_API_URL ou VITE_API_URL — URL de l'API backend
-- VITE_KEYCLOAK_URL, VITE_KEYCLOAK_REALM, VITE_KEYCLOAK_CLIENT_ID — paramètres Keycloak si utilisés
+- VITE_FILES_BASE — base URL utilisée pour servir les documents (S3, CDN, etc.)
 
 (Vérifier dans le code ou la documentation interne du backend les noms exacts.)
 
@@ -65,7 +65,7 @@ Technologies principales
 - Vite (bundler et dev server)
 - TailwindCSS
 - Refine (bibliothèque d'administration)
-- Keycloak (authentification)
+- Authentification JWT custom (providers dans src/auth)
 - Zod (validation)
 
 Structure du projet (résumé)
@@ -82,7 +82,7 @@ Conseils de développement
 
 - Respecter les règles ESLint/TypeScript du projet. Le lint et les types sont exécutés lors du build.
 - Pour ajouter de nouvelles routes/pages, suivez la convention existante dans src/pages et mettez à jour la configuration de routes si nécessaire.
-- Pour modifier l'authentification Keycloak, regarder les providers dans src/providers et la configuration dans main.tsx.
+- Pour modifier le flux d'authentification, regarder les providers dans src/providers et la configuration dans main.tsx.
 
 Déploiement
 
