@@ -66,11 +66,11 @@ const VoyagesForm = () => {
         optionLabel: "name",
         optionValue: "id",
         pagination: { pageSize: 200 },
-        sort: [{ field: "name", order: "asc" }],
+        sorters: [{ field: "name", order: "asc" }],
     });
 
     // Sections (multi)
-    const { data: sectionOptions } = useList<SectionOption>({
+    const { result: sectionOptions } = useList<SectionOption>({
         resource: "sections",
         pagination: { pageSize: 500 },
     });
@@ -81,7 +81,7 @@ const VoyagesForm = () => {
         optionLabel: "fullName",
         optionValue: "publicId",
         pagination: { pageSize: 500 },
-        sort: [{ field: "firstName", order: "asc" }],
+        sorters: [{ field: "firstName", order: "asc" }],
         filters: [{ field: "role", operator: "in", value: ["TEACHER", "ADMIN"]}],
     });
 

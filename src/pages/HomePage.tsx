@@ -40,9 +40,9 @@ const HomePage = () => {
     const [open, setOpen] = useState(false);
     const [roleInFrench, setRoleInFrench] = useState<string>("");
 
-    const me = { ...form.refineCore.queryResult?.data?.data} as Me;
-    const isLoading = form.refineCore.queryResult?.isLoading;
-    const isError = form.refineCore.queryResult?.isError;
+    const me = { ...form.refineCore.query?.data?.data} as Me;
+    const isLoading = form.refineCore.query?.isLoading;
+    const isError = form.refineCore.query?.isError;
 
     // Remplir le champ quand les données arrivent
     useEffect(() => {
@@ -81,7 +81,7 @@ const HomePage = () => {
 
     const onSubmit = async (values: formData) => {
         await form.refineCore.onFinish(values);
-        if (form.refineCore.queryResult?.isSuccess) {
+        if (form.refineCore.query?.isSuccess) {
             setOpen(false);
         }
     };

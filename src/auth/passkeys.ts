@@ -39,7 +39,7 @@ function pickB64url(v: string | { value: string } | undefined): string {
     return typeof v === "string" ? v : v.value;
 }
 
-function toArrayBufferId(id: string | { value: string }): ArrayBuffer {
+function toArrayBufferId(id: string | { value: string }): Uint8Array<ArrayBuffer> {
     return base64urlToBuffer(pickB64url(id));
 }
 

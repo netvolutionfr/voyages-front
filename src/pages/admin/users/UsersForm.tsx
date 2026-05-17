@@ -55,7 +55,7 @@ const UsersForm = () => {
     const { id } = useParams<{ id: string }>();
     const isEditing = Boolean(id);
 
-    const { data: sectionOptions } = useList<SectionOption>({
+    const { result: sectionOptions } = useList<SectionOption>({
         resource: "sections",
         pagination: { pageSize: 500 },
     });
@@ -98,7 +98,7 @@ const UsersForm = () => {
     });
 
     const {
-        refineCore: { queryResult, formLoading },
+        refineCore: { query: queryResult, formLoading },
         reset,
         control,
         register,

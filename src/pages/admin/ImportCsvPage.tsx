@@ -10,9 +10,12 @@ type ImportResult = { imported: number; skipped: number; errors: LineError[] };
 export default function ImportCsvPage() {
     const [file, setFile] = useState<File | null>(null);
 
-    const { mutate, isLoading, isSuccess, data } = useCreate<ImportResult>({
+    const { mutate, mutation } = useCreate<ImportResult>({
         resource: "admin/import",               // → POST /api/admin/import
     });
+    const isPending = mutation.isPending;
+    const isSuccess = mutation.isSuccess;
+    const data = mutation.data;
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,8 +45,8 @@ export default function ImportCsvPage() {
                                 En-têtes attendus : role, lastName, firstName, email, telephone, gender, section, birthDate, parent1_lastName, parent1_firstName, parent1_email, parent1_tel, parent2_lastName, parent2_firstName, parent2_email, parent2_tel
                             </p>
                         </div>
-                        <Button type="submit" disabled={!file || isLoading}>
-                            {isLoading ? "Import en cours..." : "Importer"}
+                        <Button type="submit" disabled={!file || isPending}>
+                            {isPending ? "Import en cours..." : "Importer"}
                         </Button>
                     </form>
 

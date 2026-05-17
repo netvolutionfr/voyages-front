@@ -46,13 +46,12 @@ export default function VoyageDetail() {
     const { id } = useParams();
     const numericId = React.useMemo(() => (id ? Number(id) : NaN), [id]);
 
-    const { data, isLoading, isError, error, refetch } = useOne<IVoyage>({
+    const { result: voyage, query } = useOne<IVoyage>({
         resource: "trips",
         id: numericId,
         queryOptions: { enabled: Number.isFinite(numericId) },
     });
-
-    const voyage = data?.data;
+    const { isLoading, isError, error, refetch } = query;
     const cover = voyage?.coverPhotoUrl ? getCoverUrl(voyage.coverPhotoUrl) : undefined;
 
     // Interest (poll) toggle
@@ -66,7 +65,7 @@ export default function VoyageDetail() {
         }
     }, [voyage]);
 
-    const { mutate: setPref, isLoading: isTogglingPref } = useUpdate<{ id: string; voyageId: string; userId: string; interest: "YES" | "NO"; }>();
+    const { mutate: setPref, mutation: { isPending: isTogglingPref } } = useUpdate<{ id: string; voyageId: string; userId: string; interest: "YES" | "NO"; }>();
 
     const toggleInterest = () => {
         if (!voyage?.id) return;
@@ -99,7 +98,7 @@ export default function VoyageDetail() {
         return within(now, voyage.registrationDates?.from, voyage.registrationDates?.to);
     }, [voyage]);
 
-    const { mutate: createRegistration, isLoading: isSigningUp } =
+    const { mutate: createRegistration, mutation: { isPending: isSigningUp } } =
         useCreate<TripRegistrationResponse, HttpError, TripRegistrationRequest>();
 
     const openSignupDialog = () => {

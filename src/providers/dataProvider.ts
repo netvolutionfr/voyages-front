@@ -20,7 +20,7 @@ function buildListParams(params: GetListParams, extra?: Record<string, unknown>)
     const search = new URLSearchParams();
 
     // Pagination (Refine est 1-based, Spring est 0-based)
-    const current = pagination?.current ?? 1;
+    const current = pagination?.currentPage ?? 1;
     const pageSize = pagination?.pageSize ?? 10;
     search.set("page", String(current - 1));
     search.set("size", String(pageSize));

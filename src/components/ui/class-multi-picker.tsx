@@ -15,6 +15,7 @@ import {
     CommandGroup,
     CommandItem,
 } from "@/components/ui/command";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, ChevronDown } from "lucide-react";
 
 export type Cycle =

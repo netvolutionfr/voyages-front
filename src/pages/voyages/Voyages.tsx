@@ -11,7 +11,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { VoyageCard } from "@/pages/voyages/VoyageCard";
 
 const Voyages: React.FC = () => {
-    // 1) Demande d’autorisation : “édition voyages” = profil Admin/Teacher dans nos règles
+    // 1) Demande d'autorisation : "édition voyages" = profil Admin/Teacher dans nos règles
     const { data: canEditRes, isLoading: canLoading } = useCan({
         resource: "voyages",
         action: "edit",
@@ -24,12 +24,12 @@ const Voyages: React.FC = () => {
     const tableInstance = useTable({
         columns,
         refineCoreProps: {
-            resource: "trips", // ton nom d’endpoint REST
+            resource: "trips", // ton nom d'endpoint REST
         },
     });
 
-    // 3) Grille “élève/parent”
-    const { data, isLoading: isLoadingList } = useList<IVoyage>({
+    // 3) Grille "élève/parent"
+    const { result: listResult, query: listQuery } = useList<IVoyage>({
         resource: "trips",
         pagination: { pageSize: 12 },
         sorters: [{ field: "departureDate", order: "asc" }],
@@ -41,7 +41,7 @@ const Voyages: React.FC = () => {
         ? true
         : isAdminOrTeacher
             ? tableIsLoading
-            : isLoadingList;
+            : listQuery.isLoading;
 
     if (isLoading) {
         return isAdminOrTeacher ? (
@@ -70,7 +70,7 @@ const Voyages: React.FC = () => {
 
     // 5) Vue élève/parent
     if (!isAdminOrTeacher) {
-        const voyages = data?.data ?? [];
+        const voyages = listResult?.data ?? [];
         return (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {voyages.map((v) => (

@@ -15,13 +15,13 @@ export const arrayBufferToB64url = (buf: ArrayBuffer): string => {
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 };
 
-export function base64urlToBuffer(base64url: string): Uint8Array {
+export function base64urlToBuffer(base64url: string): Uint8Array<ArrayBuffer> {
     const b64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
     const pad = "=".repeat((4 - (b64.length % 4)) % 4);
     const str = atob(b64 + pad);
     const bytes = new Uint8Array(str.length);
     for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i);
-    return bytes;
+    return bytes as Uint8Array<ArrayBuffer>;
 }
 
 

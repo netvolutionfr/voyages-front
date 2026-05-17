@@ -97,11 +97,11 @@ export default function VoyageDashboard() {
     const tripId = Number(id);
 
     // Trip details
-    const { data: tripOne, isLoading: tripLoading } = useOne<TripDetailDTO>({
+    const { result: trip, query: tripQuery } = useOne<TripDetailDTO>({
         resource: "trips",
         id: tripId,
     });
-    const trip = tripOne?.data;
+    const tripLoading = tripQuery.isLoading;
 
     // Filtres UI
     const [q, setQ] = React.useState<string>("");
@@ -109,9 +109,9 @@ export default function VoyageDashboard() {
     const [sectionId, setSectionId] = React.useState<string>("ALL");
 
     // Sections (pour filtre)
-    const { data: sectionsList } = useList<{ id: number; label: string }>({
+    const { result: sectionsList } = useList<{ id: number; label: string }>({
         resource: "sections",
-        pagination: { current: 1, pageSize: 200 },
+        pagination: { currentPage: 1, pageSize: 200 },
         meta: {
             query: {
                 activeOnly: true,
@@ -122,9 +122,9 @@ export default function VoyageDashboard() {
     const sections = sectionsList?.data ?? [];
 
     // Inscriptions (server-side pagination simple; adapte si tu veux paginer dans l’UI)
-    const { data: regsList, isLoading: regsLoading } = useList<TripRegistrationAdminViewDTO>({
+    const { result: regsList, query: regsQuery } = useList<TripRegistrationAdminViewDTO>({
         resource: "admin-registrations",
-        pagination: { current: 1, pageSize: 200 },
+        pagination: { currentPage: 1, pageSize: 200 },
         meta: {
             query: {
                 includeDocSummary: true,
@@ -136,6 +136,7 @@ export default function VoyageDashboard() {
         },
     });
     const registrations = regsList?.data ?? [];
+    const regsLoading = regsQuery.isLoading;
 
     return (
         <div className="space-y-6">
@@ -340,20 +341,22 @@ function StudentSheet({
     const user = registration?.user;
 
     // Documents
-    const { data: docsOne, isLoading: docsLoading } = useOne<DocumentsAdminDTO>({
+    const { result: docsData, query: docsQuery } = useOne<DocumentsAdminDTO>({
         resource: "admin-user-documents",
         id: user?.publicId ?? "0",
         queryOptions: { enabled: open && Boolean(user) },
         meta: { tripId },
     });
+    const docsLoading = docsQuery.isLoading;
 
     // Fiche sanitaire
-    const { data: healthOne, isLoading: healthLoading } = useOne<HealthFormAdminDTO>({
+    const { result: healthData, query: healthQuery } = useOne<HealthFormAdminDTO>({
         resource: "admin-user-health",
         id: user?.publicId ?? "0",
         queryOptions: { enabled: open && Boolean(user) },
         meta: { tripId },
     });
+    const healthLoading = healthQuery.isLoading;
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -393,13 +396,13 @@ function StudentSheet({
 
                             <TabsContent value="docs" className="mt-4">
                                 {docsLoading ? <Skeleton className="h-24" /> : (
-                                    <DocumentsList data={docsOne?.data} />
+                                    <DocumentsList data={docsData} />
                                 )}
                             </TabsContent>
 
                             <TabsContent value="health" className="mt-4">
                                 {healthLoading ? <Skeleton className="h-24" /> : (
-                                    <HealthFormView data={healthOne?.data} />
+                                    <HealthFormView data={healthData} />
                                 )}
                             </TabsContent>
                         </Tabs>

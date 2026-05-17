@@ -70,18 +70,20 @@ export default function StudentHealthFormImproved() {
     const [transportReason, setTransportReason] = useState("");
 
     // GET /me/health-form
-    const { data, isLoading, refetch } = useOne<StudentHealthFormResponse>({
+    const { result, query: healthQuery } = useOne<StudentHealthFormResponse>({
         resource: "me/health-form",
         id: "me",
         queryOptions: { staleTime: 0 },
     });
+    const { isLoading, refetch } = healthQuery;
 
     // POST /me/health-form (upsert)
-    const { mutate: save, isLoading: isSaving } = useCreate<StudentHealthFormResponse>();
+    const { mutate: save, mutation: saveMutation } = useCreate<StudentHealthFormResponse>();
+    const isSaving = saveMutation.isPending;
 
     // Map API → form defaults
     const initial: StudentHealthFormValues = useMemo(() => {
-        const res = data?.data;
+        const res = result;
         return {
             // allergies
             drugAllergiesCsv: arrayToCsv(res?.allergies?.drug ?? undefined),
@@ -121,7 +123,7 @@ export default function StudentHealthFormImproved() {
             validUntil: res?.validUntil ?? "",
             version: res?.version ?? 0,
         };
-    }, [data]);
+    }, [result]);
 
     // React Hook Form
     const form = useForm<StudentHealthFormResponse, HttpError, StudentHealthFormValues>({
@@ -136,14 +138,14 @@ export default function StudentHealthFormImproved() {
 
     // Refresh defaults on new data
     useEffect(() => {
-        if (data?.data) {
+        if (result) {
             form.reset(initial);
             // Reset motifs si nécessaire (si on recharge depuis API et que consentements sont true)
             if (initial.consentHospitalization) setHospitalizationReason("");
             if (initial.consentTransport) setTransportReason("");
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data]);
+    }, [result]);
 
     // Submit → DTO mapping
     const onSubmit: SubmitHandler<StudentHealthFormValues> = (values) => {
@@ -230,15 +232,15 @@ export default function StudentHealthFormImproved() {
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Statut de complétion (signedAt / updatedAt) */}
-                {(data?.data?.signedAt || data?.data?.updatedAt) && (
+                {(result?.signedAt || result?.updatedAt) && (
                     <div className="flex items-start gap-3 rounded-lg border bg-emerald-50 p-4 dark:bg-emerald-950/20">
                         <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0 dark:text-emerald-400" />
                         <div className="text-sm">
                             <p className="font-medium text-emerald-800 dark:text-emerald-200">Formulaire enregistré</p>
                             <p className="text-emerald-700 dark:text-emerald-300">
-                                {data?.data?.signedAt
-                                    ? `Signé le ${new Date(data.data.signedAt).toLocaleString()}`
-                                    : `Dernière mise à jour : ${new Date(data!.data!.updatedAt!).toLocaleString()}`}
+                                {result?.signedAt
+                                    ? `Signé le ${new Date(result.signedAt).toLocaleString()}`
+                                    : `Dernière mise à jour : ${new Date(result!.updatedAt!).toLocaleString()}`}
                             </p>
                         </div>
                     </div>
@@ -746,9 +748,9 @@ export default function StudentHealthFormImproved() {
                 )}
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground">
-                {data?.data?.updatedAt ? (
+                {result?.updatedAt ? (
                     <span>
-                        Dernière mise à jour : {new Date(data.data.updatedAt).toLocaleString()}
+                        Dernière mise à jour : {new Date(result.updatedAt).toLocaleString()}
                     </span>
                 ) : (
                     <span>Complétez la fiche puis Enregistrer</span>

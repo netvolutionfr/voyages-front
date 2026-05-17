@@ -87,11 +87,11 @@ function bytesToHuman(n?: number | null): string {
 
 /* ==== Composant principal ==== */
 export default function Documents() {
-    const { data, isLoading, isError, error, refetch } = useOne<DocumentsDTO, HttpError>({
+    const { result: docs, query: docsQuery } = useOne<DocumentsDTO, HttpError>({
         resource: "me/documents",
         id: "current",
     });
-    const docs = data?.data;
+    const { isLoading, isError, error, refetch } = docsQuery;
 
     const preview = useDocumentPreview();
 

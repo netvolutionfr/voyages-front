@@ -65,7 +65,7 @@ const FicheRenseignements = () => {
                                         <FormControl>
                                             <RadioGroup
                                                 {...register("gender")}
-                                                defaultValue={form.refineCore.queryResult?.data?.data.sexe}
+                                                defaultValue={form.refineCore.query?.data?.data.sexe}
                                                 className="flex flex-row gap-8">
                                                 <FormItem className="flex items-center gap-3">
                                                     <FormControl>

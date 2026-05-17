@@ -20,14 +20,15 @@ export function DataTable<TData extends BaseRecord, TValue>({
                                                                 filter = "name",
                                                                 createButon = true,
                                          }: DataTableProps<TData, TValue>) {
+    const { reactTable } = table;
 
     return (
         <div className="flex flex-col gap-4">
-        <DataTableToolbar table={table} entity={entity} filter={filter} createButon={createButon} />
+        <DataTableToolbar table={reactTable} entity={entity} filter={filter} createButon={createButon} />
         <div className="overflow-hidden rounded-md border">
             <Table>
                 <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
+                    {reactTable.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => {
                                 return (
@@ -45,8 +46,8 @@ export function DataTable<TData extends BaseRecord, TValue>({
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
+                    {reactTable.getRowModel().rows?.length ? (
+                        reactTable.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
@@ -68,7 +69,7 @@ export function DataTable<TData extends BaseRecord, TValue>({
                 </TableBody>
             </Table>
         </div>
-        <DataTablePagination table={table} />
+        <DataTablePagination table={reactTable} />
         </div>
     )
 }
