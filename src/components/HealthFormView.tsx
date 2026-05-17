@@ -44,16 +44,7 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
         return <div className="text-sm text-muted-foreground">Aucune fiche sanitaire transmise.</div>;
     }
 
-    // Si c'est du HTML, afficher comme avant
-    if (data.content.trim().startsWith("<")) {
-        return (
-            <div className="prose prose-sm max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: data.content }} />
-            </div>
-        );
-    }
-
-    // Sinon, parser le JSON
+    // Parser le JSON
     let healthForm: HealthFormContent | null = null;
     try {
         healthForm = JSON.parse(data.content);
