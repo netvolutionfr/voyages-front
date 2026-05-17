@@ -1,96 +1,70 @@
 # voyages-front
 
-Résumé
+Interface web pour la gestion des voyages scolaires : inscription des élèves, suivi des documents, tableaux de bord administrateurs.
 
-Projet frontend React + TypeScript basé sur Vite. Cette application fournit l'interface d'administration et utilisateur pour gérer des voyages, participants et profils. Elle utilise TailwindCSS pour le style, Refine pour les composants d'administration et un provider d'authentification interne basé sur des JWT fournis par l'API.
+Construit avec React 19 + TypeScript, Vite, TailwindCSS v4, shadcn/ui et Refine. L'authentification repose exclusivement sur les **passkeys (WebAuthn)** et des JWT émis par le backend.
 
-Prérequis
+## Prérequis
 
-- Node.js (>= 18 recommandé)
-- npm, yarn ou pnpm
-- Git
+- Node.js ≥ 18
+- Backend `voyages-back` disponible sur `http://localhost:8080`
 
-Installation et mise en place locale
-
-1. Cloner le dépôt
-
-```bash
-git clone <url-du-repo>
-cd voyages-front
-```
-
-2. Installer les dépendances
-
-Avec npm
+## Installation
 
 ```bash
 npm install
+cp .env.example .env.development
+# Éditer .env.development si nécessaire
 ```
 
-Ou avec pnpm
+## Variables d'environnement
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | URL de base de l'API REST (ex : `http://localhost:8080/api`) |
+| `VITE_FILES_BASE` | URL de base pour les documents (S3 / CDN) |
+
+En développement, Vite proxifie `/api` → `http://localhost:8080`, donc les appels directs `/api/…` fonctionnent sans CORS.
+
+## Commandes
 
 ```bash
-pnpm install
+npm run dev      # Serveur de développement (http://localhost:5173, HMR)
+npm run build    # Vérification TypeScript + bundle de production
+npm run preview  # Prévisualiser le build de production en local
+npm run lint     # ESLint
 ```
 
-3. Configuration des variables d'environnement
+## Architecture
 
-Créez un fichier .env à la racine si nécessaire (ne pas committer) et ajoutez les variables attendues par le projet, p. ex. :
-
-- REACT_APP_API_URL ou VITE_API_URL — URL de l'API backend
-- VITE_FILES_BASE — base URL utilisée pour servir les documents (S3, CDN, etc.)
-
-(Vérifier dans le code ou la documentation interne du backend les noms exacts.)
-
-4. Lancer l'application en développement
-
-```bash
-npm run dev
-# ou
-pnpm dev
+```
+src/
+├── auth/          # JWT, passkeys (WebAuthn), session, RBAC
+├── components/
+│   ├── common/    # Layout, sidebar, thème, flux passkey
+│   ├── layout/    # DashboardLayout
+│   └── ui/        # Composants shadcn/ui
+├── config/        # Ressources Refine, menus
+├── pages/
+│   ├── admin/     # Sections, utilisateurs, import CSV
+│   ├── profil/    # Fiche renseignements, parents, sanitaire
+│   └── voyages/   # Liste, détail, dashboard, formulaire
+├── providers/     # Data providers Refine (authentifié + public)
+├── schemas/       # Schémas de validation Zod
+└── type/          # Types TypeScript partagés
 ```
 
-L'application sera disponible par défaut sur http://localhost:5173 (ou le port indiqué par Vite).
+**Authentification** : passkeys uniquement (WebAuthn). Les JWT (access + refresh) sont stockés en `localStorage`. Le refresh est automatique et transparent.
 
-Scripts utiles
+**Rôles** : `ADMIN`, `TEACHER`, `PARENT`, `STUDENT`, `USER`. Les règles sont définies dans `src/auth/rbac.ts`.
 
-- npm run dev — démarre le serveur de développement Vite (HMR)
-- npm run build — compile TypeScript puis build Vite pour la production
-- npm run preview — lance un serveur local pour prévisualiser le build de production
-- npm run lint — exécute ESLint sur le projet
+**Data layer** : deux providers Refine — `voyagesDataProvider` (authentifié) et `publicDataProvider` (sans auth). Le backend renvoie des réponses paginées Spring : `{ content: T[], page: { totalElements: number } }`.
 
-Technologies principales
-
-- React 19 + TypeScript
-- Vite (bundler et dev server)
-- TailwindCSS
-- Refine (bibliothèque d'administration)
-- Authentification JWT custom (providers dans src/auth)
-- Zod (validation)
-
-Structure du projet (résumé)
-
-- src/ — code source de l'application
-  - components/ — composants réutilisables et UI
-  - pages/ — pages applicatives (voyages, participants, profil...)
-  - providers/ — providers pour auth, data, access control
-  - lib/ — utilitaires et configuration axios
-  - schemas/ — schémas de validation
-  - type/ — définitions de types
-
-Conseils de développement
-
-- Respecter les règles ESLint/TypeScript du projet. Le lint et les types sont exécutés lors du build.
-- Pour ajouter de nouvelles routes/pages, suivez la convention existante dans src/pages et mettez à jour la configuration de routes si nécessaire.
-- Pour modifier le flux d'authentification, regarder les providers dans src/providers et la configuration dans main.tsx.
-
-Déploiement
-
-1. Construire l'application
+## Déploiement
 
 ```bash
 npm run build
+# Servir le dossier dist/ avec un serveur statique ou via Docker
 ```
 
-2. Servir le dossier dist avec un serveur statique ou intégrer au pipeline de déploiement (Netlify, Vercel, Docker, etc.).
-
+Un `Dockerfile` et une configuration Nginx (`deploy/nginx.conf`) sont fournis.

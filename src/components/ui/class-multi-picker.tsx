@@ -15,7 +15,6 @@ import {
     CommandGroup,
     CommandItem,
 } from "@/components/ui/command";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, ChevronDown } from "lucide-react";
 
 export type Cycle =
@@ -161,17 +160,16 @@ export function ClassesMultiPicker({ options, value, onChange, placeholder = "Ch
     };
 
     return (
-        <div className="w-full">
-            {/* Résumé + clear */}
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="justify-between">
-                            {value.length === 0 ? placeholder : `${value.length} sélection(s)`}
-                            <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 w-[560px]" align="start">
+        <div className="w-full space-y-2">
+            {/* Trigger */}
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button variant="outline" className="justify-between">
+                        {value.length === 0 ? placeholder : `${value.length} sélection(s)`}
+                        <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[560px]" align="start">
                         {/* Barre presets + actions globales */}
                         <div className="p-2 flex flex-wrap gap-2 border-b">
                             <Button size="sm" variant="secondary" onClick={() => applyPreset("ALL_TERMINALE")}>
@@ -291,10 +289,11 @@ export function ClassesMultiPicker({ options, value, onChange, placeholder = "Ch
                         </Button>
                       </div>
                         </PopoverContent>
-                </Popover>
+            </Popover>
 
-                {/* Chips des éléments choisis */}
-                <ScrollArea className="max-h-20">
+            {/* Chips des éléments choisis */}
+            {value.length > 0 && (
+                <div className="max-h-24 overflow-y-auto">
                     <div className="flex flex-wrap gap-1">
                         {value
                             .map((id) => options.find((o) => o.id === id))
@@ -313,8 +312,8 @@ export function ClassesMultiPicker({ options, value, onChange, placeholder = "Ch
                                 </Badge>
                             ))}
                     </div>
-                </ScrollArea>
-            </div>
+                </div>
+            )}
         </div>
     );
 }
