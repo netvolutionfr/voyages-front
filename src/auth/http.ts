@@ -7,21 +7,15 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 let refreshing: Promise<Response | null> | null = null;
 
-async function refreshIfNeeded(): Promise<boolean> {
+export async function refreshIfNeeded(): Promise<boolean> {
     const auth = readAuth();
-    if (!auth) return false;
-    if (!isAccessExpired(auth)) return true; // encore bon
+    if (auth && !isAccessExpired(auth)) return true; // token valide en mémoire
 
-    // pas de refresh token => impossible (PENDING typiquement)
-    if (!auth.refreshToken) return false;
-
-    // éviter courses : une seule requête /auth/refresh à la fois
+    // Token absent (premier chargement) ou expiré → refresh via cookie httpOnly
     if (!refreshing) {
         refreshing = fetch(`${API_URL}/auth/refresh`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ refresh_token: auth.refreshToken }),
         }).then(async (r) => {
             if (!r.ok) return null;
             const data = await r.json();
@@ -29,7 +23,6 @@ async function refreshIfNeeded(): Promise<boolean> {
                 tokenType: data.token_type,
                 accessToken: data.access_token,
                 expiresIn: data.expires_in,
-                refreshToken: data.refresh_token // rotation donc nouveau refresh token
             });
             setIdentityCache(getIdentityFromJwt());
             return r;
@@ -42,16 +35,11 @@ async function refreshIfNeeded(): Promise<boolean> {
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
     const url = path.startsWith("http") ? path : `${API_URL}${path}`;
 
-    // 1) Lire l'état courant
+    // 1) S’assurer qu’on a un token valide (refresh si absent ou expiré)
     let auth = readAuth();
-
-    // 2) Refresh proactif si expiré
-    if (auth && isAccessExpired(auth)) {
+    if (!auth || isAccessExpired(auth)) {
         const ok = await refreshIfNeeded();
-        if (!ok) {
-            clearAuth();
-        }
-        // 🔑 Re-lire l’auth après refresh pour récupérer le NOUVEL access token
+        if (!ok) clearAuth();
         auth = readAuth();
     }
 
@@ -71,8 +59,9 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
 
     let res = await fetch(url, { ...init, headers: headersObj, credentials: "include" });
 
-    // si 401 → tenter refresh et rejouer
+    // si 401 → tenter refresh et rejouer une fois
     if (res.status === 401) {
+        clearAuth(); // invalider le token mémoire avant de refresh
         const refreshed = await refreshIfNeeded();
         if (refreshed) {
             const auth2 = readAuth();
@@ -83,7 +72,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
             res = await fetch(url, { ...init, headers: headers2, credentials: "include" });
         }
         if (res.status === 401) {
-            clearAuth(); // refresh impossible ou invalide
+            clearAuth();
         }
     }
     return res;

@@ -214,9 +214,8 @@ export type CredentialRequestResponse = {
 export type AuthFinishResponse = {
     tokenType: string;
     accessToken: string;
-    refreshToken: string;
     expiresIn: number;
-    refreshExpiresIn: number;
+    // refreshToken est désormais émis exclusivement via cookie httpOnly par le backend
     user: {
         id: string;
         email: string;

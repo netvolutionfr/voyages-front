@@ -1,47 +1,34 @@
 export type StoredAuth = {
     tokenType: string;          // "Bearer"
     accessToken: string;        // JWT
-    refreshToken?: string | null;
-    // date absolue ISO de l’expiration de l’accessToken
     accessTokenExpiresAt?: string | null;
-    refreshTokenExpiresAt?: string | null;
+    // Le refresh token est stocké exclusivement dans un cookie httpOnly côté serveur
 };
 
-const KEY = "auth.jwt";
+let _auth: StoredAuth | null = null;
 
 export function saveAuth(p: {
     tokenType: string;
     accessToken: string;
     expiresIn?: number;         // en secondes, ex: 900
-    refreshToken?: string | null;
-    refreshTokenExpiresIn?: number | null;
 }) {
-    const now = Date.now();
     const accessTokenExpiresAt = p.expiresIn
-        ? new Date(now + p.expiresIn * 1000).toISOString()
+        ? new Date(Date.now() + p.expiresIn * 1000).toISOString()
         : readJwtExp(p.accessToken);
-    const refreshTokenExpiresAt = p.refreshToken && p.refreshTokenExpiresIn
-        ? new Date(now + p.refreshTokenExpiresIn * 1000).toISOString()
-        : null;
 
-    const payload: StoredAuth = {
+    _auth = {
         tokenType: p.tokenType,
         accessToken: p.accessToken,
-        refreshToken: p.refreshToken ?? null,
         accessTokenExpiresAt,
-        refreshTokenExpiresAt,
     };
-    localStorage.setItem(KEY, JSON.stringify(payload));
 }
 
 export function readAuth(): StoredAuth | null {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    try { return JSON.parse(raw) as StoredAuth; } catch { return null; }
+    return _auth;
 }
 
 export function clearAuth() {
-    localStorage.removeItem(KEY);
+    _auth = null;
 }
 
 // --- helpers JWT ---

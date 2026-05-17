@@ -72,8 +72,6 @@ export default function OtpPage() {
                 tokenType: data.token_type,
                 accessToken: data.access_token,
                 expiresIn: data.expires_in,
-                refreshToken: data.refresh_token ?? null,
-                refreshTokenExpiresIn: data.refresh_expires_in ?? null
             });
             setIdentityCache(getIdentityFromJwt());
 

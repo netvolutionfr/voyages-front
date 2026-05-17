@@ -35,8 +35,6 @@ export function LoginPasskeyFlow({
                 tokenType: result.tokenType,
                 accessToken: result.accessToken,
                 expiresIn: result.expiresIn,
-                refreshToken: result.refreshToken,
-                refreshTokenExpiresIn: result.refreshExpiresIn
             });
             setIdentityCache(getIdentityFromJwt());
 
