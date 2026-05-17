@@ -54,7 +54,7 @@ src/
 └── type/          # Types TypeScript partagés
 ```
 
-**Authentification** : passkeys uniquement (WebAuthn). Les JWT (access + refresh) sont stockés en `localStorage`. Le refresh est automatique et transparent.
+**Authentification** : passkeys uniquement (WebAuthn). L'access token est stocké en mémoire ; le refresh token est géré exclusivement via un cookie `httpOnly` côté serveur. Le refresh est automatique et transparent, y compris après rechargement de page.
 
 **Rôles** : `ADMIN`, `TEACHER`, `PARENT`, `STUDENT`, `USER`. Les règles sont définies dans `src/auth/rbac.ts`.
 
