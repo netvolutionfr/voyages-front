@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 import {apiFetch} from "@/auth/http.ts";
 
 type PreviewState = {
@@ -33,8 +33,20 @@ function DocumentPreviewContent({ state }: { state: PreviewState }) {
     const [error, setError] = React.useState<string | null>(null);
     const [resolvedMime, setResolvedMime] = React.useState<string | undefined>(state.mime);
 
-    const isImage = resolvedMime?.startsWith("image/");
-    const isPdf = resolvedMime === "application/pdf";
+    const mime = resolvedMime?.split(";")[0]?.trim().toLowerCase();
+    const isImage = mime?.startsWith("image/");
+    const isPdf = mime === "application/pdf";
+    const canOpenInTab = Boolean(blobUrl && (isImage || isPdf));
+    const downloadName = React.useMemo(() => {
+        const base = state.title?.trim() || "document";
+        const safe = Array.from(base)
+            .map((char) => {
+                const code = char.charCodeAt(0);
+                return code < 32 || /[\\/:*?"<>|]/.test(char) ? "-" : char;
+            })
+            .join("");
+        return safe.trim() || "document";
+    }, [state.title]);
 
     // Nettoyage du blob au changement/démontage (la fermeture démonte ce composant)
     React.useEffect(() => {
@@ -83,10 +95,10 @@ function DocumentPreviewContent({ state }: { state: PreviewState }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.open, state.url]);
 
-    // bouton "Ouvrir dans un onglet" : on réutilise le blobUrl pour ouvrir sans auth header
+    // N'ouvre en navigation que les types rendus comme aperçu; les autres restent en téléchargement.
     const handleOpenInTab = () => {
-        if (blobUrl) {
-            window.open(blobUrl, "_blank", "noreferrer");
+        if (canOpenInTab && blobUrl) {
+            window.open(blobUrl, "_blank", "noopener,noreferrer");
         }
     };
 
@@ -104,9 +116,23 @@ function DocumentPreviewContent({ state }: { state: PreviewState }) {
 
                     {/* Actions row (separate container, not inside DialogDescription) */}
                     <div className="mt-2 flex items-center justify-end">
-                        <Button variant="ghost" size="sm" onClick={handleOpenInTab} disabled={!blobUrl}>
-                            Ouvrir dans un onglet <ExternalLink className="ml-2 h-4 w-4" />
-                        </Button>
+                        {canOpenInTab ? (
+                            <Button variant="ghost" size="sm" onClick={handleOpenInTab}>
+                                Ouvrir dans un onglet <ExternalLink className="ml-2 h-4 w-4" />
+                            </Button>
+                        ) : (
+                            <Button variant="ghost" size="sm" disabled={!blobUrl} asChild={Boolean(blobUrl)}>
+                                {blobUrl ? (
+                                    <a href={blobUrl} download={downloadName}>
+                                        Télécharger <Download className="ml-2 h-4 w-4" />
+                                    </a>
+                                ) : (
+                                    <span>
+                                        Télécharger <Download className="ml-2 h-4 w-4" />
+                                    </span>
+                                )}
+                            </Button>
+                        )}
                     </div>
                 </DialogHeader>
 
@@ -134,8 +160,14 @@ function DocumentPreviewContent({ state }: { state: PreviewState }) {
                     ) : (
                         <div className="text-sm text-muted-foreground p-6">
                             Type non pris en charge pour l’aperçu.
-                            <Button variant="link" className="pl-2" onClick={handleOpenInTab} disabled={!blobUrl}>
-                                Télécharger / ouvrir
+                            <Button variant="link" className="pl-2" disabled={!blobUrl} asChild={Boolean(blobUrl)}>
+                                {blobUrl ? (
+                                    <a href={blobUrl} download={downloadName}>
+                                        Télécharger
+                                    </a>
+                                ) : (
+                                    <span>Télécharger</span>
+                                )}
                             </Button>
                         </div>
                     )}

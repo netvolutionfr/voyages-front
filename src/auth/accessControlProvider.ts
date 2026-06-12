@@ -31,11 +31,9 @@ export const accessControlProvider: AccessControlProvider = {
         const rulesForResource = resource ? RULES[resource] : undefined;
 
         if (!resource || !rulesForResource) {
-            console.log(`Ressource non autorisée: ${resource}`);
             return { can: false, reason: "Ressource non autorisée" };
         }
         if (!act || !(act in rulesForResource)) {
-            console.log(`Action non autorisée: ${action} sur ressource ${resource}`);
             return { can: false, reason: "Action non autorisée" };
         }
 

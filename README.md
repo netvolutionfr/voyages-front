@@ -72,6 +72,10 @@ Le workflow `.github/workflows/frontend-cicd.yml` applique une **barrière quali
 
 Tant que ce job `quality` ne passe pas, les jobs de construction d'image (`build-and-push`) et de déploiement (`deploy_to_server`) ne démarrent pas. Pensez à exécuter `npm run lint` et `npm run build` en local avant de pousser.
 
+## Journalisation côté client
+
+Les traces d'authentification WebAuthn et de décisions RBAC ne doivent pas être journalisées dans le navigateur. Le build de production Vite/Rolldown supprime également les appels `console.*` et les instructions `debugger` via la minification Oxc (`dropConsole` / `dropDebugger`) ; les avertissements utiles au développement restent donc limités aux builds locaux.
+
 ## Déploiement
 
 ```bash
@@ -86,3 +90,9 @@ Un `Dockerfile` et une configuration Nginx (`deploy/nginx.conf`) sont fournis.
 `deploy/security-headers.conf` ajoute, sur toutes les réponses, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` et `Strict-Transport-Security`. Le snippet est ré-inclus dans **chaque** `location` (nginx n'hérite pas les `add_header` quand une location définit les siens).
 
 La **CSP** est volontairement livrée en `Content-Security-Policy-Report-Only` : elle ne casse pas le rendu et ne fait que signaler les violations dans la console du navigateur. À promouvoir en `Content-Security-Policy` (enforcing) après observation, idéalement en remplaçant les `https:` génériques de `connect-src`/`img-src` par les origines réelles de l'API (`VITE_API_URL`) et du stockage (`VITE_FILES_BASE`).
+
+### Aperçu des documents
+
+Le composant `DocumentPreviewDialog` n'ouvre un blob dans un nouvel onglet que pour les images (`image/*`) et les PDF (`application/pdf`). Les autres types MIME sont proposés en téléchargement via l'attribut `download` afin d'éviter la navigation vers un blob HTML same-origin.
+
+Cette protection reste une défense en profondeur : le backend doit continuer à servir les fichiers utilisateur non prévisualisables avec `Content-Disposition: attachment`, un `Content-Type` non interprétable comme HTML, et les réponses Nginx doivent conserver `X-Content-Type-Options: nosniff`.

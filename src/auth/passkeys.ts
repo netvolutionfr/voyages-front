@@ -105,7 +105,6 @@ export async function beginRegistrationOneStep(): Promise<CredentialCreationResp
 
     // 2) Conversion en PublicKeyCredentialCreationOptions
     const serverOptions: ServerRegistrationOptions = await res.json();
-    console.log("beginRegistrationOneStep - conversion des options", serverOptions);
 
     const publicKey = normalizeCreationOptions(serverOptions);
 
@@ -152,16 +151,13 @@ export async function beginRegistration(email: string): Promise<CredentialCreati
 
     // 2) Conversion en PublicKeyCredentialCreationOptions
     const serverOptions: ServerRegistrationOptions = await res.json();
-    console.log("beginRegistration - conversion des options", serverOptions);
 
     const publicKey = normalizeCreationOptions(serverOptions);
-    console.log("beginRegistration - publicKey", publicKey);
 
     // 3) Création de la passkey (discoverable + UV requis déjà côté serveur)
     const cred = (await navigator.credentials.create({ publicKey })) as PublicKeyCredential | null;
     if (!cred) throw new Error("Création annulée");
 
-    console.log("beginRegistration - credential created", cred);
     return makeCredentialCreationResponse(cred);
 }
 

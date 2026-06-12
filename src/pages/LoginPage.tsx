@@ -12,7 +12,6 @@ export default function LoginPage() {
 
 
     const handleSuccess = async (r: FinishResult) => {
-        console.log("register success", r);
         if (r.status === "PENDING") {
             navigate("/otp", { replace: true });
         } else {
