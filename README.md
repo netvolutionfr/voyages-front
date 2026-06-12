@@ -72,6 +72,8 @@ Le workflow `.github/workflows/frontend-cicd.yml` applique une **barrière quali
 
 Tant que ce job `quality` ne passe pas, les jobs de construction d'image (`build-and-push`) et de déploiement (`deploy_to_server`) ne démarrent pas. Pensez à exécuter `npm run lint` et `npm run build` en local avant de pousser.
 
+Les actions GitHub utilisées par le workflow doivent rester sur des versions qui ciblent Node 24 ; ne réactivez pas `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`, qui masque les actions encore déclarées en Node 20 au lieu de les corriger.
+
 ## Journalisation côté client
 
 Les traces d'authentification WebAuthn et de décisions RBAC ne doivent pas être journalisées dans le navigateur. Le build de production Vite/Rolldown supprime également les appels `console.*` et les instructions `debugger` via la minification Oxc (`dropConsole` / `dropDebugger`) ; les avertissements utiles au développement restent donc limités aux builds locaux.
