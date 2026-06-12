@@ -6,17 +6,9 @@ import type {
     FinishOneStepResponse
 } from "@/lib/credentials";
 
-const API_URL = import.meta.env.VITE_API_URL;
+import {xsrfHeader} from "@/auth/csrf";
 
-// ---------------- CSRF Helper ----------------
-function readCookie(name: string): string | null {
-    const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-    return m ? decodeURIComponent(m[1]) : null;
-}
-async function xsrfHeader(): Promise<Record<string, string>> {
-    const token = readCookie("XSRF-TOKEN");
-    return token ? { "X-XSRF-TOKEN": token } : {};
-}
+const API_URL = import.meta.env.VITE_API_URL;
 
 // ---------------- Fetch Wrapper ----------------
 export const authApi = async (path: string, init?: RequestInit) => {
@@ -24,7 +16,7 @@ export const authApi = async (path: string, init?: RequestInit) => {
     const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
     const headers: HeadersInit = {
         "Content-Type": "application/json",
-        ...(needsCsrf ? await xsrfHeader() : {}),
+        ...(needsCsrf ? xsrfHeader() : {}),
         ...(init?.headers || {}),
     };
     return fetch(`${API_URL}${path}`, {
@@ -227,10 +219,9 @@ export type AuthFinishResponse = {
 };
 
 export async function beginAuthenticationOneStep(): Promise<CredentialRequestResponse> {
-    const res = await fetch("/api/webauthn/authenticate/options", {
+    const res = await authApi(`/webauthn/authenticate/options`, {
         method: "GET",
         headers: { Accept: "application/json" },
-        credentials: "include",
     });
     if (!res.ok) throw new Error("Impossible d’obtenir les options d’authentification");
     const opts = await res.json();
@@ -277,11 +268,10 @@ export async function finishAuthenticationOneStep(
         clientExtensionResults: credential.clientExtensionResults,
     }
 
-    const res = await fetch("/api/webauthn/authenticate/finish", {
+    const res = await authApi(`/webauthn/authenticate/finish`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(authenticationRequest),
-        credentials: "include",
     });
     if (!res.ok) {
         const text = await res.text().catch(() => "");

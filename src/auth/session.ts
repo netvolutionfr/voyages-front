@@ -11,7 +11,7 @@ export type Identity = {
 
 let memIdentity: { value: Identity | null; expiresAt: number } | null = null;
 
-export function decodeJwtPayload<T = any>(jwt?: string): T | null {
+export function decodeJwtPayload<T = unknown>(jwt?: string): T | null {
     if (!jwt) return null;
     try {
         const [, b64] = jwt.split(".");
@@ -30,10 +30,20 @@ export function clearIdentityCache() {
     memIdentity = null;
 }
 
+/** Contrat attendu du payload JWT émis par le backend */
+type JwtIdentityPayload = {
+    sub: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role?: Identity["role"];
+    status?: Identity["status"];
+};
+
 /** Renvoie l'identité en lecture rapide (JWT), ou null si insuffisant */
 export function getIdentityFromJwt(): Identity | null {
     const auth = readAuth();
-    const p = decodeJwtPayload<any>(auth?.accessToken);
+    const p = decodeJwtPayload<JwtIdentityPayload>(auth?.accessToken);
     if (!p) return null;
     // adapter les champs selon ton contrat de JWT
     return {

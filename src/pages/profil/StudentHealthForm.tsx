@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { AlertCircle, Pill, Phone, Shield, Info, CheckCircle } from "lucide-react";
 import { useOne, useCreate, type HttpError } from "@refinedev/core";
 import type {
@@ -46,13 +46,30 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // ===== Helpers =====
+// Bornes de découpage : évite d'envoyer des listes/items démesurés au backend
+const MAX_LIST_ITEMS = 50;
+const MAX_ITEM_LENGTH = 200;
+
 const csvToArray = (csv?: string): string[] | undefined => {
     if (!csv) return undefined;
     const arr = csv
-        .split(",")
+        .split(/[;,]/)
         .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+        .filter((s) => s.length > 0)
+        .slice(0, MAX_LIST_ITEMS)
+        .map((s) => s.slice(0, MAX_ITEM_LENGTH));
     return arr.length ? arr : undefined;
+};
+
+const splitTreatments = (raw?: string): { name: string }[] | null => {
+    if (!raw || raw.trim().length === 0) return null;
+    const items = raw
+        .split(";")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
+        .slice(0, MAX_LIST_ITEMS)
+        .map((s) => ({ name: s.slice(0, MAX_ITEM_LENGTH) }));
+    return items.length ? items : null;
 };
 
 const arrayToCsv = (arr?: string[] | null): string => {
@@ -65,10 +82,6 @@ const ensureStringOrNull = (v?: string): string | null =>
 
 // ===== Component =====
 export default function StudentHealthFormImproved() {
-    // Motifs de refus (local state côté front sans changer le schema)
-    const [hospitalizationReason, setHospitalizationReason] = useState("");
-    const [transportReason, setTransportReason] = useState("");
-
     // GET /me/health-form
     const { result, query: healthQuery } = useOne<StudentHealthFormResponse>({
         resource: "me/health-form",
@@ -118,6 +131,8 @@ export default function StudentHealthFormImproved() {
             // consents
             consentHospitalization: Boolean(res?.consentHospitalization ?? false),
             consentTransport: Boolean(res?.consentTransport ?? false),
+            hospitalizationRefusalReason: res?.hospitalizationRefusalReason ?? "",
+            transportRefusalReason: res?.transportRefusalReason ?? "",
 
             // misc
             validUntil: res?.validUntil ?? "",
@@ -140,25 +155,14 @@ export default function StudentHealthFormImproved() {
     useEffect(() => {
         if (result) {
             form.reset(initial);
-            // Reset motifs si nécessaire (si on recharge depuis API et que consentements sont true)
-            if (initial.consentHospitalization) setHospitalizationReason("");
-            if (initial.consentTransport) setTransportReason("");
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [result]);
 
     // Submit → DTO mapping
+    // Les motifs de refus sont validés par le schéma (superRefine) :
+    // ce handler n'est appelé qu'avec des valeurs cohérentes.
     const onSubmit: SubmitHandler<StudentHealthFormValues> = (values) => {
-        // Règle: si NON → motif obligatoire (front-only pour le moment)
-        if (!values.consentHospitalization && hospitalizationReason.trim().length === 0) {
-            alert("Merci de préciser le motif du refus pour l’autorisation de soins/hospitalisation.");
-            return;
-        }
-        if (!values.consentTransport && transportReason.trim().length === 0) {
-            alert("Merci de préciser le motif du refus pour l’autorisation de transport.");
-            return;
-        }
-
         const dto: StudentHealthFormUpsertRequest = {
             allergies: {
                 drug: csvToArray(values.drugAllergiesCsv) ?? null,
@@ -167,19 +171,8 @@ export default function StudentHealthFormImproved() {
                 notes: ensureStringOrNull(values.allergiesNotes),
             },
             treatments: {
-                daily:
-                    values.dailyTreatments && values.dailyTreatments.trim().length > 0
-                        ? values.dailyTreatments
-                            .split(";")
-                            .map((s) => ({ name: s.trim() }))
-                        : null,
-                emergency:
-                    values.emergencyTreatments &&
-                    values.emergencyTreatments.trim().length > 0
-                        ? values.emergencyTreatments
-                            .split(";")
-                            .map((s) => ({ name: s.trim() }))
-                        : null,
+                daily: splitTreatments(values.dailyTreatments),
+                emergency: splitTreatments(values.emergencyTreatments),
                 hasPAI: values.hasPAI,
                 paiDetails: ensureStringOrNull(values.paiDetails),
             },
@@ -211,6 +204,12 @@ export default function StudentHealthFormImproved() {
             },
             consentHospitalization: values.consentHospitalization,
             consentTransport: values.consentTransport,
+            hospitalizationRefusalReason: values.consentHospitalization
+                ? null
+                : values.hospitalizationRefusalReason,
+            transportRefusalReason: values.consentTransport
+                ? null
+                : values.transportRefusalReason,
             validUntil:
                 values.validUntil && values.validUntil.length > 0
                     ? values.validUntil
@@ -641,20 +640,23 @@ export default function StudentHealthFormImproved() {
                                                     </div>
 
                                                     {isNo && (
-                                                        <div className="mt-3">
-                                                            <FormLabel className="text-xs">Motif du refus</FormLabel>
-                                                            <Textarea
-                                                                placeholder="Précisez votre motif (requis si refus)."
-                                                                value={hospitalizationReason}
-                                                                onChange={(e) => setHospitalizationReason(e.target.value)}
-                                                                rows={2}
-                                                            />
-                                                            {hospitalizationReason.trim().length === 0 && (
-                                                                <p className="mt-1 text-xs text-destructive">
-                                                                    Motif obligatoire en cas de refus.
-                                                                </p>
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="hospitalizationRefusalReason"
+                                                            render={({ field: reasonField }) => (
+                                                                <FormItem className="mt-3">
+                                                                    <FormLabel className="text-xs">Motif du refus</FormLabel>
+                                                                    <FormControl>
+                                                                        <Textarea
+                                                                            placeholder="Précisez votre motif (requis si refus)."
+                                                                            rows={2}
+                                                                            {...reasonField}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
                                                             )}
-                                                        </div>
+                                                        />
                                                     )}
                                                 </FormItem>
                                             );
@@ -679,20 +681,23 @@ export default function StudentHealthFormImproved() {
                                                     </div>
 
                                                     {isNo && (
-                                                        <div className="mt-3">
-                                                            <FormLabel className="text-xs">Motif du refus</FormLabel>
-                                                            <Textarea
-                                                                placeholder="Précisez votre motif (requis si refus)."
-                                                                value={transportReason}
-                                                                onChange={(e) => setTransportReason(e.target.value)}
-                                                                rows={2}
-                                                            />
-                                                            {transportReason.trim().length === 0 && (
-                                                                <p className="mt-1 text-xs text-destructive">
-                                                                    Motif obligatoire en cas de refus.
-                                                                </p>
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="transportRefusalReason"
+                                                            render={({ field: reasonField }) => (
+                                                                <FormItem className="mt-3">
+                                                                    <FormLabel className="text-xs">Motif du refus</FormLabel>
+                                                                    <FormControl>
+                                                                        <Textarea
+                                                                            placeholder="Précisez votre motif (requis si refus)."
+                                                                            rows={2}
+                                                                            {...reasonField}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
                                                             )}
-                                                        </div>
+                                                        />
                                                     )}
                                                 </FormItem>
                                             );

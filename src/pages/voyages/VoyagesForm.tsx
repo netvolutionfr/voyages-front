@@ -29,6 +29,7 @@ import {dtoToForm} from "@/pages/voyages/voyageMappers";
 import { fr } from "react-day-picker/locale";
 
 import imageCompression from "browser-image-compression";
+import { toast } from "sonner";
 import type {VoyageUpsertRequest} from "@/pages/voyages/dto/VoyageUpsertRequest.tsx";
 import type {VoyageDTO} from "@/pages/voyages/dto/VoyageDTO.tsx";
 import type {DateRange} from "react-day-picker";
@@ -56,9 +57,8 @@ const isoPlusDays = (n: number) => new Date(Date.now() + n*864e5).toISOString();
 const VoyagesForm = () => {
     const { id } = useParams<{ id: string }>();
     const isEditing = Boolean(id);
-    const [coverPreview, setCoverPreview] = useState<string | null | undefined>(null);
-    const [tripStartDate, setTripStartDate] = useState<Date>(new Date());
-    const [registerStartDate, setRegisterStartDate] = useState<Date>(new Date());
+    // Aperçu local après upload ; sinon dérivé du record (voir coverPreview plus bas)
+    const [coverOverride, setCoverOverride] = useState<string | null>(null);
 
     // Pays
     const { options: paysOptions } = useSelect<IPays>({
@@ -123,13 +123,13 @@ const VoyagesForm = () => {
     // Pré-remplissage en édition : mapper la réponse API (IVoyage) vers les defaults du form
     const record = query?.data?.data as VoyageDTO | undefined;
 
+    // Valeurs d'affichage dérivées du record : pas d'état à synchroniser dans un effet
+    const coverPreview = coverOverride ?? (record?.coverPhotoUrl ? getCoverUrl(record.coverPhotoUrl) : null);
+    const tripStartDate = record?.tripDates?.from ? new Date(record.tripDates.from) : new Date();
+    const registerStartDate = record?.registrationDates?.from ? new Date(record.registrationDates.from) : new Date();
+
     useEffect(() => {
         if (!isEditing || !record) return;
-        setCoverPreview(record.coverPhotoUrl ? getCoverUrl(record.coverPhotoUrl) : null);
-        setTripStartDate(new Date(record.tripDates.from));
-        if (record.registrationDates) {
-            setRegisterStartDate(new Date(record.registrationDates.from));
-        }
         form.reset(dtoToForm(record));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditing, record?.id, record?.updatedAt]);
@@ -139,29 +139,45 @@ const VoyagesForm = () => {
     }, [form]);
 
 
-    /** Upload direct vers MinIO via presigned URL */
+    /** Upload direct vers MinIO via presigned URL.
+     *  Garde-fous côté client (type/taille) ; le backend/storage doit
+     *  réinspecter le contenu réel, les métadonnées client étant falsifiables. */
+    const MAX_COVER_MB = 10;
     const handleCoverUpload = async (file: File) => {
-        // Compression de l'image
-        const compressed = await imageCompression(file, {
-            maxSizeMB: 1,          // max 1 Mo
-            maxWidthOrHeight: 1600, // redimensionne si trop grand
-            useWebWorker: true,
-        });
+        try {
+            if (!file.type.startsWith("image/")) {
+                toast.error("Seules les images sont acceptées.");
+                return;
+            }
+            if (file.size > MAX_COVER_MB * 1024 * 1024) {
+                toast.error(`Image trop volumineuse (max ${MAX_COVER_MB} Mo).`);
+                return;
+            }
 
-        // 2) URL pré-signée
-        const presignRes: {url: string, key: string} = await api.get(
-            `/files/presign`,
-            { params: { filename: compressed.name, contentType: compressed.type } }
-        );
-        const { url, key } = presignRes;
+            // Compression de l'image
+            const compressed = await imageCompression(file, {
+                maxSizeMB: 1,          // max 1 Mo
+                maxWidthOrHeight: 1600, // redimensionne si trop grand
+                useWebWorker: true,
+            });
 
-        // 3) PUT sur MinIO
-        const putRes = await fetch(url, { method: "PUT", body: compressed, headers: { "Content-Type": compressed.type } });
-        if (!putRes.ok) throw new Error("Échec de l’upload de la photo");
+            // 2) URL pré-signée
+            const presignRes: {url: string, key: string} = await api.get(
+                `/files/presign`,
+                { params: { filename: compressed.name, contentType: compressed.type } }
+            );
+            const { url, key } = presignRes;
 
-        // 3) Stocker la clé (coverPhotoUrl) côté form
-        form.setValue("coverPhotoUrl", key, { shouldDirty: true, shouldValidate: true });
-        setCoverPreview(URL.createObjectURL(file));
+            // 3) PUT sur MinIO
+            const putRes = await fetch(url, { method: "PUT", body: compressed, headers: { "Content-Type": compressed.type } });
+            if (!putRes.ok) throw new Error("Échec de l’upload de la photo");
+
+            // 3) Stocker la clé (coverPhotoUrl) côté form
+            form.setValue("coverPhotoUrl", key, { shouldDirty: true, shouldValidate: true });
+            setCoverOverride(URL.createObjectURL(file));
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Échec de l’upload de la photo");
+        }
     };
 
     const onSubmit: SubmitHandler<VoyageFormData> = async (values) => {

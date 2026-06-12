@@ -26,6 +26,13 @@ const formSchema = z.object({
 })
 type formData = z.infer<typeof formSchema>;
 
+const ROLE_LABELS: Record<string, string> = {
+    TEACHER: "Enseignant",
+    ADMIN: "Administrateur",
+    STUDENT: "Élève",
+    PARENT: "Parent",
+};
+
 const HomePage = () => {
     const form = useForm<Me, HttpError, { telephone: string }>({
         resolver: zodResolver(formSchema),
@@ -38,11 +45,13 @@ const HomePage = () => {
         shouldFocusError: true,
     });
     const [open, setOpen] = useState(false);
-    const [roleInFrench, setRoleInFrench] = useState<string>("");
 
     const me = { ...form.refineCore.query?.data?.data} as Me;
     const isLoading = form.refineCore.query?.isLoading;
     const isError = form.refineCore.query?.isError;
+
+    // Dérivé du rôle courant : pas d'état à synchroniser
+    const roleInFrench = me?.role ? ROLE_LABELS[me.role] ?? "" : "";
 
     // Remplir le champ quand les données arrivent
     useEffect(() => {
@@ -51,29 +60,6 @@ const HomePage = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [me?.telephone]);
-
-    // Traduire le rôle
-    useEffect(() => {
-        if (me?.role) {
-            switch (me.role) {
-                case "TEACHER":
-                    setRoleInFrench("Enseignant");
-                    break;
-                case "ADMIN":
-                    setRoleInFrench("Administrateur");
-                    break;
-                case "STUDENT":
-                    setRoleInFrench("Élève");
-                    break;
-                case "PARENT":
-                    setRoleInFrench("Parent");
-                    break;
-                default:
-                    setRoleInFrench("");
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [me?.role]);
 
     useEffect(() => {
         form.setFocus("telephone");

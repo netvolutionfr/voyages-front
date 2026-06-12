@@ -45,7 +45,7 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
     }
 
     // Parser le JSON
-    let healthForm: HealthFormContent | null = null;
+    let healthForm: HealthFormContent | null;
     try {
         healthForm = JSON.parse(data.content);
     } catch {

@@ -8,6 +8,8 @@ export interface StudentHealthFormResponse {
     emergencyContacts: EmergencyContacts | null;
     consentHospitalization: boolean;
     consentTransport: boolean;
+    hospitalizationRefusalReason?: string | null;
+    transportRefusalReason?: string | null;
     signedAt: string | null;
     signatureUrl: string | null;
     validUntil: string | null;
@@ -23,6 +25,10 @@ export interface StudentHealthFormUpsertRequest {
     emergencyContacts: EmergencyContacts | null;
     consentHospitalization: boolean;
     consentTransport: boolean;
+    // Motif requis côté front quand le consentement est refusé ;
+    // à persister côté backend pour ne pas perdre l'information de consentement.
+    hospitalizationRefusalReason?: string | null;
+    transportRefusalReason?: string | null;
     validUntil: string | null; // ISO string or null
     expectedVersion: number | null;
 }

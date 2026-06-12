@@ -1,18 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
     InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {readAuth, saveAuth /*, saveAuth*/} from "@/auth/token";
+import {readAuth, saveAuth} from "@/auth/token";
 import { authApi } from "@/auth/passkeys";
 import {useNavigate} from "react-router-dom";
-import {getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
+import {decodeJwtPayload, getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
 
 export default function OtpPage() {
     const navigate = useNavigate();
     const [otp, setOtp] = useState("");
-    const [email, setEmail] = useState("");
+    // L'email vient du JWT temporaire présent au montage : lecture unique, pas d'effet
+    const [email] = useState(
+        () => decodeJwtPayload<{ email?: string }>(readAuth()?.accessToken)?.email ?? ""
+    );
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -25,19 +28,6 @@ export default function OtpPage() {
     const normalize = (v: string) => v.replace(/\D+/g, "").slice(0, 6);
     const normalizedOtp = useMemo(() => normalize(otp), [otp]);
     const canSubmit = normalizedOtp.length === 6 && !!email && !submitting;
-
-    useEffect(() => {
-        const auth = readAuth();
-        const token = auth?.accessToken;
-        if (!token) return;
-        try {
-            const [, payloadB64] = token.split(".");
-            if (!payloadB64) return;
-            const json = atob(payloadB64.replace(/-/g, "+").replace(/_/g, "/"));
-            const payload = JSON.parse(decodeURIComponent(escape(json)));
-            if (payload?.email) setEmail(payload.email);
-        } catch {}
-    }, []);
 
     const handleChange = (v: string) => setOtp(normalize(v));
 

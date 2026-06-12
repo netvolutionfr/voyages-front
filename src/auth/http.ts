@@ -2,22 +2,35 @@
 import { readAuth, saveAuth, clearAuth, isAccessExpired } from "@/auth/token";
 import {getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
 import {isBodyLike} from "@/auth/api.ts";
+import {xsrfHeader} from "@/auth/csrf.ts";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 let refreshing: Promise<Response | null> | null = null;
+// Après un refresh raté (famille de tokens révoquée), chaque requête en vol
+// retenterait /auth/refresh : on coupe court pendant un court délai.
+let refreshFailedAt = 0;
+const REFRESH_RETRY_COOLDOWN_MS = 5_000;
 
 export async function refreshIfNeeded(): Promise<boolean> {
     const auth = readAuth();
     if (auth && !isAccessExpired(auth)) return true; // token valide en mémoire
+
+    if (!refreshing && Date.now() - refreshFailedAt < REFRESH_RETRY_COOLDOWN_MS) {
+        return false;
+    }
 
     // Token absent (premier chargement) ou expiré → refresh via cookie httpOnly
     if (!refreshing) {
         refreshing = fetch(`${API_URL}/auth/refresh`, {
             method: "POST",
             credentials: "include",
+            headers: xsrfHeader(),
         }).then(async (r) => {
-            if (!r.ok) return null;
+            if (!r.ok) {
+                refreshFailedAt = Date.now();
+                return null;
+            }
             const data = await r.json();
             saveAuth({
                 tokenType: data.token_type,
@@ -25,7 +38,11 @@ export async function refreshIfNeeded(): Promise<boolean> {
                 expiresIn: data.expires_in,
             });
             setIdentityCache(getIdentityFromJwt());
+            refreshFailedAt = 0;
             return r;
+        }).catch(() => {
+            refreshFailedAt = Date.now();
+            return null;
         }).finally(() => { refreshing = null; });
     }
     const res = await refreshing;

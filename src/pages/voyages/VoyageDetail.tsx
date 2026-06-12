@@ -54,24 +54,21 @@ export default function VoyageDetail() {
     const { isLoading, isError, error, refetch } = query;
     const cover = voyage?.coverPhotoUrl ? getCoverUrl(voyage.coverPhotoUrl) : undefined;
 
-    // Interest (poll) toggle
-    const [currentUserInterest, setCurrentUserInterest] = React.useState<boolean>(voyage?.interestedByCurrentUser ?? false);
-    const [countUserInterests, setCountUserInterests] = React.useState<number>(voyage?.interestedCount ?? 0);
-
-    React.useEffect(() => {
-        if (voyage) {
-            setCurrentUserInterest(voyage.interestedByCurrentUser);
-            setCountUserInterests(voyage.interestedCount ?? 0);
-        }
-    }, [voyage]);
+    // Interest (poll) toggle : les valeurs serveur font foi, l'override local ne
+    // sert qu'à l'affichage optimiste le temps de la mutation + du refetch.
+    const [interestOverride, setInterestOverride] = React.useState<{ interested: boolean; count: number } | null>(null);
+    const currentUserInterest = interestOverride?.interested ?? voyage?.interestedByCurrentUser ?? false;
+    const countUserInterests = interestOverride?.count ?? voyage?.interestedCount ?? 0;
 
     const { mutate: setPref, mutation: { isPending: isTogglingPref } } = useUpdate<{ id: string; voyageId: string; userId: string; interest: "YES" | "NO"; }>();
 
     const toggleInterest = () => {
         if (!voyage?.id) return;
         const next = !currentUserInterest;
-        setCurrentUserInterest(next);
-        setCountUserInterests((c) => (next ? c + 1 : Math.max(0, c - 1)));
+        setInterestOverride({
+            interested: next,
+            count: next ? countUserInterests + 1 : Math.max(0, countUserInterests - 1),
+        });
 
         setPref({
             resource: "trip-preferences",
@@ -79,11 +76,9 @@ export default function VoyageDetail() {
             values: { interest: next ? "YES" : "NO" },
             mutationMode: "pessimistic",
         }, {
-            onError: () => {
-                setCurrentUserInterest(!next);
-                setCountUserInterests((c) => (!next ? c + 1 : Math.max(0, c - 1)));
-            },
-            onSuccess: () => refetch()
+            onError: () => setInterestOverride(null),
+            // l'override reste affiché jusqu'à l'arrivée des données fraîches
+            onSuccess: () => { refetch().finally(() => setInterestOverride(null)); },
         });
     };
 

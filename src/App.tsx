@@ -13,6 +13,7 @@ import {resources} from "@/config/resources.ts";
 import Error403 from "@/pages/error/403.tsx";
 import Error404 from "@/pages/error/404.tsx";
 import RequireAdmin from "@/components/RequireAdmin.tsx";
+import RequireCan from "@/components/RequireCan.tsx";
 import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
@@ -75,10 +76,32 @@ export default function App() {
                     </Route>
 
                     <Route path="/voyages" element={<Voyages />} />
-                    <Route path="/voyages/create" element={<VoyagesForm />} />
-                    <Route path="/voyages/edit/:id" element={<VoyagesForm />} />
+                    {/* Routes de gestion : RBAC explicite, pas seulement Authenticated */}
+                    <Route
+                        path="/voyages/create"
+                        element={
+                            <RequireCan resource="trips" action="create">
+                                <VoyagesForm />
+                            </RequireCan>
+                        }
+                    />
+                    <Route
+                        path="/voyages/edit/:id"
+                        element={
+                            <RequireCan resource="trips" action="edit">
+                                <VoyagesForm />
+                            </RequireCan>
+                        }
+                    />
                     <Route path="/voyages/:id" element={<VoyageDetail />} />
-                    <Route path="/voyages/detail/:id" element={<VoyageDashboard />} />
+                    <Route
+                        path="/voyages/detail/:id"
+                        element={
+                            <RequireCan resource="trips" action="edit">
+                                <VoyageDashboard />
+                            </RequireCan>
+                        }
+                    />
 
                     <Route path="/documents" element={<Documents />} />
 

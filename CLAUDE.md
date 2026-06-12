@@ -45,12 +45,13 @@ Authentication is **WebAuthn/passkeys only** — there is no password flow. The 
 
 | File | Role |
 |------|------|
-| `token.ts` | `StoredAuth` shape, `localStorage` persistence (`auth.jwt`), JWT decode helpers, expiry check |
-| `http.ts` | `apiFetch()` — wraps `fetch`, injects `Authorization` header, proactively refreshes expired access tokens (via `/auth/refresh`), retries once on 401 |
+| `token.ts` | `StoredAuth` shape, **in-memory** access-token storage (refresh token lives in an httpOnly cookie), JWT decode helpers, expiry check; `clearAuth()` also purges the identity cache |
+| `http.ts` | `apiFetch()` — wraps `fetch`, injects `Authorization` header, proactively refreshes expired access tokens (via `/auth/refresh`, with X-XSRF-TOKEN header and a short cooldown after a failed refresh), retries once on 401 |
 | `api.ts` | `api.get/post/put/patch/delete` typed wrapper over `apiFetch`; throws `ApiError` on non-2xx |
-| `passkeys.ts` | WebAuthn browser API calls for registration and authentication (one-step and two-step flows) |
+| `csrf.ts` | Shared `xsrfHeader()` helper — reflects the `XSRF-TOKEN` cookie for cookie-backed endpoints (refresh, logout, WebAuthn) |
+| `passkeys.ts` | WebAuthn browser API calls for registration and authentication (one-step and two-step flows), all through `authApi` (`VITE_API_URL` + CSRF) |
 | `session.ts` | In-memory identity cache (60s TTL); fast-path reads identity from the JWT payload |
-| `authProvider.ts` | Refine `AuthProvider` — `check()` reads `localStorage`, `getIdentity()` calls `/me` |
+| `authProvider.ts` | Refine `AuthProvider` — `check()` reads the in-memory token, restores via `/auth/refresh` cookie; awaited server-side `logout`; `onError` forces logout on 401 |
 | `accessControlProvider.ts` | Refine `AccessControlProvider` — evaluates `RULES` from `rbac.ts` against cached identity |
 | `rbac.ts` | Static `RULES` table mapping `resource → action → Role[]` |
 | `types.ts` | `Role` union, `Me` interface |

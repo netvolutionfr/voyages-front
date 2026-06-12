@@ -37,8 +37,12 @@ export function parseCurrencyToCents(value: string): number | null {
 
 export function getCoverUrl(coverPhotoUrl?: string | null): string | undefined {
     if (!coverPhotoUrl) return undefined;
-    if (/^https?:\/\//i.test(coverPhotoUrl)) return coverPhotoUrl;
     const base = import.meta.env.VITE_FILES_BASE || "";
+    if (/^https?:\/\//i.test(coverPhotoUrl)) {
+        // N'autorise que les URLs absolues du stockage maîtrisé (VITE_FILES_BASE) :
+        // pas de domaine tiers (tracking, contenu mixte, dépendance externe).
+        return base && coverPhotoUrl.startsWith(base) ? coverPhotoUrl : undefined;
+    }
     const sep = base.endsWith("/") ? "" : "/";
     return `${base}${sep}${coverPhotoUrl}`;
 }

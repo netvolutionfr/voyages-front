@@ -1,3 +1,5 @@
+import { clearIdentityCache } from "@/auth/session";
+
 export type StoredAuth = {
     tokenType: string;          // "Bearer"
     accessToken: string;        // JWT
@@ -29,10 +31,13 @@ export function readAuth(): StoredAuth | null {
 
 export function clearAuth() {
     _auth = null;
+    // L'identité (rôle RBAC) est dérivée du JWT : elle doit tomber avec lui,
+    // sinon le cache 60s peut servir un rôle obsolète après révocation/logout.
+    clearIdentityCache();
 }
 
 // --- helpers JWT ---
-export function decodeJwt<T = any>(jwt: string): T | null {
+export function decodeJwt<T = unknown>(jwt: string): T | null {
     const parts = jwt.split(".");
     if (parts.length !== 3) return null;
     try {

@@ -10,16 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { VoyageCard } from "@/pages/voyages/VoyageCard";
 
-const Voyages: React.FC = () => {
-    // 1) Demande d'autorisation : "édition voyages" = profil Admin/Teacher dans nos règles
-    const { data: canEditRes, isLoading: canLoading } = useCan({
-        resource: "voyages",
-        action: "edit",
-    });
-
-    const isAdminOrTeacher = canEditRes?.can === true;
-
-    // 2) Table gestion (admin/teacher)
+/** Table de gestion (admin/teacher). Montée seulement si le RBAC l'autorise :
+ *  la requête liste "gestion" ne part jamais pour un parent/élève. */
+const VoyagesAdminTable: React.FC = () => {
     const columns = React.useMemo<ColumnDef<IVoyage>[]>(() => voyagesColumns, []);
     const tableInstance = useTable({
         columns,
@@ -28,25 +21,28 @@ const Voyages: React.FC = () => {
         },
     });
 
-    // 3) Grille "élève/parent"
+    if (tableInstance.refineCore.tableQuery?.isLoading) {
+        return <LoadingSpinner />;
+    }
+
+    return (
+        <div className="flex flex-col gap-4">
+            <h1 className="text-2xl font-bold">Gestion des voyages</h1>
+            <DataTable columns={voyagesColumns} table={tableInstance} entity="trips" filter="title" />
+        </div>
+    );
+};
+
+/** Grille de consultation (élève/parent). */
+const VoyagesGrid: React.FC = () => {
     const { result: listResult, query: listQuery } = useList<IVoyage>({
         resource: "trips",
         pagination: { pageSize: 12 },
         sorters: [{ field: "departureDate", order: "asc" }],
     });
 
-    // 4) Loading global : tient compte du temps de `useCan`
-    const tableIsLoading = tableInstance.refineCore.tableQuery?.isLoading ?? false;
-    const isLoading = canLoading
-        ? true
-        : isAdminOrTeacher
-            ? tableIsLoading
-            : listQuery.isLoading;
-
-    if (isLoading) {
-        return isAdminOrTeacher ? (
-            <LoadingSpinner />
-        ) : (
+    if (listQuery.isLoading) {
+        return (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                     <Card key={i} className="overflow-hidden">
@@ -68,25 +64,29 @@ const Voyages: React.FC = () => {
         );
     }
 
-    // 5) Vue élève/parent
-    if (!isAdminOrTeacher) {
-        const voyages = listResult?.data ?? [];
-        return (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {voyages.map((v) => (
-                    <VoyageCard key={v.id} v={v} />
-                ))}
-            </div>
-        );
-    }
-
-    // 6) Vue admin/teacher (table gestion)
+    const voyages = listResult?.data ?? [];
     return (
-        <div className="flex flex-col gap-4">
-            <h1 className="text-2xl font-bold">Gestion des voyages</h1>
-            <DataTable columns={voyagesColumns} table={tableInstance} entity="trips" filter="title" />
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {voyages.map((v) => (
+                <VoyageCard key={v.id} v={v} />
+            ))}
         </div>
     );
+};
+
+const Voyages: React.FC = () => {
+    // Décision RBAC d'abord, fetch ensuite : on ne monte que la vue (et la
+    // requête) correspondant au rôle, au lieu de lancer les deux en parallèle.
+    const { data: canEditRes, isLoading: canLoading } = useCan({
+        resource: "trips",
+        action: "edit",
+    });
+
+    if (canLoading) {
+        return <LoadingSpinner />;
+    }
+
+    return canEditRes?.can === true ? <VoyagesAdminTable /> : <VoyagesGrid />;
 };
 
 export default Voyages;

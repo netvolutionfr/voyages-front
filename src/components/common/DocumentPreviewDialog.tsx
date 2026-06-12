@@ -25,16 +25,18 @@ export function useDocumentPreview() {
     return { state, open, close };
 }
 
-export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState; onClose: () => void }) {
+/** Contenu du dialog : remonté à chaque ouverture/document via la prop `key`,
+ *  donc tout l'état (blob, MIME, erreur) repart de zéro sans effet de reset. */
+function DocumentPreviewContent({ state }: { state: PreviewState }) {
     const [blobUrl, setBlobUrl] = React.useState<string | null>(null);
-    const [loading, setLoading] = React.useState(false);
+    const [loading, setLoading] = React.useState(() => Boolean(state.open && state.url));
     const [error, setError] = React.useState<string | null>(null);
     const [resolvedMime, setResolvedMime] = React.useState<string | undefined>(state.mime);
 
     const isImage = resolvedMime?.startsWith("image/");
     const isPdf = resolvedMime === "application/pdf";
 
-    // Nettoyage du blob à la fermeture/changement
+    // Nettoyage du blob au changement/démontage (la fermeture démonte ce composant)
     React.useEffect(() => {
         return () => {
             if (blobUrl) {
@@ -43,20 +45,12 @@ export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState;
         };
     }, [blobUrl]);
 
-    // Charge le blob quand on ouvre / quand l’URL change
+    // Charge le blob à l'ouverture
     React.useEffect(() => {
         let cancelled = false;
 
         async function fetchBlob() {
             if (!state.open || !state.url) return;
-            setLoading(true);
-            setError(null);
-
-            // nettoie l’ancien blob si on relance
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-                setBlobUrl(null);
-            }
 
             try {
                 const resp: Response = await apiFetch(state.url);
@@ -65,11 +59,9 @@ export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState;
                     if (cancelled) return;
                     const url = URL.createObjectURL(blob);
                     setBlobUrl(url);
-                    if (!state.mime) {
-                        setResolvedMime(blob.type || resp.headers.get("Content-Type") || "application/octet-stream");
-                    } else {
-                        setResolvedMime(state.mime);
-                    }
+                    setResolvedMime(
+                        state.mime || blob.type || resp.headers.get("Content-Type") || "application/octet-stream"
+                    );
                     setLoading(false);
                     return;
                 }
@@ -98,24 +90,9 @@ export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState;
         }
     };
 
-    // Reset MIME si on ferme le dialog (pour que la prochaine ouverture recalcule)
-    React.useEffect(() => {
-        if (!state.open) {
-            setResolvedMime(state.mime);
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-                setBlobUrl(null);
-            }
-            setLoading(false);
-            setError(null);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state.open]);
-
     return (
-        <Dialog open={state.open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent className="max-w-[95vw] md:max-w-5xl h-[85vh] p-0 overflow-hidden">
-                <DialogHeader className="px-4 py-3">
+        <>
+            <DialogHeader className="px-4 py-3">
                     <DialogTitle className="truncate">
                         {state.title ?? "Aperçu du document"}
                     </DialogTitle>
@@ -163,6 +140,18 @@ export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState;
                         </div>
                     )}
                 </div>
+        </>
+    );
+}
+
+export function DocumentPreviewDialog({ state, onClose }: { state: PreviewState; onClose: () => void }) {
+    return (
+        <Dialog open={state.open} onOpenChange={(v) => !v && onClose()}>
+            <DialogContent className="max-w-[95vw] md:max-w-5xl h-[85vh] p-0 overflow-hidden">
+                <DocumentPreviewContent
+                    key={`${state.open}:${state.url ?? "none"}`}
+                    state={state}
+                />
             </DialogContent>
         </Dialog>
     );

@@ -15,7 +15,9 @@ export const RULES: ResourceRules = {
         delete: ["ADMIN"],
         export: ["ADMIN"],
     },
-    voyages: {
+    // Clé alignée sur le nom de ressource Refine/API (resources.ts), sinon le
+    // contrôle central ne couvre pas les ressources réellement mutées.
+    trips: {
         list: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
         show: ["ADMIN", "TEACHER", "STUDENT", "PARENT"],
         create: ["ADMIN", "TEACHER"],

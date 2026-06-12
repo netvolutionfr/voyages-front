@@ -1,14 +1,15 @@
 import { z } from 'zod'
+import { optionalPhone, optionalShortText } from '@/schemas/common'
 
 export const ficheParentsSchema = z.object({
-    parent1LastName: z.string().optional().nullable(),
-    parent1FirstName: z.string().optional().nullable(),
+    parent1LastName: optionalShortText(),
+    parent1FirstName: optionalShortText(),
     parent1Email: z.email('Email du parent 1 invalide').optional().nullable(),
-    parent1Telephone: z.string().optional(),
-    parent2LastName: z.string().optional().nullable(),
-    parent2FirstName: z.string().optional().nullable(),
+    parent1Telephone: optionalPhone,
+    parent2LastName: optionalShortText(),
+    parent2FirstName: optionalShortText(),
     parent2Email: z.email('Email du parent 2 invalide').optional().nullable(),
-    parent2Telephone: z.string().optional(),
+    parent2Telephone: optionalPhone,
 })
 
 export type ficheParentsFormData = z.infer<typeof ficheParentsSchema>

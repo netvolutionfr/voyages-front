@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SAFE_ID_REGEX, optionalPhone, requiredShortText } from "@/schemas/common";
 
 const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
 
@@ -23,13 +24,13 @@ const BirthDateSchema = z
     .optional();
 
 export const UserSchema = z.object({
-    firstName: z.string().min(1, "Le prénom est requis"),
-    lastName: z.string().min(1, "Le nom est requis"),
+    firstName: requiredShortText("Le prénom est requis"),
+    lastName: requiredShortText("Le nom est requis"),
     email: z.email("Email invalide"),
     gender: z.enum(["M", "F", "N"]),
     birthDate: BirthDateSchema,
-    telephone: z.string().optional(),
-    sectionPublicId: z.string().nullable().optional(),
+    telephone: optionalPhone,
+    sectionPublicId: z.string().regex(SAFE_ID_REGEX, "Section invalide").nullable().optional(),
     role: z.enum(["STUDENT", "TEACHER", "PARENT", "ADMIN"]),
 });
 

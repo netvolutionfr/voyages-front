@@ -8,6 +8,10 @@ import type {
 } from "@refinedev/core";
 import { api } from "@/auth/api.ts";
 
+/** Encode un id (route param, publicId…) inséré dans un chemin d'URL :
+ *  évite toute confusion path/query si la valeur est malformée ou forgée. */
+const enc = (id: string | number) => encodeURIComponent(String(id));
+
 /**
  * Construit les params Spring standards :
  * - Pagination: page (0-based), size
@@ -131,7 +135,7 @@ export const voyagesDataProvider: DataProvider = {
                 const tripId = meta?.tripId;
                 const qs = new URLSearchParams();
                 if (tripId !== undefined) qs.set("tripId", String(tripId));
-                const data = await api.get<TData>(`/users/${id}/documents?${qs.toString()}`);
+                const data = await api.get<TData>(`/users/${enc(id)}/documents?${qs.toString()}`);
                 return { data };
             }
 
@@ -140,18 +144,18 @@ export const voyagesDataProvider: DataProvider = {
                 const tripId = meta?.tripId;
                 const qs = new URLSearchParams();
                 if (tripId !== undefined) qs.set("tripId", String(tripId));
-                const data = await api.get<TData>(`/users/${id}/health-form?${qs.toString()}`);
+                const data = await api.get<TData>(`/users/${enc(id)}/health-form?${qs.toString()}`);
                 return { data };
             }
 
             // URL de prévisualisation document : /users/documents/{docId}/preview-url
             if (resource === "admin-document-preview-url") {
-                const data = await api.get<TData>(`/users/documents/${id}/preview-url`);
+                const data = await api.get<TData>(`/users/documents/${enc(id)}/preview-url`);
                 return { data };
             }
 
             // Fallback générique
-            const data = await api.get<TData>(`/${resource}/${id}`);
+            const data = await api.get<TData>(`/${resource}/${enc(id)}`);
             return { data };
         } catch (error) {
             return Promise.reject(error);
@@ -180,10 +184,10 @@ export const voyagesDataProvider: DataProvider = {
                 return { data };
             }
             if (resource === "trip-preferences") {
-                const data = await api.post<TData>(`/trip-preferences/${id}`, variables);
+                const data = await api.post<TData>(`/trip-preferences/${enc(id)}`, variables);
                 return { data };
             }
-            const data = await api.put<TData>(`/${resource}/${id}`, variables);
+            const data = await api.put<TData>(`/${resource}/${enc(id)}`, variables);
             return { data };
         } catch (error) {
             return Promise.reject(error);
@@ -279,7 +283,7 @@ export const voyagesDataProvider: DataProvider = {
         params: DeleteOneParams<TVariables>
     ): Promise<DeleteOneResponse<TData>> => {
         const { resource, id } = params;
-        const data = await api.delete<TData>(`/${resource}/${id}`);
+        const data = await api.delete<TData>(`/${resource}/${enc(id)}`);
         return { data };
     },
 

@@ -6,13 +6,17 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config([
-  globalIgnores(['dist']),
+  // 'src/components/ui' = composants shadcn importés (anciennement .eslintignore)
+  globalIgnores(['dist', 'src/components/ui/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      // eslint-plugin-react-hooks v7 : les configs flat vivent sous `configs.flat`,
+      // `configs['recommended-latest']` est le format legacy (plugins en tableau)
+      // qui fait planter ESLint 10 avant toute analyse.
+      reactHooks.configs.flat['recommended-latest'],
       reactRefresh.configs.vite,
     ],
     languageOptions: {
