@@ -12,8 +12,35 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # Barrière qualité bloquante : lint + types/build + audit de dépendances.
+  # Tout échec ici stoppe le pipeline avant la construction de l'image.
+  quality:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check & build
+        run: npm run build
+
+      - name: Audit dependencies (high+)
+        run: npm audit --audit-level=high
+
   build-and-push:
     runs-on: ubuntu-24.04
+    needs: quality
     environment: Prod
     permissions:
       contents: read
@@ -22,12 +49,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # (facultatif) Lint rapide – non bloquant au début
-      - name: Lint (non-bloquant)
-        run: |
-          npm ci || true
-          npm run lint --if-present || true
 
       - name: Log in to GHCR
         uses: docker/login-action@v3

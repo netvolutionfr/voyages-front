@@ -60,6 +60,18 @@ src/
 
 **Data layer** : deux providers Refine — `voyagesDataProvider` (authentifié) et `publicDataProvider` (sans auth). Le backend renvoie des réponses paginées Spring : `{ content: T[], page: { totalElements: number } }`.
 
+## Intégration continue (CI)
+
+Le workflow `.github/workflows/frontend-cicd.yml` applique une **barrière qualité bloquante** avant toute construction d'image, sur chaque push et pull request vers `master` (Node 24) :
+
+| Étape | Commande | Effet si échec |
+|---|---|---|
+| Lint | `npm run lint` | Pipeline stoppé |
+| Vérification des types + build | `npm run build` | Pipeline stoppé (`tsc -b` + bundle) |
+| Audit des dépendances | `npm audit --audit-level=high` | Pipeline stoppé (vulnérabilité high/critical) |
+
+Tant que ce job `quality` ne passe pas, les jobs de construction d'image (`build-and-push`) et de déploiement (`deploy_to_server`) ne démarrent pas. Pensez à exécuter `npm run lint` et `npm run build` en local avant de pousser.
+
 ## Déploiement
 
 ```bash
