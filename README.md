@@ -6,7 +6,7 @@ Construit avec React 19 + TypeScript, Vite, TailwindCSS v4, shadcn/ui et Refine.
 
 ## Prérequis
 
-- Node.js ≥ 18
+- Node.js 24 (aligné avec la CI et l'image Docker de build)
 - Backend `voyages-back` disponible sur `http://localhost:8080`
 
 ## Installation
@@ -83,7 +83,14 @@ npm run build
 # Servir le dossier dist/ avec un serveur statique ou via Docker
 ```
 
-Un `Dockerfile` et une configuration Nginx (`deploy/nginx.conf`) sont fournis.
+Un `Dockerfile` et une configuration Nginx (`deploy/nginx.conf`) sont fournis. L'image construit le frontend avec `node:24-alpine`, puis sert `dist/` via Nginx. Les seuls arguments Vite attendus au build sont `VITE_API_URL` et `VITE_FILES_BASE`, identiques à ceux passés par la CI :
+
+```bash
+docker build \
+  --build-arg VITE_API_URL=https://api.example.test/api \
+  --build-arg VITE_FILES_BASE=https://files.example.test \
+  -t voyages-front .
+```
 
 ### En-têtes de sécurité
 

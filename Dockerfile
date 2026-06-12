@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 # Copie du lock + npmrc avant l'install
@@ -9,13 +9,11 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 
 # --- Vars de build Vite ---
-ARG VITE_API_BASE
 ARG VITE_API_URL
 ARG VITE_FILES_BASE
 
 # Les exposer au process de build:
-ENV VITE_API_BASE=$VITE_API_BASE \
-    VITE_API_URL=$VITE_API_URL \
+ENV VITE_API_URL=$VITE_API_URL \
     VITE_FILES_BASE=$VITE_FILES_BASE
 
 RUN npm run build
