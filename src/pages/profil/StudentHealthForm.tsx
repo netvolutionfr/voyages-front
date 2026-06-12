@@ -1,11 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { AlertCircle, Pill, Phone, Shield, Info, CheckCircle } from "lucide-react";
-import { useOne, useCreate, type HttpError } from "@refinedev/core";
+import { useOne, useCreate } from "@refinedev/core";
 import type {
     StudentHealthFormResponse,
     StudentHealthFormUpsertRequest,
 } from "@/type/studentHealthForm";
-import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     studentHealthFormSchema,
@@ -32,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import type { Resolver, SubmitHandler } from "react-hook-form";
+import { useForm, useWatch, type Resolver, type SubmitHandler } from "react-hook-form";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -141,7 +140,7 @@ export default function StudentHealthFormImproved() {
     }, [result]);
 
     // React Hook Form
-    const form = useForm<StudentHealthFormResponse, HttpError, StudentHealthFormValues>({
+    const form = useForm<StudentHealthFormValues>({
         resolver: zodResolver(studentHealthFormSchema) as Resolver<
             StudentHealthFormValues,
             unknown,
@@ -149,6 +148,24 @@ export default function StudentHealthFormImproved() {
         >,
         defaultValues: initial,
         mode: "onChange",
+    });
+    const hasUnsavedChanges = form.formState.isDirty;
+    const canSave = hasUnsavedChanges && !isSaving && !isLoading;
+    const hasSavedHealthForm = Boolean(
+        result &&
+        result.status !== "MISSING" &&
+        (result.signedAt || result.updatedAt)
+    );
+    const savedHealthFormStatus = hasSavedHealthForm
+        ? result?.signedAt
+            ? `Signé le ${new Date(result.signedAt).toLocaleString()}`
+            : result?.updatedAt
+                ? `Dernière mise à jour : ${new Date(result.updatedAt).toLocaleString()}`
+                : null
+        : null;
+    const hasPAI = useWatch({
+        control: form.control,
+        name: "hasPAI",
     });
 
     // Refresh defaults on new data
@@ -163,6 +180,10 @@ export default function StudentHealthFormImproved() {
     // Les motifs de refus sont validés par le schéma (superRefine) :
     // ce handler n'est appelé qu'avec des valeurs cohérentes.
     const onSubmit: SubmitHandler<StudentHealthFormValues> = (values) => {
+        if (!hasUnsavedChanges) {
+            return;
+        }
+
         const dto: StudentHealthFormUpsertRequest = {
             allergies: {
                 drug: csvToArray(values.drugAllergiesCsv) ?? null,
@@ -231,15 +252,13 @@ export default function StudentHealthFormImproved() {
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Statut de complétion (signedAt / updatedAt) */}
-                {(result?.signedAt || result?.updatedAt) && (
+                {savedHealthFormStatus && (
                     <div className="flex items-start gap-3 rounded-lg border bg-emerald-50 p-4 dark:bg-emerald-950/20">
                         <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0 dark:text-emerald-400" />
                         <div className="text-sm">
                             <p className="font-medium text-emerald-800 dark:text-emerald-200">Formulaire enregistré</p>
                             <p className="text-emerald-700 dark:text-emerald-300">
-                                {result?.signedAt
-                                    ? `Signé le ${new Date(result.signedAt).toLocaleString()}`
-                                    : `Dernière mise à jour : ${new Date(result!.updatedAt!).toLocaleString()}`}
+                                {savedHealthFormStatus}
                             </p>
                         </div>
                     </div>
@@ -406,7 +425,6 @@ export default function StudentHealthFormImproved() {
                                             control={form.control}
                                             name="paiDetails"
                                             render={({ field }) => {
-                                                const hasPAI = form.watch("hasPAI");
                                                 // Mobile: totalement masqué quand non coché
                                                 // Desktop: invisible mais espace réservé quand non coché (pas de décalage)
                                                 const mobile = hasPAI ? "block" : "hidden";
@@ -722,7 +740,7 @@ export default function StudentHealthFormImproved() {
 
                             {/* Actions */}
                             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-                                <Button type="submit" disabled={isSaving} className="flex-1">
+                                <Button type="submit" disabled={!canSave} className="flex-1">
                                     {isSaving ? "Enregistrement…" : "Enregistrer"}
                                 </Button>
 
@@ -753,7 +771,7 @@ export default function StudentHealthFormImproved() {
                 )}
             </CardContent>
             <CardFooter className="text-xs text-muted-foreground">
-                {result?.updatedAt ? (
+                {hasSavedHealthForm && result?.updatedAt ? (
                     <span>
                         Dernière mise à jour : {new Date(result.updatedAt).toLocaleString()}
                     </span>
