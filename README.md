@@ -80,3 +80,9 @@ npm run build
 ```
 
 Un `Dockerfile` et une configuration Nginx (`deploy/nginx.conf`) sont fournis.
+
+### En-têtes de sécurité
+
+`deploy/security-headers.conf` ajoute, sur toutes les réponses, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` et `Strict-Transport-Security`. Le snippet est ré-inclus dans **chaque** `location` (nginx n'hérite pas les `add_header` quand une location définit les siens).
+
+La **CSP** est volontairement livrée en `Content-Security-Policy-Report-Only` : elle ne casse pas le rendu et ne fait que signaler les violations dans la console du navigateur. À promouvoir en `Content-Security-Policy` (enforcing) après observation, idéalement en remplaçant les `https:` génériques de `connect-src`/`img-src` par les origines réelles de l'API (`VITE_API_URL`) et du stockage (`VITE_FILES_BASE`).
