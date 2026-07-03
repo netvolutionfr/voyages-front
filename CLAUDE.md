@@ -91,6 +91,8 @@ Types for all of the above live in `src/type/rgpd.ts`. The export page (`/profil
 
 ⚠️ **`section` is now read-only in the UI** (per product decision): it isn't part of `PATCH /me/profile` nor a rectification field. Changing it requires an admin (`PUT /users/{id}`, existing `UsersForm.tsx`).
 
+**Admin processing** (`/admin/rectifications`, `src/pages/admin/rectifications/RectificationsAdmin.tsx`, behind `RequireAdmin`): lists requests via a new `admin-rectification-requests` dataProvider case (`GET /users/rectification-requests`, Spring Pageable, `status` filter through `meta.query`). Each `PENDING` row opens `ProcessRectificationDialog.tsx`, which enforces the backend's two-step contract in the UI: a link to the user's edit page (`/admin/users/edit/{userPublicId}`, opened in a new tab so the dialog stays open) to actually apply the change via the existing `PUT /users/{id}`, then a separate, explicitly-confirmed "Marquer appliquée" / "Rejeter" action that only calls `PATCH /users/rectification-requests/{id}` — it never touches the user record itself.
+
 ### Routing (`src/App.tsx`)
 
 Three tiers:

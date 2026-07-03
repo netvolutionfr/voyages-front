@@ -66,7 +66,9 @@ Page `/profil/donnees` (`src/pages/profil/MesDonnees.tsx`) : droit d'accès — 
 
 **Rectification** : la fiche de renseignements (`/profil`) sépare désormais les champs modifiables en libre-service (sexe, téléphone, nom d'affichage — via `PATCH /me/profile`) des champs d'identité en lecture seule (prénom, nom, email, date de naissance, section), qui passent par une demande de rectification (`POST /me/rectification-request`) examinée par l'établissement — la demande ne modifie rien immédiatement.
 
-D'autres volets (écran admin de traitement des demandes, effacement du compte) sont prévus dans des vagues ultérieures.
+**Traitement admin** : `/admin/rectifications` liste les demandes (filtrables par statut) et matérialise le flux imposé par le back en deux actions distinctes — appliquer le changement sur la fiche utilisateur (lien vers `/admin/users/edit/{id}`), puis clôturer la demande (« Marquer appliquée » / « Rejeter »), sans jamais confondre les deux.
+
+L'effacement du compte est prévu dans une vague ultérieure.
 
 ## Intégration continue (CI)
 

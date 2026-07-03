@@ -250,6 +250,23 @@ export const voyagesDataProvider: DataProvider = {
                 };
             }
 
+            // --- Liste des demandes de rectification (RGPD) ---
+            // Endpoint: /users/rectification-requests (ADMIN)
+            if (resource === "admin-rectification-requests") {
+                const extra: Record<string, unknown> = {};
+                if (meta?.query && typeof meta.query === "object") {
+                    Object.assign(extra, meta.query);
+                }
+                const qs = buildListParams({ resource, pagination, sorters, filters }, extra);
+                const url = `/users/rectification-requests?${qs.toString()}`;
+                const response = await api.get<PagedResponse<TData>>(url);
+
+                return {
+                    data: response.content,
+                    total: response.page?.totalElements ?? response.content.length,
+                };
+            }
+
             // --- Liste des sections ---
             // Endpoint: /sections
             // On veut généralement activeOnly=true, sortKey="yearLabel"

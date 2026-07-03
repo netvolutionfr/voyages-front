@@ -6,6 +6,7 @@ import {
     IconUser,
     IconUsers,
     IconId,
+    IconEdit,
 } from "@tabler/icons-react";
 
 export const menuEleves = [
@@ -77,5 +78,10 @@ export const menuAdmin = [
         title: "Utilisateurs",
         url: "/admin/users",
         icon: IconUser,
+    },
+    {
+        title: "Rectifications RGPD",
+        url: "/admin/rectifications",
+        icon: IconEdit,
     },
 ];

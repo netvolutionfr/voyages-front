@@ -24,6 +24,7 @@ import UsersAdmin from "@/pages/admin/users/UsersAdmin.tsx";
 import VoyagesForm from "@/pages/voyages/VoyagesForm.tsx";
 import {publicDataProvider} from "@/providers/publicDataProvider.ts";
 import ImportCsvPage from "@/pages/admin/ImportCsvPage.tsx";
+import RectificationsAdmin from "@/pages/admin/rectifications/RectificationsAdmin.tsx";
 
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -160,6 +161,14 @@ export default function App() {
                         element={
                             <RequireAdmin>
                                 <ImportCsvPage />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="/admin/rectifications"
+                        element={
+                            <RequireAdmin>
+                                <RectificationsAdmin />
                             </RequireAdmin>
                         }
                     />
