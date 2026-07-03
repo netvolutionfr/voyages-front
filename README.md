@@ -68,7 +68,7 @@ Page `/profil/donnees` (`src/pages/profil/MesDonnees.tsx`) : droit d'accès — 
 
 **Traitement admin** : `/admin/rectifications` liste les demandes (filtrables par statut) et matérialise le flux imposé par le back en deux actions distinctes — appliquer le changement sur la fiche utilisateur (lien vers `/admin/users/edit/{id}`), puis clôturer la demande (« Marquer appliquée » / « Rejeter »), sans jamais confondre les deux.
 
-L'effacement du compte est prévu dans une vague ultérieure.
+**Effacement du compte** : sur `/profil/donnees`, flux en deux temps — case de consentement, envoi d'un code à 6 chiffres par email, puis confirmation définitive. Les refus du back (dernier admin actif, inscription voyage en cours, tuteur d'un élève actif…) sont affichés via un dictionnaire de messages front ; l'action est masquée pour les comptes élèves. Après suppression, purge locale de la session et retour à l'écran de connexion.
 
 ## Intégration continue (CI)
 

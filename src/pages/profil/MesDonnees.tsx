@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 import { fetchDataExport } from "@/api/rgpd.ts";
+import AccountDeletionCard from "@/pages/profil/AccountDeletionCard.tsx";
 import { IconDownload, IconInfoCircle } from "@tabler/icons-react";
 
 /** Déclenche le téléchargement d'un JSON en mémoire, sans jamais naviguer sur le blob
@@ -48,7 +49,8 @@ const MesDonnees = () => {
     };
 
     return (
-        <Card className="w-full max-w-lg shadow-none">
+        <div className="w-full max-w-lg space-y-6">
+        <Card className="shadow-none">
             <CardHeader>
                 <CardTitle>Mes données</CardTitle>
                 <CardDescription>
@@ -83,6 +85,9 @@ const MesDonnees = () => {
                 )}
             </CardContent>
         </Card>
+
+        <AccountDeletionCard />
+        </div>
     );
 };
 
