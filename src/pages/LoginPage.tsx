@@ -4,7 +4,7 @@ import {RegisterPasskeyFlow} from "@/components/common/RegisterPasskeyFlow.tsx";
 import PasskeyInfo from "@/components/common/PasskeyInfo.tsx";
 import {LoginPasskeyFlow} from "@/components/common/LoginPasskeyFlow.tsx";
 import type {FinishResult} from "@/lib/credentials.ts";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 export default function LoginPage() {
     const [supported, setSupported] = useState<boolean | null>(null);
@@ -54,6 +54,12 @@ export default function LoginPage() {
                     )}
 
                     <PasskeyInfo />
+
+                    <p className="text-center text-xs text-muted-foreground">
+                        <Link to="/mentions-legales" className="underline">
+                            Mentions légales et protection des données
+                        </Link>
+                    </p>
                 </CardContent>
             </Card>
         </div>

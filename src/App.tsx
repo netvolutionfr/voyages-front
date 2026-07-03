@@ -28,6 +28,7 @@ import RectificationsAdmin from "@/pages/admin/rectifications/RectificationsAdmi
 
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import MentionsLegales from "@/pages/MentionsLegales.tsx";
 import OtpPage from "@/pages/OtpPage.tsx";
 import VoyageDetail from "@/pages/voyages/VoyageDetail.tsx";
 import StudentHealthForm from "@/pages/profil/StudentHealthForm.tsx";
@@ -51,6 +52,8 @@ export default function App() {
                 {/* Routes publiques */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                {/* L'information légale/RGPD doit rester consultable sans compte */}
+                <Route path="/mentions-legales" element={<MentionsLegales />} />
 
                 {/* Route OTP, restreinte par un JWT temporaire */}
                 <Route path="/otp" element={

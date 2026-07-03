@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
@@ -87,6 +88,14 @@ const MesDonnees = () => {
         </Card>
 
         <AccountDeletionCard />
+
+        <p className="text-xs text-muted-foreground">
+            Pour en savoir plus sur vos droits et leur exercice, consultez les{" "}
+            <Link to="/mentions-legales" className="underline">
+                mentions légales et la politique de protection des données
+            </Link>
+            .
+        </p>
         </div>
     );
 };

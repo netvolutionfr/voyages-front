@@ -98,7 +98,7 @@ Types for all of the above live in `src/type/rgpd.ts`. The export page (`/profil
 ### Routing (`src/App.tsx`)
 
 Three tiers:
-1. **Public** — `/login`, `/register` (no auth required)
+1. **Public** — `/login`, `/register`, `/mentions-legales` (no auth required; the legal/GDPR notice page must stay reachable without an account and still contains `[À compléter]` placeholders for the school's legal identity)
 2. **OTP-gated** — `/otp` (requires a temporary JWT to be present)
 3. **Protected** — wrapped in `<Authenticated>` + `<DashboardLayout>`. Admin sub-routes (`/admin/*`) additionally wrapped in `<RequireAdmin>`.
 

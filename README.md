@@ -70,6 +70,8 @@ Page `/profil/donnees` (`src/pages/profil/MesDonnees.tsx`) : droit d'accès — 
 
 **Effacement du compte** : sur `/profil/donnees`, flux en deux temps — case de consentement, envoi d'un code à 6 chiffres par email, puis confirmation définitive. Les refus du back (dernier admin actif, inscription voyage en cours, tuteur d'un élève actif…) sont affichés via un dictionnaire de messages front ; l'action est masquée pour les comptes élèves. Après suppression, purge locale de la session et retour à l'écran de connexion.
 
+**Mentions légales** : `/mentions-legales` (`src/pages/MentionsLegales.tsx`) est une page **publique** (accessible sans compte, liée depuis les écrans de connexion et d'inscription) décrivant l'éditeur, l'hébergeur, les traitements RGPD, les droits et leur exercice (avec liens vers les écrans self-service), et les cookies. ⚠️ Elle contient des blocs `[À compléter : …]` (identité de l'établissement, hébergeur, DPO, durées de conservation) **à renseigner avant mise en production**.
+
 ## Intégration continue (CI)
 
 Le workflow `.github/workflows/frontend-cicd.yml` applique une **barrière qualité bloquante** avant toute construction d'image, sur chaque push et pull request vers `master` (Node 24) :
