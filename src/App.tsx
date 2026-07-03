@@ -16,6 +16,7 @@ import RequireAdmin from "@/components/RequireAdmin.tsx";
 import RequireCan from "@/components/RequireCan.tsx";
 import FicheRenseignements from "@/pages/profil/FicheRenseignements.tsx";
 import FicheParents from "@/pages/profil/FicheParents.tsx";
+import MesDonnees from "@/pages/profil/MesDonnees.tsx";
 import {voyagesDataProvider} from "@/providers/dataProvider.ts";
 import SectionsAdmin from "@/pages/admin/sections/SectionsAdmin.tsx";
 import SectionsForm from "@/pages/admin/sections/SectionsForm.tsx";
@@ -73,6 +74,7 @@ export default function App() {
                     <Route path="/profil" element={<ProfilLayout />}>
                         <Route index element={<FicheRenseignements />} />
                         <Route path="parents" element={<FicheParents />} />
+                        <Route path="donnees" element={<MesDonnees />} />
                     </Route>
 
                     <Route path="/voyages" element={<Voyages />} />

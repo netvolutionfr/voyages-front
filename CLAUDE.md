@@ -51,7 +51,7 @@ Authentication is **WebAuthn/passkeys only** — there is no password flow. The 
 |------|------|
 | `token.ts` | `StoredAuth` shape, **in-memory** access-token storage (refresh token lives in an httpOnly cookie), JWT decode helpers, expiry check; `clearAuth()` also purges the identity cache |
 | `http.ts` | `apiFetch()` — wraps `fetch`, injects `Authorization` header, proactively refreshes expired access tokens (via `/auth/refresh`, with X-XSRF-TOKEN header and a short cooldown after a failed refresh), retries once on 401 |
-| `api.ts` | `api.get/post/put/patch/delete` typed wrapper over `apiFetch`; throws `ApiError` on non-2xx |
+| `api.ts` | `api.get/post/put/patch/delete` typed wrapper over `apiFetch`; `delete` accepts an optional body (needed for `DELETE /me` with an OTP); throws `ApiError` on non-2xx |
 | `csrf.ts` | Shared `xsrfHeader()` helper — reflects the `XSRF-TOKEN` cookie for cookie-backed endpoints (refresh, logout, WebAuthn) |
 | `passkeys.ts` | WebAuthn browser API calls for registration and authentication (one-step and two-step flows), all through `authApi` (`VITE_API_URL` + CSRF) |
 | `session.ts` | In-memory identity cache (60s TTL); fast-path reads identity from the JWT payload |
@@ -72,6 +72,18 @@ Two Refine data providers:
 - **`publicDataProvider`** — unauthenticated calls (no `Authorization` header).
 
 When using `useList` with `voyagesDataProvider`, pass backend-specific query params through `meta.query` or `meta.includeDocSummary` etc.
+
+### GDPR (`src/api/rgpd.ts`, `src/type/rgpd.ts`)
+
+`src/api/rgpd.ts` wraps the backend's GDPR endpoints (right of access, rectification, erasure), all authenticated via the `Authorization` header (no CSRF surface, unlike the cookie-backed auth endpoints):
+
+- `fetchDataExport()` → `GET /me/data-export` — fetched as JSON and turned into a client-side `Blob` download (never navigated to directly, since `Content-Disposition` would be useless without the in-memory bearer token).
+- `patchMyProfile()` → `PATCH /me/profile` (replaces the deprecated `POST /me` for `telephone`/`displayName`/`gender`).
+- `createRectificationRequest()` → `POST /me/rectification-request` for identity fields that aren't self-editable (`firstName`, `lastName`, `birthDate`, `email`).
+- `requestAccountDeletion()` / `confirmAccountDeletion(otp)` → the two-step self-service erasure flow (`POST /me/delete-request` then `DELETE /me`).
+- `patchRectificationRequest()` → admin-side `PATCH /users/rectification-requests/{id}`.
+
+Types for all of the above live in `src/type/rgpd.ts`. The export page (`/profil/donnees`, `src/pages/profil/MesDonnees.tsx`) is the first consumer.
 
 ### Routing (`src/App.tsx`)
 

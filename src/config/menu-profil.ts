@@ -1,4 +1,4 @@
-import {IconHeartbeat, IconUsersGroup, IconUser} from "@tabler/icons-react";
+import {IconHeartbeat, IconUsersGroup, IconUser, IconShieldLock} from "@tabler/icons-react";
 
 const menuProfil = [
     {
@@ -15,6 +15,11 @@ const menuProfil = [
         title: 'Parents',
         icon: IconUsersGroup,
         href: '/profil/parents',
+    },
+    {
+        title: 'Mes données',
+        icon: IconShieldLock,
+        href: '/profil/donnees',
     },
 ]
 export default menuProfil;

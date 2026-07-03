@@ -60,6 +60,12 @@ src/
 
 **Data layer** : deux providers Refine — `voyagesDataProvider` (authentifié) et `publicDataProvider` (sans auth). Le backend renvoie des réponses paginées Spring : `{ content: T[], page: { totalElements: number } }`.
 
+## RGPD
+
+Page `/profil/donnees` (`src/pages/profil/MesDonnees.tsx`) : droit d'accès — l'utilisateur télécharge une copie JSON de toutes ses données (`GET /me/data-export`), générée en mémoire via un `Blob` puis un lien `download` (jamais une navigation directe sur le blob). Les fonctions d'appel (export, rectification, effacement) sont centralisées dans `src/api/rgpd.ts` ; les types dans `src/type/rgpd.ts`.
+
+D'autres volets (rectification en self-service, écran admin de traitement, effacement du compte) sont prévus dans des vagues ultérieures.
+
 ## Intégration continue (CI)
 
 Le workflow `.github/workflows/frontend-cicd.yml` applique une **barrière qualité bloquante** avant toute construction d'image, sur chaque push et pull request vers `master` (Node 24) :
