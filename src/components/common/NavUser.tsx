@@ -3,7 +3,9 @@
 import {
   IconDotsVertical,
   IconLogout,
+  IconUserCircle,
 } from "@tabler/icons-react"
+import { Link } from "react-router-dom"
 
 import {
   Avatar,
@@ -103,6 +105,13 @@ const NavUser = () => {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/profil">
+                  <IconUserCircle />
+                  Mon profil
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <a onClick={() => logout()}>

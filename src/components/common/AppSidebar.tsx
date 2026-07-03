@@ -1,6 +1,7 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { IconGlobe } from '@tabler/icons-react'
 import React from "react";
+import {Link} from "react-router-dom";
 import {menuAdmin, menuEleves, menuParents, menuProfs} from "@/config/menu.ts";
 import {useGetIdentity} from "@refinedev/core";
 import type {User} from "@/type/User.ts";
@@ -29,10 +30,13 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="/">
+                            {/* Link SPA obligatoire : une ancre brute recharge la page et
+                                détruit l'access token en mémoire (retour /login si le
+                                refresh cookie ne restaure pas la session à temps). */}
+                            <Link to="/">
                                 <IconGlobe className="!size-5" />
                                 <span className="text-base font-semibold">Voyages</span>
-                            </a>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

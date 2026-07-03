@@ -9,7 +9,8 @@ const menuProfil = [
     {
         title: 'Fiche sanitaire',
         icon: IconHeartbeat,
-        href: '/profil/sanitaire',
+        // La route est déclarée au niveau racine dans App.tsx, pas sous /profil.
+        href: '/sanitaire',
     },
     {
         title: 'Parents',
