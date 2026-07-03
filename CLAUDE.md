@@ -85,6 +85,12 @@ When using `useList` with `voyagesDataProvider`, pass backend-specific query par
 
 Types for all of the above live in `src/type/rgpd.ts`. The export page (`/profil/donnees`, `src/pages/profil/MesDonnees.tsx`) is the first consumer.
 
+**Rectification** (`src/pages/profil/FicheRenseignements.tsx`): split into a read-only identity block (`firstName`, `lastName`, `email`, `birthDate`, `section` — none of these are in the `PATCH /me/profile` contract) and an editable block (`gender`, `telephone`, `displayName`) submitted through `dataProvider.update({ resource: "me" })`, which now whitelists exactly those 3 fields before calling `PATCH /me/profile` — it no longer calls the deprecated `POST /me`. The identity block's "Demander une rectification" button opens `RectificationRequestDialog.tsx`, which posts to `/me/rectification-request` and always shows a "transmitted, processed within 1 month" message — it never implies the change is already applied.
+
+⚠️ **Known backend gap**: `GET /me` (`UserResponse`) does not return `displayName`, even though `PATCH /me/profile` accepts it and the data export DTO includes `profile.displayName`. The form currently can't prefill this field with its stored value — flagged for the backend team, not solved client-side.
+
+⚠️ **`section` is now read-only in the UI** (per product decision): it isn't part of `PATCH /me/profile` nor a rectification field. Changing it requires an admin (`PUT /users/{id}`, existing `UsersForm.tsx`).
+
 ### Routing (`src/App.tsx`)
 
 Three tiers:

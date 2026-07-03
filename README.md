@@ -64,7 +64,9 @@ src/
 
 Page `/profil/donnees` (`src/pages/profil/MesDonnees.tsx`) : droit d'accès — l'utilisateur télécharge une copie JSON de toutes ses données (`GET /me/data-export`), générée en mémoire via un `Blob` puis un lien `download` (jamais une navigation directe sur le blob). Les fonctions d'appel (export, rectification, effacement) sont centralisées dans `src/api/rgpd.ts` ; les types dans `src/type/rgpd.ts`.
 
-D'autres volets (rectification en self-service, écran admin de traitement, effacement du compte) sont prévus dans des vagues ultérieures.
+**Rectification** : la fiche de renseignements (`/profil`) sépare désormais les champs modifiables en libre-service (sexe, téléphone, nom d'affichage — via `PATCH /me/profile`) des champs d'identité en lecture seule (prénom, nom, email, date de naissance, section), qui passent par une demande de rectification (`POST /me/rectification-request`) examinée par l'établissement — la demande ne modifie rien immédiatement.
+
+D'autres volets (écran admin de traitement des demandes, effacement du compte) sont prévus dans des vagues ultérieures.
 
 ## Intégration continue (CI)
 

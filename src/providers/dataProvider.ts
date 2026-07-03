@@ -179,8 +179,17 @@ export const voyagesDataProvider: DataProvider = {
         { resource, id, variables }: UpdateParams<TVariables>
     ): Promise<UpdateResponse<TData>> => {
         try {
+            // Rectification self-service : PATCH /me/profile n'accepte que ces 3 champs.
+            // Whitelist explicite pour ne jamais relayer un payload arbitraire vers ce PATCH,
+            // même si l'appelant (ex: variables du formulaire) en contient davantage.
             if (resource === "me") {
-                const data = await api.post<TData>("/me", variables);
+                const allowed = ["telephone", "displayName", "gender"] as const;
+                const source = (variables ?? {}) as Record<string, unknown>;
+                const patch: Record<string, unknown> = {};
+                for (const key of allowed) {
+                    if (source[key] !== undefined) patch[key] = source[key];
+                }
+                const data = await api.patch<TData>("/me/profile", patch);
                 return { data };
             }
             if (resource === "trip-preferences") {

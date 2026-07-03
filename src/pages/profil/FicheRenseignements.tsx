@@ -1,6 +1,8 @@
 import {useForm} from "@refinedev/react-hook-form";
+import type {HttpError} from "@refinedev/core";
 import LoadingSpinner from "@/components/common/LoadingSpinner.tsx";
 import {Card, CardContent, CardHeader} from "@/components/ui/card.tsx";
+import {Separator} from "@/components/ui/separator.tsx";
 import {
     Form,
     FormControl,
@@ -9,49 +11,80 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form.tsx";
-import {ficheRenseignementSchema, type ficheRenseignementFormData} from "@/schemas/ficheRenseignementSchema.ts";
+import {profilePatchSchema, type ProfilePatchFormData} from "@/schemas/profilePatchSchema.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group.tsx";
-import {useHookFormMask} from "use-mask-input";
 import {PhoneInput} from "@/components/ui/phone-input.tsx";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.tsx";
-import {SECTIONS} from "@/config/sections.ts";
-import {Check, ChevronsUpDown} from "lucide-react";
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command.tsx";
-import {cn} from "@/lib/utils.ts";
+import RectificationRequestDialog from "@/pages/profil/RectificationRequestDialog.tsx";
 
-function convertDateToISO(dateStr: string): string {
-    const [day, month, year] = dateStr.split('/')
-    return `${year}-${month}-${day}` // format ISO compatible avec LocalDate
+/** yyyy-MM-dd (LocalDate backend) -> jj/mm/aaaa, affichage seul (champ non modifiable ici). */
+function formatDateFR(isoDate?: string | null): string {
+    if (!isoDate) return "—";
+    const [year, month, day] = isoDate.split("-");
+    return `${day}/${month}/${year}`;
+}
+
+function ReadOnlyField({label, value}: { label: string; value?: string | null }) {
+    return (
+        <div>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="font-medium">{value || "—"}</p>
+        </div>
+    );
 }
 
 const FicheRenseignements = () => {
-    const form = useForm({
-        resolver: zodResolver(ficheRenseignementSchema),
-        refineCoreProps : {
+    const form = useForm<ProfilePatchFormData, HttpError, ProfilePatchFormData>({
+        resolver: zodResolver(profilePatchSchema),
+        refineCoreProps: {
             resource: "me",
             id: "me",
             action: "edit",
-            redirect: false
+            redirect: false,
         },
     });
 
-    const registerWithMask = useHookFormMask(form.register);
-    const register = form.register;
+    const {register} = form;
+    const profile = form.refineCore.query?.data?.data as
+        | { firstName?: string; lastName?: string; email?: string; birthDate?: string; section?: string }
+        | undefined;
 
-    const onSubmit = async (values: ficheRenseignementFormData) => {
-        // Convert date to ISO format for LocalDate compatibility
-        if (values.birthDate) {
-            values.birthDate = convertDateToISO(values.birthDate);
-        }
-        await form.refineCore.onFinish(values);
+    const onSubmit = async (values: ProfilePatchFormData) => {
+        // PATCH /me/profile : absent = inchangé, on n'envoie donc que des valeurs renseignées.
+        await form.refineCore.onFinish({
+            gender: values.gender,
+            telephone: values.telephone || undefined,
+            displayName: values.displayName || undefined,
+        });
     };
 
+    if (form.refineCore.query?.isLoading) {
+        return <LoadingSpinner/>;
+    }
+
     return (
-        <>
-            <Card className="w-full max-w-lg shadow-none">
+        <div className="w-full max-w-lg space-y-6">
+            <Card className="shadow-none">
+                <CardHeader>Identité</CardHeader>
+                <CardContent className="p-4 space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                        Ces informations relèvent du dossier scolaire ou de l'identifiant de connexion et ne sont pas
+                        modifiables directement.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <ReadOnlyField label="Prénom" value={profile?.firstName}/>
+                        <ReadOnlyField label="Nom" value={profile?.lastName}/>
+                        <ReadOnlyField label="Email" value={profile?.email}/>
+                        <ReadOnlyField label="Date de naissance" value={formatDateFR(profile?.birthDate)}/>
+                        <ReadOnlyField label="Section" value={profile?.section}/>
+                    </div>
+                    <RectificationRequestDialog/>
+                </CardContent>
+            </Card>
+
+            <Card className="shadow-none">
                 <CardHeader>Fiche de renseignements</CardHeader>
                 <CardContent className="p-4">
                     <Form {...form}>
@@ -59,17 +92,17 @@ const FicheRenseignements = () => {
                             <FormField
                                 control={form.control}
                                 name="gender"
-                                render={( {field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Sexe</FormLabel>
                                         <FormControl>
                                             <RadioGroup
-                                                {...register("gender")}
-                                                defaultValue={form.refineCore.query?.data?.data.sexe}
+                                                onValueChange={field.onChange}
+                                                value={field.value}
                                                 className="flex flex-row gap-8">
                                                 <FormItem className="flex items-center gap-3">
                                                     <FormControl>
-                                                        <RadioGroupItem value="M" checked={field.value === "M"}/>
+                                                        <RadioGroupItem value="M"/>
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Masculin
@@ -77,7 +110,7 @@ const FicheRenseignements = () => {
                                                 </FormItem>
                                                 <FormItem className="flex items-center gap-3">
                                                     <FormControl>
-                                                        <RadioGroupItem value="F" checked={field.value === "F"}/>
+                                                        <RadioGroupItem value="F"/>
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Féminin
@@ -85,7 +118,7 @@ const FicheRenseignements = () => {
                                                 </FormItem>
                                                 <FormItem className="flex items-center gap-3">
                                                     <FormControl>
-                                                        <RadioGroupItem value="N" checked={field.value === "N"}/>
+                                                        <RadioGroupItem value="N"/>
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Non spécifié
@@ -93,123 +126,49 @@ const FicheRenseignements = () => {
                                                 </FormItem>
                                             </RadioGroup>
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="birthDate"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormLabel>Date de naissance</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    {...registerWithMask("birthDate", ['99/99/9999'], {
-                                                        required: true
-                                                    })}
-                                                    inputMode="numeric"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-
-
-                                <div className="col-span-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="telephone"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Téléphone</FormLabel>
-                                                <FormControl>
-                                                    <PhoneInput defaultCountry="FR" {...field} className="input" />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
 
                             <FormField
                                 control={form.control}
-                                name="section"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Section</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn(
-                                                            "w-[200px] justify-between",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value
-                                                            ? SECTIONS.find(
-                                                                (section) => section === field.value
-                                                            )
-                                                            : "Choisir une section"}
-                                                        <ChevronsUpDown className="opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-[200px] p-0">
-                                                <Command>
-                                                    <CommandInput
-                                                        placeholder="Rechercher..."
-                                                        className="h-9"
-                                                    />
-                                                    <CommandList>
-                                                        <CommandEmpty>Aucune section trouvée.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {SECTIONS.map((section) => (
-                                                                <CommandItem
-                                                                    value={section}
-                                                                    key={section}
-                                                                    onSelect={() => {
-                                                                        form.setValue("section", section)
-                                                                    }}
-                                                                >
-                                                                    {section}
-                                                                    <Check
-                                                                        className={cn(
-                                                                            "ml-auto",
-                                                                            section === field.value
-                                                                                ? "opacity-100"
-                                                                                : "opacity-0"
-                                                                        )}
-                                                                    />
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
+                                name="telephone"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>Téléphone</FormLabel>
+                                        <FormControl>
+                                            <PhoneInput defaultCountry="FR" {...field} className="input"/>
+                                        </FormControl>
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
 
+                            <FormField
+                                control={form.control}
+                                name="displayName"
+                                render={() => (
+                                    <FormItem>
+                                        <FormLabel>Nom d'affichage</FormLabel>
+                                        <FormControl>
+                                            <Input {...register("displayName")} />
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <Separator/>
+
                             <Button type="submit" disabled={form.refineCore.formLoading}>
-                                {form.refineCore.formLoading ? <LoadingSpinner /> : "Enregistrer"}
+                                {form.refineCore.formLoading ? <LoadingSpinner/> : "Enregistrer"}
                             </Button>
                         </form>
                     </Form>
                 </CardContent>
             </Card>
-        </>
+        </div>
     );
-
-}
+};
 export default FicheRenseignements;
