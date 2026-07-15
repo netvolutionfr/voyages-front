@@ -34,8 +34,8 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                 détruit l'access token en mémoire (retour /login si le
                                 refresh cookie ne restaure pas la session à temps). */}
                             <Link to="/">
-                                <IconGlobe className="!size-5" />
-                                <span className="text-base font-semibold">Voyages</span>
+                                <IconGlobe className="!size-5 text-sun" />
+                                <span className="font-display text-base font-semibold">Voyages</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

@@ -76,7 +76,8 @@ const NavUser = () => {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user?.fullName}</span>
-                <span className="text-muted-foreground truncate text-xs">
+                {/* Sur la sidebar marine, muted-foreground (encre) serait illisible */}
+                <span className="text-sidebar-foreground/70 truncate text-xs">
                   {user?.email}
                 </span>
               </div>
