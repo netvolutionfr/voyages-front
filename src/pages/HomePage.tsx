@@ -18,7 +18,7 @@ import {useEffect, useState} from "react";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import type {Me} from "@/auth/types.ts";
 import type {HttpError} from "@refinedev/core";
-import {User, Mail, Calendar, Phone, UserCircle, Info} from "lucide-react";
+import {IconUser, IconMail, IconCalendar, IconPhone, IconUserCircle, IconInfoCircle} from "@tabler/icons-react";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 const formSchema = z.object({
@@ -87,7 +87,7 @@ const HomePage = () => {
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
                     <div className="flex gap-3 rounded-lg border bg-muted/50 p-4">
-                        <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <IconInfoCircle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Bienvenue sur votre tableau de bord. Consultez et gérez vos informations personnelles.
                         </p>
@@ -129,7 +129,7 @@ const HomePage = () => {
                                 {/* Nom */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <User className="h-4 w-4 text-muted-foreground" />
+                                        <IconUser className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Nom</span>
                                     </div>
                                     <div className="flex-1 text-sm pl-7 sm:pl-0">{me.lastName}</div>
@@ -138,7 +138,7 @@ const HomePage = () => {
                                 {/* Prénom */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <User className="h-4 w-4 text-muted-foreground" />
+                                        <IconUser className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Prénom</span>
                                     </div>
                                     <div className="flex-1 text-sm pl-7 sm:pl-0">{me.firstName}</div>
@@ -147,7 +147,7 @@ const HomePage = () => {
                                 {/* Profil */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <UserCircle className="h-4 w-4 text-muted-foreground" />
+                                        <IconUserCircle className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Profil</span>
                                     </div>
                                     <div className="flex-1 pl-7 sm:pl-0">
@@ -160,7 +160,7 @@ const HomePage = () => {
                                 {/* Email */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <Mail className="h-4 w-4 text-muted-foreground" />
+                                        <IconMail className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Email</span>
                                     </div>
                                     <div className="flex-1 text-sm pl-7 sm:pl-0 break-all">{me.email}</div>
@@ -169,7 +169,7 @@ const HomePage = () => {
                                 {/* Date de naissance */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <IconCalendar className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Date de naissance</span>
                                     </div>
                                     <div className="flex-1 text-sm pl-7 sm:pl-0">
@@ -189,7 +189,7 @@ const HomePage = () => {
                                 {/* Genre */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b last:border-0">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <UserCircle className="h-4 w-4 text-muted-foreground" />
+                                        <IconUserCircle className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Genre</span>
                                     </div>
                                     <div className="flex-1 text-sm pl-7 sm:pl-0">{me.gender || "—"}</div>
@@ -198,7 +198,7 @@ const HomePage = () => {
                                 {/* Téléphone */}
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3">
                                     <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
-                                        <Phone className="h-4 w-4 text-muted-foreground" />
+                                        <IconPhone className="h-4 w-4 text-muted-foreground" />
                                         <span className="text-sm font-medium text-muted-foreground">Téléphone</span>
                                     </div>
                                     <div className="flex-1 flex items-center gap-2 pl-7 sm:pl-0">

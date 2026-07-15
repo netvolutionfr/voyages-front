@@ -18,7 +18,7 @@ import {PhoneInput} from "@/components/ui/phone-input.tsx";
 import {useHookFormMask} from "use-mask-input";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.tsx";
 import {cn} from "@/lib/utils.ts";
-import {Check, ChevronsUpDown} from "lucide-react";
+import {IconCheck, IconSelector} from "@tabler/icons-react";
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command.tsx";
 import type {ISection} from "@/pages/admin/sections/ISection.ts";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group.tsx";
@@ -221,7 +221,7 @@ const ParticipantsForm = () => {
                                                         )}
                                                     >
                                                         {field.value ? options.find((section) => (section.value === field.value))?.label : "Choisir une section"}
-                                                        <ChevronsUpDown className="opacity-50" />
+                                                        <IconSelector className="opacity-50" />
                                                     </Button>
                                                 </FormControl>
                                             </PopoverTrigger>
@@ -243,7 +243,7 @@ const ParticipantsForm = () => {
                                                                     }}
                                                                 >
                                                                     {section.label}
-                                                                    <Check
+                                                                    <IconCheck
                                                                         className={cn(
                                                                             "ml-auto",
                                                                             section.value === field.value

@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import {ChevronsUpDown, Check, ImageIcon} from "lucide-react";
+import {IconSelector, IconCheck, IconPhoto} from "@tabler/icons-react";
 import {cn, getCoverUrl} from "@/lib/utils";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
@@ -139,7 +139,7 @@ const VoyagesForm = () => {
     }, [form]);
 
 
-    /** Upload direct vers MinIO via presigned URL.
+    /** IconUpload direct vers MinIO via presigned URL.
      *  Garde-fous côté client (type/taille) ; le backend/storage doit
      *  réinspecter le contenu réel, les métadonnées client étant falsifiables. */
     const MAX_COVER_MB = 10;
@@ -269,7 +269,7 @@ const VoyagesForm = () => {
                                                 {field.value
                                                     ? paysOptions.find((o) => Number(o.value) === Number(field.value))?.label
                                                     : "Choisir un pays"}
-                                                <ChevronsUpDown className="opacity-50" />
+                                                <IconSelector className="opacity-50" />
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
@@ -286,7 +286,7 @@ const VoyagesForm = () => {
                                                             onSelect={() => form.setValue("countryId", Number(p.value), { shouldDirty: true })}
                                                         >
                                                             {p.label}
-                                                            <Check
+                                                            <IconCheck
                                                                 className={cn(
                                                                     "ml-auto",
                                                                     Number(p.value) === Number(field.value) ? "opacity-100" : "opacity-0"
@@ -377,7 +377,7 @@ const VoyagesForm = () => {
                                                     />
                                                 ) : (
                                                     <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
-                                                        <ImageIcon className="h-8 w-8 opacity-60" />
+                                                        <IconPhoto className="h-8 w-8 opacity-60" />
                                                         <span className="text-sm">Aucune image</span>
                                                     </div>
                                                 )}

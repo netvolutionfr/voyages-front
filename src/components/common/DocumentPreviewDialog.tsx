@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, ExternalLink } from "lucide-react";
+import { IconDownload, IconExternalLink } from "@tabler/icons-react";
 import {apiFetch} from "@/auth/http.ts";
 
 type PreviewState = {
@@ -118,17 +118,17 @@ function DocumentPreviewContent({ state }: { state: PreviewState }) {
                     <div className="mt-2 flex items-center justify-end">
                         {canOpenInTab ? (
                             <Button variant="ghost" size="sm" onClick={handleOpenInTab}>
-                                Ouvrir dans un onglet <ExternalLink className="ml-2 h-4 w-4" />
+                                Ouvrir dans un onglet <IconExternalLink className="ml-2 h-4 w-4" />
                             </Button>
                         ) : (
                             <Button variant="ghost" size="sm" disabled={!blobUrl} asChild={Boolean(blobUrl)}>
                                 {blobUrl ? (
                                     <a href={blobUrl} download={downloadName}>
-                                        Télécharger <Download className="ml-2 h-4 w-4" />
+                                        Télécharger <IconDownload className="ml-2 h-4 w-4" />
                                     </a>
                                 ) : (
                                     <span>
-                                        Télécharger <Download className="ml-2 h-4 w-4" />
+                                        Télécharger <IconDownload className="ml-2 h-4 w-4" />
                                     </span>
                                 )}
                             </Button>

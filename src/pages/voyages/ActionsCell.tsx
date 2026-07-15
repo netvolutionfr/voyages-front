@@ -2,7 +2,7 @@ import {useDelete, useGetIdentity} from "@refinedev/core";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button.tsx";
-import {ClipboardList, EditIcon, TrashIcon} from "lucide-react";
+import {IconClipboardList, IconEdit, IconTrash} from "@tabler/icons-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -48,19 +48,19 @@ function ActionsCell({item}: { item: ISection }) {
         <div className="flex gap-2">
             <Button variant="outline" asChild>
                 <Link to={`/voyages/detail/${item.id}`}>
-                    <ClipboardList />
+                    <IconClipboardList />
                 </Link>
             </Button>
             <Button variant="outline" asChild>
                 <Link to={`/voyages/edit/${item.id}`}>
-                    <EditIcon/>
+                    <IconEdit/>
                 </Link>
             </Button>
             {isAdmin?
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="outline" color="destructive">
-                        <TrashIcon/>
+                        <IconTrash/>
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

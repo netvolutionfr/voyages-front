@@ -1,7 +1,7 @@
 import type {ColumnDef} from "@tanstack/react-table";
 import {DataTableColumnHeader} from "@/components/ui/data-table-column-header.tsx";
 import type {IUser} from "@/pages/admin/users/IUser.ts";
-import {UserCheck, UserLock} from "lucide-react";
+import {IconUserCheck, IconUserOff} from "@tabler/icons-react";
 import ActionsCell from "@/pages/admin/users/ActionsCell.tsx";
 
 export const usersColumns: ColumnDef<IUser>[] = [
@@ -89,13 +89,13 @@ export const usersColumns: ColumnDef<IUser>[] = [
             row.getValue("status") === "ACTIVE"
                 ? (
                     <div className="flex justify-center items-center">
-                        <UserCheck size={18} />
+                        <IconUserCheck size={18} />
                     </div>
                 )
                 : row.getValue("status") === "PENDING"
                     ? (
                         <div className="flex justify-center items-center">
-                            <UserLock size={18} />
+                            <IconUserOff size={18} />
                         </div>
                     )
                     : null

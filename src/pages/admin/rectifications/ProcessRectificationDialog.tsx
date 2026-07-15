@@ -25,7 +25,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { ExternalLink } from "lucide-react";
+import { IconExternalLink } from "@tabler/icons-react";
 
 const FIELD_LABELS: Record<AdminRectificationRequest["field"], string> = {
     FIRST_NAME: "Prénom",
@@ -83,7 +83,7 @@ export function ProcessRectificationDialog({
                     </p>
                     <Button variant="secondary" asChild className="w-full">
                         <Link to={`/admin/users/edit/${request.userPublicId}`} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink />
+                            <IconExternalLink />
                             Ouvrir la fiche utilisateur
                         </Link>
                     </Button>

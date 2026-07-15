@@ -4,7 +4,7 @@ import {Card, CardHeader, CardTitle, CardContent} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {AlertCircle} from "lucide-react";
+import {IconAlertCircle} from "@tabler/icons-react";
 
 type LineError = { line: number; error: string };
 type ImportResult = { imported: number; skipped: number; errors: LineError[] };
@@ -139,7 +139,7 @@ export default function ImportCsvPage() {
 
                         {fileError && (
                             <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
+                                <IconAlertCircle className="h-4 w-4" />
                                 <AlertTitle>Fichier refusé</AlertTitle>
                                 <AlertDescription>{fileError}</AlertDescription>
                             </Alert>

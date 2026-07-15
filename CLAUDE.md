@@ -34,7 +34,7 @@ In dev mode, Vite proxies `/api` → `http://localhost:8080`, so direct `/api/..
 
 - **React 19 + TypeScript**, bundled with **Vite 8**
 - **TailwindCSS v4** (Vite plugin, CSS variables, no `tailwind.config.js`)
-- **shadcn/ui** "new-york" style — components live in `src/components/ui/`, icon library is `lucide-react` (+ `@tabler/icons-react` is also used)
+- **shadcn/ui** "new-york" style — components live in `src/components/ui/`. **Icon library for app code is `@tabler/icons-react`** ; `lucide-react` stays only where the shadcn primitives in `src/components/ui/` import it internally — don't add new lucide imports elsewhere
 - **Refine** (`@refinedev/core`) for resource/data/auth/access-control wiring
 - **React Router v7** for routing
 - **Zod** + **react-hook-form** + `@hookform/resolvers` for form validation
@@ -114,6 +114,13 @@ Each feature area has a Zod schema in `src/schemas/` and uses `react-hook-form` 
 - Data tables use `src/components/ui/data-table.tsx` (TanStack Table via `@refinedev/react-table`).
 - Toast notifications via `sonner`.
 - Theme (light/dark) managed by `src/components/common/ThemeProvider.tsx`.
+
+### Design system — thème « Cap au large »
+
+- All color tokens live in `src/index.css` (OKLCH, light + dark): navy `--primary`, dark navy `--sidebar` (dark **even in light mode** — deliberate), and a custom `--sun`/`--sun-foreground` amber pair exposed as `bg-sun`/`text-sun`. Amber is reserved for attention (badges, active step, sidebar active marker) — never decorative. Don't hardcode colors (`bg-amber-50`, `text-red-600`…); use tokens.
+- Fonts are **self-hosted** via `@fontsource-variable` imports in `index.css` (no Google Fonts request): Inter Variable (`font-sans`, UI/body) and Bricolage Grotesque (`font-display`, applied to h1–h3 and Card/Dialog titles automatically).
+- Public screens (login, register, OTP) are wrapped in `src/components/common/PublicShell.tsx` (marine night gradient + amber horizon); the legal notice page carries a matching navy header band. These stay marine in both light and dark themes.
+- Empty states use `src/components/common/EmptyState.tsx` (nautical-chart contour SVG), already wired into `data-table.tsx`.
 
 ### Admin-only pages
 

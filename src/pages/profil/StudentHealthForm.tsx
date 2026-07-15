@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { AlertCircle, Pill, Phone, Shield, Info, CheckCircle } from "lucide-react";
+import { IconAlertCircle, IconPill, IconPhone, IconShield, IconInfoCircle, IconCircleCheck } from "@tabler/icons-react";
 import { useOne, useCreate } from "@refinedev/core";
 import type {
     StudentHealthFormResponse,
@@ -254,7 +254,7 @@ export default function StudentHealthFormImproved() {
                 {/* Statut de complétion (signedAt / updatedAt) */}
                 {savedHealthFormStatus && (
                     <div className="flex items-start gap-3 rounded-lg border bg-emerald-50 p-4 dark:bg-emerald-950/20">
-                        <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0 dark:text-emerald-400" />
+                        <IconCircleCheck className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0 dark:text-emerald-400" />
                         <div className="text-sm">
                             <p className="font-medium text-emerald-800 dark:text-emerald-200">Formulaire enregistré</p>
                             <p className="text-emerald-700 dark:text-emerald-300">
@@ -266,7 +266,7 @@ export default function StudentHealthFormImproved() {
 
                 {/* Notice RGPD */}
                 <div className="flex gap-3 rounded-lg border bg-muted/50 p-4">
-                    <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                    <IconInfoCircle className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                     <p className="text-sm text-muted-foreground leading-relaxed">
                         Ces informations sont <span className="font-medium text-foreground">confidentielles</span> et uniquement accessibles par les personnels habilités de l’établissement et les encadrants lors des sorties. Elles sont protégées conformément au RGPD (mission d’intérêt public).
                     </p>
@@ -281,7 +281,7 @@ export default function StudentHealthFormImproved() {
                             <section className="rounded-lg border bg-card shadow-sm">
                                 <div className="border-b bg-muted/50 px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <AlertCircle className="h-5 w-5" />
+                                        <IconAlertCircle className="h-5 w-5" />
                                         <h2 className="text-lg font-semibold">Allergies</h2>
                                     </div>
                                 </div>
@@ -363,7 +363,7 @@ export default function StudentHealthFormImproved() {
                             <section className="rounded-lg border bg-card shadow-sm">
                                 <div className="border-b bg-muted/50 px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <Pill className="h-5 w-5" />
+                                        <IconPill className="h-5 w-5" />
                                         <h2 className="text-lg font-semibold">Traitements</h2>
                                     </div>
                                 </div>
@@ -455,7 +455,7 @@ export default function StudentHealthFormImproved() {
                             <section className="rounded-lg border bg-card shadow-sm">
                                 <div className="border-b bg-muted/50 px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <Phone className="h-5 w-5" />
+                                        <IconPhone className="h-5 w-5" />
                                         <h2 className="text-lg font-semibold">Contacts d'urgence</h2>
                                     </div>
                                 </div>
@@ -635,7 +635,7 @@ export default function StudentHealthFormImproved() {
                             <section className="rounded-lg border bg-card shadow-sm">
                                 <div className="border-b bg-muted/50 px-6 py-4">
                                     <div className="flex items-center gap-2">
-                                        <Shield className="h-5 w-5" />
+                                        <IconShield className="h-5 w-5" />
                                         <h2 className="text-lg font-semibold">Autorisations & validité</h2>
                                     </div>
                                 </div>

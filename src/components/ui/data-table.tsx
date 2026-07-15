@@ -4,6 +4,7 @@ import type {UseTableReturnType} from "@refinedev/react-table";
 import type {BaseRecord, HttpError} from "@refinedev/core";
 import {DataTableToolbar} from "@/components/ui/data-table-toolbar.tsx";
 import {DataTablePagination} from "@/components/ui/data-table-pagination.tsx";
+import EmptyState from "@/components/common/EmptyState.tsx";
 
 interface DataTableProps<TData extends BaseRecord, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -61,8 +62,8 @@ export function DataTable<TData extends BaseRecord, TValue>({
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center">
-                                Aucune donnée trouvée.
+                            <TableCell colSpan={columns.length}>
+                                <EmptyState title="Aucune donnée trouvée" />
                             </TableCell>
                         </TableRow>
                     )}

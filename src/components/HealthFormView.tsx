@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, Phone, AlertTriangle, Pill } from "lucide-react";
+import { IconCircleCheck, IconAlertCircle, IconPhone, IconAlertTriangle, IconPill } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import type {HealthFormAdminDTO} from "@/providers/dataProvider.ts";
 
@@ -75,7 +75,7 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
             {/* Allergies */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    <IconAlertTriangle className="h-4 w-4 text-muted-foreground" />
                     <h3 className="text-sm font-semibold">Allergies</h3>
                 </div>
                 <div className="rounded-lg border bg-card p-4 space-y-3 text-sm">
@@ -115,7 +115,7 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
             {/* Traitements */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <Pill className="h-4 w-4 text-muted-foreground" />
+                    <IconPill className="h-4 w-4 text-muted-foreground" />
                     <h3 className="text-sm font-semibold">Traitements</h3>
                 </div>
                 <div className="rounded-lg border bg-card p-4 space-y-3 text-sm">
@@ -158,7 +158,7 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
             {/* Contacts d'urgence */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <IconPhone className="h-4 w-4 text-muted-foreground" />
                     <h3 className="text-sm font-semibold">Contacts d'urgence</h3>
                 </div>
                 <div className="space-y-3">
@@ -244,12 +244,12 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
                     <div className="flex items-center gap-3 text-sm">
                         {healthForm.consentHospitalization ? (
                             <>
-                                <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                <IconCircleCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                                 <span>Soins et hospitalisation autorisés</span>
                             </>
                         ) : (
                             <>
-                                <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                                <IconAlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
                                 <span>Soins et hospitalisation non autorisés</span>
                             </>
                         )}
@@ -257,12 +257,12 @@ function HealthFormView({ data }: { data?: HealthFormAdminDTO }) {
                     <div className="flex items-center gap-3 text-sm">
                         {healthForm.consentTransport ? (
                             <>
-                                <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                <IconCircleCheck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                                 <span>Transport autorisé</span>
                             </>
                         ) : (
                             <>
-                                <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                                <IconAlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
                                 <span>Transport non autorisé</span>
                             </>
                         )}

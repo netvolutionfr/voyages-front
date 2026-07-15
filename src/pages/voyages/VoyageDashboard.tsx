@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {DocumentPreviewDialog, useDocumentPreview} from "@/components/common/DocumentPreviewDialog.tsx";
-import {FileUser, ScanSearch} from "lucide-react";
+import {IconFileDescription, IconZoomScan} from "@tabler/icons-react";
 import HealthFormView from "@/components/HealthFormView.tsx";
 
 // ---- Types (reprennent ceux du provider) ----
@@ -285,7 +285,7 @@ function RegistrationsTable({
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <Button size="sm" variant="outline" onClick={() => setSelected(r)}>
-                                        <FileUser />
+                                        <IconFileDescription />
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -457,7 +457,7 @@ function DocumentsList({ data }: { data?: DocumentsAdminDTO }) {
                                             variant="outline"
                                             onClick={() => preview.open(it.lastObject!.id, it.lastObject!.mime, it.documentType.label)}
                                         >
-                                            <ScanSearch />
+                                            <IconZoomScan />
                                         </Button>
                                     ) : (
                                         <span className="text-xs text-muted-foreground">—</span>

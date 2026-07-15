@@ -7,7 +7,7 @@ import type {IUser} from "@/pages/admin/users/IUser.ts";
 import {usersColumns} from "@/pages/admin/users/UsersColumns.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Link} from "@refinedev/core";
-import {Upload} from "lucide-react";
+import {IconUpload} from "@tabler/icons-react";
 
 const UsersAdmin = () => {
     const columns =
@@ -32,7 +32,7 @@ const UsersAdmin = () => {
                 <h1 className="text-2xl font-bold">Liste des utilisateurs de l&#39;application</h1>
                 <Button>
                     <Link to="/admin/users/import" className="flex items-center gap-2">
-                        <Upload />
+                        <IconUpload />
                         Importer depuis un CSV
                     </Link>
                 </Button>

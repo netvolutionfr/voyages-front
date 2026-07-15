@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {cn, formatCurrencyFromCents, getCoverUrl} from "@/lib/utils";
-import { Heart } from "lucide-react";
+import { IconHeart } from "@tabler/icons-react";
 import type { IVoyage } from "./IVoyage";
 import React from "react";
 
@@ -71,7 +71,7 @@ export function VoyageCard({v}: {
 
                 {v.poll && typeof v.interestedCount === "number" && (
                     <div className="absolute left-2 top-2 rounded-full bg-background/80 backdrop-blur px-2 py-1 text-xs border flex items-center gap-1">
-                        <Heart
+                        <IconHeart
                             className={cn(
                                 "h-3.5 w-3.5 cursor-pointer",
                                 currentUserInterest ? "fill-red-500 text-red-500" : "text-muted-foreground"

@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import {CheckCircle2, AlertCircle, FileText, Upload, Clock, ScanSearch, Info} from "lucide-react";
+import {IconCircleCheck, IconAlertCircle, IconFileText, IconUpload, IconClock, IconZoomScan, IconInfoCircle} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/auth/api.ts";
+import EmptyState from "@/components/common/EmptyState.tsx";
 import { DocumentPreviewDialog, useDocumentPreview } from "@/components/common/DocumentPreviewDialog.tsx";
 
 /* ==== Types (alignés sur OpenAPI) ==== */
@@ -124,7 +125,7 @@ export default function Documents() {
         input.click();
     }
 
-    /* Upload direct multipart */
+    /* IconUpload direct multipart */
     async function handleFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
         try {
             const file = e.target.files?.[0];
@@ -186,7 +187,7 @@ export default function Documents() {
         return (
             <div className="container mx-auto max-w-6xl p-4 py-8">
                 <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
+                    <IconAlertCircle className="h-4 w-4" />
                     <AlertTitle>Erreur</AlertTitle>
                     <AlertDescription>
                         {(error as HttpError)?.message ?? "Impossible de charger vos documents."}
@@ -212,7 +213,7 @@ export default function Documents() {
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight">Mes documents</h1>
                     <div className="flex gap-3 rounded-lg border bg-muted/50 p-4">
-                        <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <IconInfoCircle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Ces documents peuvent être requis pour vos voyages en cours ou à venir. Assurez-vous de les téléverser avant les dates limites.
                         </p>
@@ -266,7 +267,9 @@ export default function Documents() {
                             </div>
                             <div className="p-6">
                                 {items.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">Aucun document à afficher.</p>
+                                    <EmptyState title="Aucun document à afficher">
+                                        Les documents demandés pour vos voyages apparaîtront ici.
+                                    </EmptyState>
                                 ) : (
                                     <div className="space-y-3">
                                         {items.map((it) => {
@@ -278,18 +281,18 @@ export default function Documents() {
                                                     {/* En-tête */}
                                                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                                                            <FileText className="h-5 w-5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                                                            <IconFileText className="h-5 w-5 mt-0.5 text-muted-foreground flex-shrink-0" />
                                                             <div className="flex-1 min-w-0">
                                                                 <h3 className="font-medium leading-tight">{dt.label || dt.code || "Document"}</h3>
                                                                 <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground flex-wrap">
                                                                     {it.provided ? (
                                                                         <>
-                                                                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                                                            <IconCircleCheck className="h-3.5 w-3.5 text-emerald-600" />
                                                                             <span>Fourni{it.providedAt ? ` le ${fmtDateTime(it.providedAt)}` : ""}</span>
                                                                         </>
                                                                     ) : (
                                                                         <>
-                                                                            <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+                                                                            <IconAlertCircle className="h-3.5 w-3.5 text-amber-600" />
                                                                             <span>Non fourni</span>
                                                                         </>
                                                                     )}
@@ -317,7 +320,7 @@ export default function Documents() {
                                                             <Badge variant="outline">{dt.kind}</Badge>
                                                             {typeof dt.maxSizeMb === "number" && (
                                                                 <Badge variant="outline" className="inline-flex items-center gap-1">
-                                                                    <Clock className="h-3 w-3" />
+                                                                    <IconClock className="h-3 w-3" />
                                                                     {dt.maxSizeMb} Mo
                                                                 </Badge>
                                                             )}
@@ -343,7 +346,7 @@ export default function Documents() {
                                                             disabled={dt.kind !== "FILE" || uploadingTypeId === dt.id}
                                                             onClick={() => pickFileForType(dt.id, dt.acceptedMime || [])}
                                                         >
-                                                            <Upload className="h-4 w-4" />
+                                                            <IconUpload className="h-4 w-4" />
                                                             {uploadingTypeId === dt.id ? "Envoi…" : it.provided ? "Mettre à jour" : "Téléverser"}
                                                         </Button>
                                                         <Button
@@ -359,7 +362,7 @@ export default function Documents() {
                                                                 )
                                                             }
                                                         >
-                                                            <ScanSearch className="h-4 w-4" />
+                                                            <IconZoomScan className="h-4 w-4" />
                                                             Aperçu
                                                         </Button>
                                                     </div>
@@ -369,7 +372,7 @@ export default function Documents() {
                                                         <div className="pl-8 space-y-1">
                                                             {it.warnings.map((w) => (
                                                                 <div key={w.code} className="flex items-start gap-2 text-xs text-amber-700 dark:text-amber-500">
-                                                                    <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                                                                    <IconAlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
                                                                     <span>{w.message}</span>
                                                                 </div>
                                                             ))}
@@ -390,7 +393,7 @@ export default function Documents() {
                         {/* Erreur d'upload */}
                         {uploadError && (
                             <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
+                                <IconAlertCircle className="h-4 w-4" />
                                 <AlertTitle>Erreur d'envoi</AlertTitle>
                                 <AlertDescription>{uploadError}</AlertDescription>
                             </Alert>
@@ -428,7 +431,7 @@ export default function Documents() {
                         {/* Alerte documents manquants */}
                         {totalMissing > 0 && (
                             <Alert>
-                                <AlertCircle className="h-4 w-4" />
+                                <IconAlertCircle className="h-4 w-4" />
                                 <AlertTitle>Documents manquants</AlertTitle>
                                 <AlertDescription>
                                     {totalMissing} document(s) requis à fournir pour vos voyages.
@@ -436,10 +439,10 @@ export default function Documents() {
                             </Alert>
                         )}
 
-                        {/* Info pratique */}
+                        {/* IconInfoCircle pratique */}
                         <div className="rounded-lg border bg-muted/30 p-4">
                             <div className="flex gap-3">
-                                <Info className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                <IconInfoCircle className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                                 <div className="space-y-2 text-sm text-muted-foreground">
                                     <p className="font-medium text-foreground">Besoin d'aide ?</p>
                                     <p>Contactez l'administration si vous avez des questions sur les documents requis.</p>

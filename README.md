@@ -58,6 +58,8 @@ src/
 
 **Rôles** : `ADMIN`, `TEACHER`, `PARENT`, `STUDENT`, `USER`. Les règles sont définies dans `src/auth/rbac.ts`.
 
+**Thème** : identité « Cap au large » — marine institutionnel + ambre solaire, tokens OKLCH (clair et sombre) dans `src/index.css`. Les polices (Inter Variable, Bricolage Grotesque pour les titres) sont auto-hébergées via Fontsource : aucune requête vers Google Fonts. Les icônes applicatives utilisent `@tabler/icons-react` ; la couleur ambre (`--sun`) est réservée aux éléments qui réclament l'attention.
+
 **Data layer** : deux providers Refine — `voyagesDataProvider` (authentifié) et `publicDataProvider` (sans auth). Le backend renvoie des réponses paginées Spring : `{ content: T[], page: { totalElements: number } }`.
 
 ## RGPD

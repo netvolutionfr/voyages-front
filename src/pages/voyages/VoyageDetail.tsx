@@ -9,8 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-    Heart, Calendar as CalendarIcon, MapPin, Users, FileText, ChevronLeft, ShieldCheck, Clock
-} from "lucide-react";
+    IconHeart, IconCalendar as CalendarIcon, IconMapPin, IconUsers, IconFileText, IconChevronLeft, IconShieldCheck, IconClock
+} from "@tabler/icons-react";
 import type { IVoyage } from "@/pages/voyages/IVoyage";
 import { cn, formatCurrencyFromCents, getCoverUrl } from "@/lib/utils";
 
@@ -136,7 +136,7 @@ export default function VoyageDetail() {
                     <AlertDescription>Impossible de charger ce voyage : l'URL ne contient pas d'identifiant valide.</AlertDescription>
                 </Alert>
                 <div className="mt-4">
-                    <Button asChild variant="secondary"><Link to="/voyages"><ChevronLeft className="h-4 w-4 mr-1"/>Retour aux voyages</Link></Button>
+                    <Button asChild variant="secondary"><Link to="/voyages"><IconChevronLeft className="h-4 w-4 mr-1"/>Retour aux voyages</Link></Button>
                 </div>
             </div>
         );
@@ -171,7 +171,7 @@ export default function VoyageDetail() {
                 </Alert>
                 <div className="mt-4 flex items-center gap-2">
                     <Button onClick={() => refetch()} variant="secondary">Réessayer</Button>
-                    <Button asChild variant="outline"><Link to="/voyages"><ChevronLeft className="h-4 w-4 mr-1"/>Retour</Link></Button>
+                    <Button asChild variant="outline"><Link to="/voyages"><IconChevronLeft className="h-4 w-4 mr-1"/>Retour</Link></Button>
                 </div>
             </div>
         );
@@ -183,7 +183,7 @@ export default function VoyageDetail() {
     return (
         <div className="container mx-auto max-w-5xl p-4">
             <Button asChild variant="ghost" className="-ml-2 mb-3">
-                <Link to="/voyages"><ChevronLeft className="h-4 w-4 mr-1"/>Retour aux voyages</Link>
+                <Link to="/voyages"><IconChevronLeft className="h-4 w-4 mr-1"/>Retour aux voyages</Link>
             </Button>
 
             {/* Cover */}
@@ -196,7 +196,7 @@ export default function VoyageDetail() {
 
                 {voyage.poll && typeof voyage.interestedCount === "number" && (
                     <div className="absolute left-3 top-3 rounded-full bg-background/80 backdrop-blur px-3 py-1 text-xs border flex items-center gap-1">
-                        <Heart
+                        <IconHeart
                             className={cn(
                                 "h-4 w-4 cursor-pointer",
                                 currentUserInterest ? "fill-red-500 text-red-500" : "text-muted-foreground"
@@ -222,7 +222,7 @@ export default function VoyageDetail() {
                                 <div className="font-medium text-base">{voyage.destination}</div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4"/>
+                                <IconMapPin className="h-4 w-4"/>
                                 <span>Pays :</span>
                                 <span className="font-medium">{voyage.country?.name || "—"}</span>
                             </div>
@@ -232,7 +232,7 @@ export default function VoyageDetail() {
                                 <span className="font-medium">{dateRange || "—"}</span>
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
-                                <Users className="h-4 w-4"/>
+                                <IconUsers className="h-4 w-4"/>
                                 <span>Participants :</span>
                                 <span className="font-medium text-foreground">Min {voyage.minParticipants} • Max {voyage.maxParticipants}</span>
                             </div>
@@ -258,7 +258,7 @@ export default function VoyageDetail() {
                                         <li key={f.id} className="rounded-lg border p-3">
                                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                                 <div className="flex items-start gap-2 flex-1 min-w-0">
-                                                    <FileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                                    <IconFileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
                                                     <div className="flex-1 min-w-0">
                                                         <div className="font-medium leading-snug">
                                                             {f.documentType?.label || f.documentType?.abr || "Document"}
@@ -275,7 +275,7 @@ export default function VoyageDetail() {
                                                     <Badge variant="outline">{f.type}</Badge>
                                                     {typeof f.daysBeforeTrip === "number" && (
                                                         <Badge variant="outline" className="inline-flex items-center gap-1">
-                                                            <Clock className="h-3.5 w-3.5" /> J-{f.daysBeforeTrip}
+                                                            <IconClock className="h-3.5 w-3.5" /> J-{f.daysBeforeTrip}
                                                         </Badge>
                                                     )}
                                                 </div>
@@ -285,7 +285,7 @@ export default function VoyageDetail() {
                                                 {f.acceptedMime?.length ? (<span>Types acceptés : {f.acceptedMime.join(", ")}</span>) : null}
                                                 {typeof f.maxSizeMb === "number" ? (<span>Taille max : {f.maxSizeMb} Mo</span>) : null}
                                                 {typeof f.retentionDays === "number" ? (<span>Conservation : {f.retentionDays} j</span>) : null}
-                                                {f.storeScan ? (<span className="inline-flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5"/>Scan conservé</span>) : null}
+                                                {f.storeScan ? (<span className="inline-flex items-center gap-1"><IconShieldCheck className="h-3.5 w-3.5"/>Scan conservé</span>) : null}
                                                 {f.manuallyAdded ? (<span>Ajout manuel</span>) : null}
                                             </div>
 
