@@ -8,6 +8,7 @@ import {readAuth, saveAuth} from "@/auth/token";
 import { authApi } from "@/auth/passkeys";
 import {useNavigate} from "react-router-dom";
 import {decodeJwtPayload, getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
+import PublicShell from "@/components/common/PublicShell.tsx";
 
 export default function OtpPage() {
     const navigate = useNavigate();
@@ -100,7 +101,7 @@ export default function OtpPage() {
     };
 
     return (
-        <div className="min-h-screen grid place-items-center p-6">
+        <PublicShell>
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle>Vérification du code OTP</CardTitle>
@@ -156,6 +157,6 @@ export default function OtpPage() {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </PublicShell>
     );
 }

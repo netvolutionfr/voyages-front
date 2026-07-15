@@ -4,7 +4,8 @@ import {RegisterPasskeyFlow} from "@/components/common/RegisterPasskeyFlow.tsx";
 import PasskeyInfo from "@/components/common/PasskeyInfo.tsx";
 import {LoginPasskeyFlow} from "@/components/common/LoginPasskeyFlow.tsx";
 import type {FinishResult} from "@/lib/credentials.ts";
-import {Link, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
+import PublicShell from "@/components/common/PublicShell.tsx";
 
 export default function LoginPage() {
     const [supported, setSupported] = useState<boolean | null>(null);
@@ -29,7 +30,7 @@ export default function LoginPage() {
     }, []);
 
     return (
-        <div className="min-h-screen grid place-items-center p-6">
+        <PublicShell>
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle>Connexion</CardTitle>
@@ -54,14 +55,8 @@ export default function LoginPage() {
                     )}
 
                     <PasskeyInfo />
-
-                    <p className="text-center text-xs text-muted-foreground">
-                        <Link to="/mentions-legales" className="underline">
-                            Mentions légales et protection des données
-                        </Link>
-                    </p>
                 </CardContent>
             </Card>
-        </div>
+        </PublicShell>
     );
 }

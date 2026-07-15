@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconGlobe } from "@tabler/icons-react";
 
 /** Valeur juridique à faire renseigner par l'établissement avant mise en production. */
 function Placeholder({ children }: { children: string }) {
@@ -25,17 +25,35 @@ function Section({ title, children }: { title: string; children: React.ReactNode
  *  consultables sans authentification (notamment depuis l'écran de connexion). */
 const MentionsLegales = () => {
     return (
-        <div className="mx-auto w-full max-w-3xl space-y-8 p-6 text-sm leading-relaxed">
-            <div className="space-y-2">
-                <Button variant="ghost" size="sm" asChild className="-ml-2">
-                    <Link to="/">
-                        <IconArrowLeft />
-                        Retour
-                    </Link>
-                </Button>
-                <h1 className="text-2xl font-bold">Mentions légales et protection des données</h1>
-                <p className="text-muted-foreground">Dernière mise à jour : juillet 2026</p>
-            </div>
+        <div className="min-h-screen bg-background">
+            {/* Bandeau marine : même habillage que les écrans publics, quel que soit le thème */}
+            <header className="bg-[oklch(0.26_0.05_240)] text-[oklch(0.97_0.008_235)]">
+                <div className="mx-auto w-full max-w-3xl space-y-4 px-6 py-8">
+                    <div className="flex items-center justify-between gap-4">
+                        <span className="flex items-center gap-2">
+                            <IconGlobe className="size-5 text-[oklch(0.78_0.14_75)]" />
+                            <span className="font-display font-semibold">Voyages scolaires</span>
+                        </span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="text-[oklch(0.97_0.008_235)] hover:bg-[oklch(0.34_0.05_240)] hover:text-[oklch(0.97_0.008_235)]"
+                        >
+                            <Link to="/">
+                                <IconArrowLeft />
+                                Retour
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-bold">Mentions légales et protection des données</h1>
+                        <p className="text-[oklch(0.97_0.008_235)]/75">Dernière mise à jour : juillet 2026</p>
+                    </div>
+                </div>
+            </header>
+
+            <div className="mx-auto w-full max-w-3xl space-y-8 p-6 text-sm leading-relaxed">
 
             <Section title="Éditeur du site">
                 <p>
@@ -148,6 +166,7 @@ const MentionsLegales = () => {
                     exemptés de consentement au sens des lignes directrices de la CNIL.
                 </p>
             </Section>
+            </div>
         </div>
     );
 };

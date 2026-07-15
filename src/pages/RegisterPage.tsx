@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {authApi} from "@/auth/passkeys.ts";
-import {Link} from "react-router-dom";
+import PublicShell from "@/components/common/PublicShell.tsx";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState<string>("");
@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
 
     return (
-        <div className="min-h-screen grid place-items-center p-6">
+        <PublicShell>
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle>Créer un compte</CardTitle>
@@ -55,13 +55,8 @@ export default function RegisterPage() {
                     <p className="text-sm text-muted-foreground">
                         Nous vous enverrons un lien d’activation. Vous créerez votre passkey après avoir cliqué sur ce lien.
                     </p>
-                    <p className="text-center text-xs text-muted-foreground">
-                        <Link to="/mentions-legales" className="underline">
-                            Mentions légales et protection des données
-                        </Link>
-                    </p>
                 </CardContent>
             </Card>
-        </div>
+        </PublicShell>
     );
 }
