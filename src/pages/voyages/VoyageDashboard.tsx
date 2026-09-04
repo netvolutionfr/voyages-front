@@ -42,6 +42,13 @@ type TripRegistrationAdminViewDTO = {
     user: UserMiniDTO;
     documentsSummary?: DocumentsSummaryDTO;
 };
+// GET /trips/registrations/{id} : détail complet, coordonnées incluses.
+type RegistrationAdminDetailDTO = {
+    registrationId: number;
+    status: string;
+    registeredAt: string;
+    user: UserMiniDTO;
+};
 type TripDetailDTO = {
     id: number;
     title: string;
@@ -261,7 +268,6 @@ function RegistrationsTable({
                             <TableRow key={r.registrationId}>
                                 <TableCell className="font-medium">
                                     {fullName(r.user)}
-                                    <div className="text-xs text-muted-foreground">{r.user.email}</div>
                                 </TableCell>
                                 <TableCell>{r.user.section?.label ?? "-"}</TableCell>
                                 <TableCell>{formatDate(r.registeredAt)}</TableCell>
@@ -340,6 +346,15 @@ function StudentSheet({
     const open = Boolean(registration);
     const user = registration?.user;
 
+    // Coordonnées (email/téléphone) : retirées de la vue liste (RGPD/F-08),
+    // récupérées via l'endpoint de détail quand le panneau s'ouvre.
+    const { result: detail, query: detailQuery } = useOne<RegistrationAdminDetailDTO>({
+        resource: "trips/registrations",
+        id: registration?.registrationId ?? 0,
+        queryOptions: { enabled: open && Boolean(registration) },
+    });
+    const detailLoading = detailQuery.isLoading;
+
     // Documents
     const { result: docsData, query: docsQuery } = useOne<DocumentsAdminDTO>({
         resource: "admin-user-documents",
@@ -376,8 +391,12 @@ function StudentSheet({
                         <Card>
                             <CardContent className="space-y-1">
                                 <div className="text-sm text-muted-foreground">Section : {user.section?.label ?? "-"}</div>
-                                <div className="text-sm text-muted-foreground">Email : {user.email ?? "-"}</div>
-                                <div className="text-sm text-muted-foreground">Téléphone : {user.telephone ?? "-"}</div>
+                                <div className="text-sm text-muted-foreground">
+                                    Email : {detailLoading ? "…" : detail?.user.email ?? "-"}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    Téléphone : {detailLoading ? "…" : detail?.user.telephone ?? "-"}
+                                </div>
                                 <div className="text-sm text-muted-foreground">Inscription : {formatDate(registration.registeredAt)}</div>
                                 <div className="pt-2">
                   <span className={cn("text-xs text-white px-2 py-1 rounded", statusColor(registration.status))}>
