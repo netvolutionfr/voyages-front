@@ -8,6 +8,7 @@ export type StoredAuth = {
 };
 
 let _auth: StoredAuth | null = null;
+let authGeneration = 0;
 
 export function saveAuth(p: {
     tokenType: string;
@@ -31,9 +32,16 @@ export function readAuth(): StoredAuth | null {
 
 export function clearAuth() {
     _auth = null;
+    // Any refresh started for an older session must not be allowed to restore it
+    // after logout, account deletion, or a terminal 401.
+    authGeneration += 1;
     // L'identité (rôle RBAC) est dérivée du JWT : elle doit tomber avec lui,
     // sinon le cache 60s peut servir un rôle obsolète après révocation/logout.
     clearIdentityCache();
+}
+
+export function readAuthGeneration(): number {
+    return authGeneration;
 }
 
 // --- helpers JWT ---

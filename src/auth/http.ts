@@ -1,5 +1,5 @@
 // src/auth/http.ts
-import { readAuth, saveAuth, clearAuth, isAccessExpired } from "@/auth/token";
+import { readAuth, saveAuth, clearAuth, isAccessExpired, readAuthGeneration } from "@/auth/token";
 import {getIdentityFromJwt, setIdentityCache} from "@/auth/session.ts";
 import {isBodyLike} from "@/auth/api.ts";
 import {xsrfHeader} from "@/auth/csrf.ts";
@@ -22,6 +22,7 @@ export async function refreshIfNeeded(): Promise<boolean> {
 
     // Token absent (premier chargement) ou expiré → refresh via cookie httpOnly
     if (!refreshing) {
+        const refreshGeneration = readAuthGeneration();
         refreshing = fetch(`${API_URL}/auth/refresh`, {
             method: "POST",
             credentials: "include",
@@ -32,6 +33,9 @@ export async function refreshIfNeeded(): Promise<boolean> {
                 return null;
             }
             const data = await r.json();
+            // Logout (or another terminal session clear) may have happened while
+            // the network request was in flight. Never resurrect that session.
+            if (refreshGeneration !== readAuthGeneration()) return null;
             saveAuth({
                 tokenType: data.token_type,
                 accessToken: data.access_token,
