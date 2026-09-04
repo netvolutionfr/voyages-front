@@ -161,10 +161,17 @@ const VoyagesForm = () => {
                 useWebWorker: true,
             });
 
-            // 2) URL pré-signée
+            // 2) URL pré-signée (tripId absent tant que le voyage n'est pas encore créé)
             const presignRes: {url: string, key: string} = await api.get(
                 `/files/presign`,
-                { params: { filename: compressed.name, contentType: compressed.type } }
+                {
+                    params: {
+                        tripId: isEditing ? id : undefined,
+                        filename: compressed.name,
+                        contentType: compressed.type,
+                        contentLength: compressed.size,
+                    },
+                }
             );
             const { url, key } = presignRes;
 
