@@ -65,6 +65,45 @@ jobs:
             type=sha,priority=800
             type=raw,value=latest,enable={{is_default_branch}}
 
+      # Build local d'abord : l'image n'est poussée (et `latest` déplacé) qu'après le scan.
+      - name: Build image for scan
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: voyages-front:scan
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_FILES_BASE=${{ vars.VITE_FILES_BASE }}
+
+      # Actions tierces épinglées par SHA (tags trivy-action compromis en mars 2026).
+      - name: Generate SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: voyages-front:scan
+          format: cyclonedx
+          output: sbom.cdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+
+      # Paquets OS de l'image (nginx/Alpine) : non couverts par `npm audit`.
+      - name: Scan image vulnerabilities (high+)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: voyages-front:scan
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          skip-setup-trivy: true
+
       - name: Build and push image (VITE_* en build-args)
         uses: docker/build-push-action@v7
         with:

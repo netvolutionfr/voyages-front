@@ -17,6 +17,8 @@ No test framework is configured.
 
 `.github/workflows/frontend-cicd.yml` runs a **blocking** `quality` job on every push and pull request to `master` (Node 24): `npm ci` → `npm run lint` → `npm run build` (`tsc -b` + bundle) → `npm audit --audit-level=high`. The image build (`build-and-push`) and deploy (`deploy_to_server`) jobs only start if `quality` passes. Keep `npm run lint` and `npm run build` green locally before pushing — a failure now stops the pipeline instead of being swallowed.
 
+`build-and-push` builds the image locally first, then runs Trivy (pinned by commit SHA): it uploads a CycloneDX SBOM as the `sbom-cyclonedx` artifact and **blocks the push** on fixable HIGH/CRITICAL CVEs in the image (Alpine/nginx packages, which `npm audit` doesn't see). The final stage runs `apk upgrade` so Alpine fixes published after the `nginx:1.30-alpine` base image don't fail the scan.
+
 ## Environment variables
 
 Copy `.env.example` to `.env.development`:
