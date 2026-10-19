@@ -226,6 +226,13 @@ export default function VoyageDetail() {
                                 <span>Pays :</span>
                                 <span className="font-medium">{voyage.country?.name || "—"}</span>
                             </div>
+                            {!!voyage.transitCountries?.length && (
+                                <div className="flex items-center gap-2">
+                                    <IconMapPin className="h-4 w-4"/>
+                                    <span>Escales :</span>
+                                    <span className="font-medium">{voyage.transitCountries.map(c => c.name).join(", ")}</span>
+                                </div>
+                            )}
                             <div className="flex items-center gap-2">
                                 <CalendarIcon className="h-4 w-4"/>
                                 <span>Période :</span>

@@ -8,6 +8,7 @@ export type VoyageUpsertRequest = {
     coverPhotoUrl?: string | null;
 
     countryId: number;
+    transitCountryIds: number[]; // pays d'escale (formalités « exigée aussi en escale »)
 
     tripDates: { from: string; to: string };        // ISO
     minParticipants: number;

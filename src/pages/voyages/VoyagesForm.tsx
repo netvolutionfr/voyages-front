@@ -106,6 +106,7 @@ const VoyagesForm = () => {
             familyContribution: null,
             coverPhotoUrl: null,
             countryId: 0, // ou undefined si tu rends ce champ optional dans le schéma
+            transitCountryIds: [],
             tripDates: { from: isoNow(), to: isoPlusDays(7) },
             minParticipants: 1,
             maxParticipants: 1,
@@ -306,6 +307,34 @@ const VoyagesForm = () => {
                                         </Command>
                                     </PopoverContent>
                                 </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Pays d'escale (multi) : leurs formalités « exigée aussi en escale » s'ajoutent au voyage */}
+                    <FormField
+                        control={form.control}
+                        name="transitCountryIds"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Pays d'escale</FormLabel>
+                                <FormControl>
+                                    <MultiSelect
+                                        options={paysOptions
+                                            .filter((o) => Number(o.value) !== Number(form.watch("countryId")))
+                                            .map((o) => ({ label: String(o.label), value: String(o.value) }))}
+                                        onValueChange={(vals) => field.onChange(vals.map(Number))}
+                                        defaultValue={(field.value ?? []).map(String)}
+                                        placeholder="Aucune escale"
+                                        responsive={true}
+                                        autoSize={true}
+                                        hideSelectAll={true}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    Les formalités exigées en transit (passeport, ESTA…) seront ajoutées automatiquement au voyage.
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}

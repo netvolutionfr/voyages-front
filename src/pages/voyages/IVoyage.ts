@@ -6,6 +6,7 @@ export type IVoyage = {
     description: string;
     destination: string;
     country?: IPays;
+    transitCountries?: IPays[];
     familyContribution: number;  // en CENTIMES côté API
     coverPhotoUrl?: string;
 
