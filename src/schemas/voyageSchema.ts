@@ -17,6 +17,7 @@ export const VoyageSchema = z.object({
     title: z.string().trim().min(1, "Le titre est requis").max(150),
     destination: z.string().trim().min(1, "La destination est requise").max(150),
     countryId: z.number().int().positive(),
+    transitCountryIds: z.array(z.number().int().positive()).max(30).default([]),
     tripDates: rangeISO,
     registrationDates: rangeISO.nullable().optional(),
     minParticipants: z.number().int().min(1).max(1000),
@@ -39,6 +40,9 @@ export const VoyageSchema = z.object({
         const voyFrom = toD(v.tripDates.from);
         if (i?.to && voyFrom && new Date(i.to) >= voyFrom) {
             ctx.addIssue({ code: "custom", path: ["registrationDates"], message: "Les inscriptions doivent se terminer avant le début du voyage." });
+        }
+        if (v.transitCountryIds.includes(v.countryId)) {
+            ctx.addIssue({ code: "custom", path: ["transitCountryIds"], message: "Le pays de destination ne peut pas être une escale." });
         }
         if (v.minParticipants > v.maxParticipants) {
             ctx.addIssue({ code: "custom", path: ["maxParticipants"], message: "Le maximum doit être ≥ au minimum." });

@@ -8,6 +8,7 @@ export type VoyageDTO = {
         name?: string;
     }
     countryName?: string;
+    transitCountries?: Array<{ id: number; name?: string }>;
 
     familyContribution: number;  // en CENTIMES côté API
     coverPhotoUrl?: string;

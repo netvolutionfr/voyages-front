@@ -7,6 +7,7 @@ export function dtoToForm(v: VoyageDTO): VoyageFormData {
         description: v.description ?? null,
         destination: v.destination ?? "",
         countryId: v.country.id ?? undefined,
+        transitCountryIds: v.transitCountries?.map(c => c.id) ?? [],
 
         // Centimes API → € dans le form
         familyContribution: v.familyContribution != null ? v.familyContribution / 100 : undefined,
