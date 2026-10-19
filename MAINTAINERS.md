@@ -9,11 +9,11 @@
 ## Gouvernance du projet
 
 - **Workflow** : toute évolution passe par une Issue → branche → Pull Request.
-- **Revue obligatoire** : au moins 1 mainteneur doit approuver une PR avant merge.
-- **Protection de la branche `main`** :
-    - Aucun push direct n’est autorisé.
+- **Revue** : toute PR externe est relue par un mainteneur avant merge. L'approbation n'est pas imposée techniquement tant qu'il n'y a qu'un mainteneur ; passer à 1 approbation requise dès qu'un second mainteneur rejoint le projet.
+- **Protection de la branche `master`** (règle GitHub active, administrateurs compris) :
+    - Aucun push direct n’est autorisé ; force-push et suppression interdits.
     - Les merges doivent se faire via Pull Request.
-    - Les tests automatiques (CI) doivent réussir avant merge.
+    - Le job CI `quality` doit réussir, sur une branche à jour avec `master`.
 - **Releases** :
     - Les mainteneurs publient les versions officielles sous forme de tags (`vYYYY-Sn`).
     - Les corrections urgentes sont publiées en *hotfix*.
