@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.22.1 # ≥ correctif CVE-2026-111497 (Brotli)
           cache: npm
 
       - name: Install dependencies

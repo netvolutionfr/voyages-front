@@ -15,7 +15,7 @@ No test framework is configured.
 
 ## CI quality gate
 
-`.github/workflows/frontend-cicd.yml` runs a **blocking** `quality` job on every push and pull request to `master` (Node 24): `npm ci` → `npm run lint` → `npm run build` (`tsc -b` + bundle) → `npm audit --audit-level=high`. The image build (`build-and-push`) and deploy (`deploy_to_server`) jobs only start if `quality` passes. Keep `npm run lint` and `npm run build` green locally before pushing — a failure now stops the pipeline instead of being swallowed.
+`.github/workflows/frontend-cicd.yml` runs a **blocking** `quality` job on every push and pull request to `master` (Node 24.22.1): `npm ci` → `npm run lint` → `npm run build` (`tsc -b` + bundle) → `npm audit --audit-level=high`. The image build (`build-and-push`) and deploy (`deploy_to_server`) jobs only start if `quality` passes. Keep `npm run lint` and `npm run build` green locally before pushing — a failure now stops the pipeline instead of being swallowed.
 
 **`master` is protected — PRs are mandatory**, admins included: no direct push, no force-push, no deletion; merging requires the `quality` check to pass on a branch up to date with `master`. No approval is required (single maintainer; GitHub forbids self-approval) — raise it to 1 when a second maintainer joins. Always work on a branch (`feat/…`, `fix/…`, `docs/…`) and open a PR; merging deploys to production, so the matching backend must be live first.
 
