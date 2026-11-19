@@ -19,6 +19,8 @@ No test framework is configured.
 
 **`master` is protected — PRs are mandatory**, admins included: no direct push, no force-push, no deletion; merging requires the `quality` check to pass on a branch up to date with `master`. No approval is required (single maintainer; GitHub forbids self-approval) — raise it to 1 when a second maintainer joins. Always work on a branch (`feat/…`, `fix/…`, `docs/…`) and open a PR; merging deploys to production, so the matching backend must be live first.
 
+`.github/dependabot.yml` opens weekly npm PRs (minor/patch grouped) and monthly GitHub Actions / Docker base-image PRs. Never auto-merge them (merge = production deploy). Dependabot doesn't touch `node-version` in the workflow: when it bumps the `node:` image in the Dockerfile, align `frontend-cicd.yml` by hand.
+
 `build-and-push` builds the image locally first, then runs Trivy (pinned by commit SHA): it uploads a CycloneDX SBOM as the `sbom-cyclonedx` artifact and **blocks the push** on fixable HIGH/CRITICAL CVEs in the image (Alpine/nginx packages, which `npm audit` doesn't see). The final stage runs `apk upgrade` so Alpine fixes published after the `nginx:1.30-alpine` base image don't fail the scan.
 
 ## Environment variables
